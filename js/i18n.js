@@ -2,6 +2,7 @@
 
 const STRINGS = {
   zh: {
+    app: { title: "太空精算師" },
     home: {
       subtitle: "設計你的太空任務",
       startGame: "開始遊戲",
@@ -129,6 +130,7 @@ const STRINGS = {
   },
 
   en: {
+    app: { title: "Space Actuary" },
     home: {
       subtitle: "Design Your Space Mission",
       startGame: "Start Game",

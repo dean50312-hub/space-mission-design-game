@@ -1,4 +1,6 @@
-# Game Design Document — Space Mission Design Game
+# Game Design Document — 太空精算師 Space Actuary
+
+正式遊戲名稱：**太空精算師**（英文：Space Actuary）。「精算師」呼應遊戲核心——在預算、質量、可靠度之間精算取捨。
 
 ## 1. 挑戰背景
 

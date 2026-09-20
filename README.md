@@ -1,4 +1,4 @@
-# Space Mission Design Game
+# 太空精算師 Space Actuary
 
 一款像素風的網頁遊戲，參加 [NASA Space Apps Challenge 2026 — Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/) 挑戰。
 
