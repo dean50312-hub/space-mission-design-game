@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Space Mission Design Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<main id="app">
+
+  <section id="screen-event" class="screen active">
+    <h1 class="game-title">SPACE MISSION<br />DESIGN GAME</h1>
+    <div class="event-card">
+      <div id="event-icon" class="event-icon"></div>
+      <h2 id="event-name"></h2>
+      <p id="event-desc"></p>
+      <p id="event-budget-note" class="budget-note"></p>
+    </div>
+    <button id="start-btn" class="btn btn-primary">開始選擇部件</button>
+  </section>
+
+  <section id="screen-selection" class="screen">
+    <h2>選擇火箭與部件</h2>
+
+    <div class="meters">
+      <div class="meter">
+        <div class="meter-label"><span>預算</span><span id="cost-text"></span></div>
+        <div class="bar"><div id="cost-bar-fill" class="bar-fill"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-label"><span>質量</span><span id="mass-text"></span></div>
+        <div class="bar"><div id="mass-bar-fill" class="bar-fill"></div></div>
+      </div>
+    </div>
+
+    <p id="selection-warning" class="warning hidden"></p>
+
+    <div id="selection-groups"></div>
+
+    <button id="launch-btn" class="btn btn-primary" disabled>發射！</button>
+  </section>
+
+  <section id="screen-simulation" class="screen">
+    <h2>任務模擬中...</h2>
+    <div id="stage-track"></div>
+    <p id="simulation-log" class="simulation-log"></p>
+  </section>
+
+  <section id="screen-results" class="screen">
+    <h2 id="result-title"></h2>
+    <p id="result-subtitle"></p>
+    <div class="chart-wrap">
+      <canvas id="radar-chart" width="360" height="360"></canvas>
+    </div>
+    <h3>解鎖成就</h3>
+    <ul id="achievements-list"></ul>
+    <button id="play-again-btn" class="btn btn-primary">再玩一次</button>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/selection.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/results.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
