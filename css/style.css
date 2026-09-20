@@ -437,6 +437,20 @@ h1, h2, .btn, .stage-name {
 
 /* ---------- Results screen ---------- */
 
+.result-reason {
+  background: rgba(255, 85, 102, 0.12);
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin: -8px 0 16px;
+}
+
+.result-reason.hidden {
+  display: none;
+}
+
 .chart-wrap {
   background: var(--panel);
   border-radius: 8px;

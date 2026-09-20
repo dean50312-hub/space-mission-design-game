@@ -71,14 +71,34 @@ function renderRadarChart(scores) {
   });
 }
 
+function composeFailureReason(failedChecks) {
+  if (!failedChecks || failedChecks.length === 0) return "";
+  return failedChecks
+    .map((c) => {
+      const stat = t("stat." + c.statKey);
+      return c.margin < 0
+        ? t("results.reasonShortfall", { stat, value: c.value, threshold: c.threshold })
+        : t("results.reasonBadLuck", { stat });
+    })
+    .join("；");
+}
+
 function renderResultsScreen(simResult, scores, achievements) {
   const title = document.getElementById("result-title");
   const subtitle = document.getElementById("result-subtitle");
+  const reason = document.getElementById("result-reason");
 
   title.textContent = simResult.overallSuccess ? t("results.successTitle") : t("results.failTitle");
   subtitle.textContent = simResult.overallSuccess
     ? t("results.successSubtitle")
     : t("results.failSubtitle", { stage: t("stage." + simResult.failedStage.id) });
+
+  if (!simResult.overallSuccess) {
+    reason.textContent = composeFailureReason(simResult.failedChecks);
+    reason.classList.remove("hidden");
+  } else {
+    reason.classList.add("hidden");
+  }
 
   renderRadarChart(scores);
 

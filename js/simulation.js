@@ -70,6 +70,7 @@ async function runSimulation() {
   let stageReachedIndex = -1;
   let overallSuccess = true;
   let failedStage = null;
+  let failedChecks = [];
 
   for (let i = 0; i < STAGES.length; i++) {
     const stage = STAGES[i];
@@ -82,11 +83,12 @@ async function runSimulation() {
     if (!result.passed) {
       overallSuccess = false;
       failedStage = stage;
+      failedChecks = result.checks.filter((c) => c.failed);
       break;
     }
   }
 
-  return { stageReachedIndex, overallSuccess, failedStage };
+  return { stageReachedIndex, overallSuccess, failedStage, failedChecks };
 }
 
 // ---------- 飛行動畫：視角固定在畫面中心，背景場景（地面→雲層→大氣層→太空）往下捲動 ----------
