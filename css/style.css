@@ -222,56 +222,105 @@ h1, h2, .btn, .stage-name {
 
 /* ---------- Simulation screen ---------- */
 
-#stage-track {
+#flight-track {
+  position: relative;
+  height: 420px;
+  margin: 20px 0 12px;
+  border-radius: 8px;
+  border: 2px solid var(--panel-light);
+  overflow: hidden;
+  background: linear-gradient(
+    to top,
+    #3d8b3d 0%,
+    #3d8b3d 10%,
+    #4fc3ff 14%,
+    #2a5fa8 40%,
+    #142250 55%,
+    #0b0e2b 100%
+  );
+}
+
+#flight-track::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 45% 0;
+  background-image: radial-gradient(1.5px 1.5px at 10% 20%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 30% 45%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 50% 15%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 70% 55%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 85% 30%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 20% 70%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 60% 5%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90% 10%, #fff, transparent);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.zone-label {
+  position: absolute;
+  left: 10px;
+  transform: translateY(50%);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+#rocket {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  line-height: 1;
+  z-index: 5;
+  transition: bottom 900ms ease-in-out;
+}
+
+#rocket.exploding {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(-8deg); }
+  75% { transform: translateX(-50%) rotate(8deg); }
+}
+
+.stage-dots {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 24px 0;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.stage-box {
-  flex: 1 1 100px;
-  background: var(--panel);
-  border: 2px solid var(--pending);
-  border-radius: 6px;
-  padding: 12px 6px;
-  text-align: center;
-  transition: border-color 0.2s ease, background 0.2s ease;
+.stage-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--pending);
+  border: 2px solid var(--panel-light);
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
-.stage-icon {
-  font-size: 24px;
-  margin-bottom: 6px;
-}
-
-.stage-name {
-  font-size: 9px;
-  color: var(--text-dim);
-  line-height: 1.4;
-}
-
-.stage-box.active {
+.stage-dot.active {
+  background: var(--accent);
   border-color: var(--accent);
-  background: var(--panel-light);
-  animation: pulse 0.8s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 4px rgba(79, 209, 255, 0.25);
 }
 
-.stage-box.pass {
+.stage-dot.pass {
+  background: var(--success);
   border-color: var(--success);
 }
 
-.stage-box.fail {
+.stage-dot.fail {
+  background: var(--warn);
   border-color: var(--warn);
-  background: rgba(255, 85, 102, 0.12);
 }
 
-.stage-box.skipped {
-  opacity: 0.4;
-}
-
-@keyframes pulse {
-  from { box-shadow: 0 0 0 0 rgba(79, 209, 255, 0.5); }
-  to { box-shadow: 0 0 0 6px rgba(79, 209, 255, 0); }
+.stage-dot.skipped {
+  opacity: 0.3;
 }
 
 .simulation-log {

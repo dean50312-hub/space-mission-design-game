@@ -66,20 +66,18 @@ function runStageCheck(stage) {
   return { passed, checks };
 }
 
-async function runSimulation(onStageStart, onStageResult) {
+async function runSimulation() {
   let stageReachedIndex = -1;
   let overallSuccess = true;
   let failedStage = null;
 
   for (let i = 0; i < STAGES.length; i++) {
     const stage = STAGES[i];
-    onStageStart(stage, i);
-    await sleep(900);
+    await animateStageAttempt(stage, i);
 
     const result = runStageCheck(stage);
     stageReachedIndex = i;
-    onStageResult(stage, i, result);
-    await sleep(600);
+    await animateStageResolve(stage, i, result);
 
     if (!result.passed) {
       overallSuccess = false;
@@ -91,53 +89,79 @@ async function runSimulation(onStageStart, onStageResult) {
   return { stageReachedIndex, overallSuccess, failedStage };
 }
 
-// ---------- 模擬畫面 DOM ----------
+// ---------- 模擬畫面 DOM：火箭飛行動畫 ----------
 
-function resetSimulationView() {
-  const track = document.getElementById("stage-track");
-  track.innerHTML = "";
+// 每個階段「成功完成後」火箭在飛行軌道上的高度（bottom %）
+const FLIGHT_START_PERCENT = 4;
+const STAGE_TARGET_PERCENTS = [18, 40, 62, 78, 92];
 
-  STAGES.forEach((stage, i) => {
-    const box = document.createElement("div");
-    box.className = "stage-box pending";
-    box.id = `stage-box-${i}`;
-    box.innerHTML = `
-      <div class="stage-icon">・</div>
-      <div class="stage-name">${stage.name}</div>
-    `;
-    track.appendChild(box);
-  });
+function resetFlightView() {
+  const rocket = document.getElementById("rocket");
+  rocket.style.transition = "none";
+  rocket.style.bottom = `${FLIGHT_START_PERCENT}%`;
+  rocket.textContent = "🚀";
+  rocket.classList.remove("exploding");
+  void rocket.offsetHeight; // 強制 reflow，確保下一次移動會套用 transition
+  rocket.style.transition = "";
 
   document.getElementById("simulation-log").textContent = "";
+
+  const dotsWrap = document.getElementById("stage-dots");
+  dotsWrap.innerHTML = "";
+  STAGES.forEach((stage, i) => {
+    const dot = document.createElement("span");
+    dot.className = "stage-dot";
+    dot.id = `stage-dot-${i}`;
+    dot.title = stage.name;
+    dotsWrap.appendChild(dot);
+  });
 }
 
-function setStageState(index, state) {
-  const box = document.getElementById(`stage-box-${index}`);
-  box.classList.remove("pending", "active", "pass", "fail");
-  box.classList.add(state);
+function setRocketBottom(percent, durationMs) {
+  const rocket = document.getElementById("rocket");
+  rocket.style.transition = `bottom ${durationMs}ms ease-in-out`;
+  rocket.style.bottom = `${percent}%`;
+  return sleep(durationMs);
+}
 
-  const icon = box.querySelector(".stage-icon");
-  const log = document.getElementById("simulation-log");
-  const stageName = STAGES[index].name;
+function setDotState(index, state) {
+  const dot = document.getElementById(`stage-dot-${index}`);
+  dot.classList.remove("active", "pass", "fail", "skipped");
+  dot.classList.add(state);
+}
 
-  if (state === "active") {
-    icon.textContent = "🚀";
-    log.textContent = `正在檢定：${stageName} ...`;
-  } else if (state === "pass") {
-    icon.textContent = "✅";
-    log.textContent = `${stageName}：通過`;
-  } else if (state === "fail") {
-    icon.textContent = "💥";
-    log.textContent = `${stageName}：失敗！`;
-    markRemainingSkipped(index);
+function markRemainingDotsSkipped(failedIndex) {
+  for (let i = failedIndex + 1; i < STAGES.length; i++) {
+    setDotState(i, "skipped");
   }
 }
 
-function markRemainingSkipped(failedIndex) {
-  for (let i = failedIndex + 1; i < STAGES.length; i++) {
-    const box = document.getElementById(`stage-box-${i}`);
-    box.classList.remove("pending");
-    box.classList.add("skipped");
-    box.querySelector(".stage-icon").textContent = "—";
+async function animateStageAttempt(stage, index) {
+  const prevPercent = index === 0 ? FLIGHT_START_PERCENT : STAGE_TARGET_PERCENTS[index - 1];
+  const targetPercent = STAGE_TARGET_PERCENTS[index];
+  const midPercent = prevPercent + (targetPercent - prevPercent) * 0.55;
+
+  setDotState(index, "active");
+  document.getElementById("simulation-log").textContent = `正在檢定：${stage.name} ...`;
+  await setRocketBottom(midPercent, 900);
+}
+
+async function animateStageResolve(stage, index, result) {
+  const log = document.getElementById("simulation-log");
+  const targetPercent = STAGE_TARGET_PERCENTS[index];
+
+  if (result.passed) {
+    setDotState(index, "pass");
+    log.textContent = `${stage.name}：通過`;
+    await setRocketBottom(targetPercent, 500);
+    await sleep(300);
+  } else {
+    const rocket = document.getElementById("rocket");
+    rocket.textContent = "💥";
+    rocket.classList.add("exploding");
+    setDotState(index, "fail");
+    log.textContent = `${stage.name}：失敗！`;
+    markRemainingDotsSkipped(index);
+    await sleep(1000);
   }
 }

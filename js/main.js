@@ -40,14 +40,11 @@ function showScreen(name) {
 
 async function startSimulation() {
   showScreen("simulation");
-  resetSimulationView();
+  resetFlightView();
 
-  const simResult = await runSimulation(
-    (stage, i) => setStageState(i, "active"),
-    (stage, i, result) => setStageState(i, result.passed ? "pass" : "fail")
-  );
+  const simResult = await runSimulation();
 
-  await sleep(800);
+  await sleep(500);
   finishMission(simResult);
 }
 
