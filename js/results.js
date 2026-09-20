@@ -1,5 +1,7 @@
 // 結果畫面：雷達圖計分與渲染
 
+const RADAR_AXES = ["mass", "power", "comm", "orbital", "science", "budget"];
+
 function sweetSpotScore(ratio) {
   const diff = Math.abs(ratio - 0.9);
   const score = 100 - Math.min(100, diff * 250);
@@ -19,12 +21,12 @@ function computeRadarScores(simResult) {
   const costRatio = currentCostUsed() / gameState.budget;
 
   return {
-    質量效率: Math.round(sweetSpotScore(massRatio)),
-    電力: Math.round(power),
-    通訊: Math.round(comm),
-    軌道可靠度: Math.round(orbital),
-    科學酬載: Math.round(science),
-    預算效率: Math.round(sweetSpotScore(costRatio)),
+    mass: Math.round(sweetSpotScore(massRatio)),
+    power: Math.round(power),
+    comm: Math.round(comm),
+    orbital: Math.round(orbital),
+    science: Math.round(science),
+    budget: Math.round(sweetSpotScore(costRatio)),
   };
 }
 
@@ -32,8 +34,8 @@ let radarChartInstance = null;
 
 function renderRadarChart(scores) {
   const ctx = document.getElementById("radar-chart").getContext("2d");
-  const labels = Object.keys(scores);
-  const data = Object.values(scores);
+  const labels = RADAR_AXES.map((key) => t("radar." + key));
+  const data = RADAR_AXES.map((key) => scores[key]);
 
   if (radarChartInstance) radarChartInstance.destroy();
 
@@ -43,7 +45,7 @@ function renderRadarChart(scores) {
       labels,
       datasets: [
         {
-          label: "任務表現",
+          label: t("results.achievementsHeader"),
           data,
           backgroundColor: "rgba(79, 209, 255, 0.3)",
           borderColor: "rgba(79, 209, 255, 1)",
@@ -73,10 +75,10 @@ function renderResultsScreen(simResult, scores, achievements) {
   const title = document.getElementById("result-title");
   const subtitle = document.getElementById("result-subtitle");
 
-  title.textContent = simResult.overallSuccess ? "任務成功！" : "任務失敗";
+  title.textContent = simResult.overallSuccess ? t("results.successTitle") : t("results.failTitle");
   subtitle.textContent = simResult.overallSuccess
-    ? "衛星已成功進入軌道並開始運作。"
-    : `任務在「${simResult.failedStage.name}」階段失敗。`;
+    ? t("results.successSubtitle")
+    : t("results.failSubtitle", { stage: t("stage." + simResult.failedStage.id) });
 
   renderRadarChart(scores);
 
@@ -84,11 +86,11 @@ function renderResultsScreen(simResult, scores, achievements) {
   achList.innerHTML = "";
 
   if (achievements.length === 0) {
-    achList.innerHTML = '<li class="no-achievement">這次沒有解鎖成就，再試一次！</li>';
+    achList.innerHTML = `<li class="no-achievement">${t("results.noAchievement")}</li>`;
   } else {
     achievements.forEach((a) => {
       const li = document.createElement("li");
-      li.textContent = `${a.icon} ${a.name}`;
+      li.textContent = `${a.icon} ${t("achievement." + a.id)}`;
       achList.appendChild(li);
     });
   }

@@ -12,27 +12,35 @@
 <body>
 <main id="app">
 
-  <section id="screen-event" class="screen active">
+  <section id="screen-home" class="screen active">
     <h1 class="game-title">SPACE MISSION<br />DESIGN GAME</h1>
+    <p class="home-subtitle" data-i18n="home.subtitle"></p>
+    <button id="home-start-btn" class="btn btn-primary" data-i18n="home.startGame"></button>
+    <button id="home-achievements-btn" class="btn btn-secondary" data-i18n="home.achievements"></button>
+    <button id="home-settings-btn" class="btn btn-secondary" data-i18n="home.settings"></button>
+  </section>
+
+  <section id="screen-event" class="screen">
+    <h2 data-i18n="event.title"></h2>
     <div class="event-card">
       <div id="event-icon" class="event-icon"></div>
       <h2 id="event-name"></h2>
       <p id="event-desc"></p>
       <p id="event-budget-note" class="budget-note"></p>
     </div>
-    <button id="start-btn" class="btn btn-primary">開始選擇部件</button>
+    <button id="start-btn" class="btn btn-primary" data-i18n="event.startBtn"></button>
   </section>
 
   <section id="screen-selection" class="screen">
-    <h2>選擇火箭與部件</h2>
+    <h2 data-i18n="selection.title"></h2>
 
     <div class="meters">
       <div class="meter">
-        <div class="meter-label"><span>預算</span><span id="cost-text"></span></div>
+        <div class="meter-label"><span data-i18n="selection.budgetLabel"></span><span id="cost-text"></span></div>
         <div class="bar"><div id="cost-bar-fill" class="bar-fill"></div></div>
       </div>
       <div class="meter">
-        <div class="meter-label"><span>質量</span><span id="mass-text"></span></div>
+        <div class="meter-label"><span data-i18n="selection.massLabel"></span><span id="mass-text"></span></div>
         <div class="bar"><div id="mass-bar-fill" class="bar-fill"></div></div>
       </div>
     </div>
@@ -41,17 +49,42 @@
 
     <div id="selection-groups"></div>
 
-    <button id="launch-btn" class="btn btn-primary" disabled>發射！</button>
+    <button id="launch-btn" class="btn btn-primary" disabled data-i18n="selection.launchBtn"></button>
   </section>
 
   <section id="screen-simulation" class="screen">
-    <h2>任務模擬中...</h2>
+    <h2 data-i18n="simulation.title"></h2>
+
     <div id="flight-track">
-      <span class="zone-label" style="bottom: 5%;">🌍 發射場</span>
-      <span class="zone-label" style="bottom: 42%;">☁️ 大氣層邊界</span>
-      <span class="zone-label" style="bottom: 90%;">🛰️ 任務軌道</span>
-      <div id="rocket">🚀</div>
+      <div id="flight-scene">
+        <div class="star-field"></div>
+
+        <div class="planet planet-mercury" style="top:60px;left:18%" title="Mercury"></div>
+        <div class="planet planet-venus" style="top:140px;left:68%" title="Venus"></div>
+        <div class="planet planet-earth" style="top:210px;left:38%" title="Earth"></div>
+        <div class="planet planet-mars" style="top:290px;left:82%" title="Mars"></div>
+        <div class="planet planet-jupiter" style="top:360px;left:22%" title="Jupiter"></div>
+        <div class="planet planet-saturn" style="top:460px;left:64%" title="Saturn"></div>
+        <div class="planet planet-uranus" style="top:550px;left:14%" title="Uranus"></div>
+        <div class="planet planet-neptune" style="top:630px;left:76%" title="Neptune"></div>
+        <div class="planet planet-pluto" style="top:700px;left:46%" title="Pluto"></div>
+
+        <div class="cloud" style="top:1240px;left:8%"></div>
+        <div class="cloud" style="top:1290px;left:52%"></div>
+        <div class="cloud" style="top:1355px;left:28%"></div>
+        <div class="cloud" style="top:1400px;left:72%"></div>
+
+        <span class="zone-label" style="top:1740px;" data-i18n="simulation.zoneGround"></span>
+        <span class="zone-label" style="top:900px;" data-i18n="simulation.zoneAtmosphere"></span>
+        <span class="zone-label" style="top:90px;" data-i18n="simulation.zoneOrbit"></span>
+      </div>
+
+      <div id="rocket-wrap">
+        <div id="rocket">🚀</div>
+        <div id="exhaust"></div>
+      </div>
     </div>
+
     <div id="stage-dots" class="stage-dots"></div>
     <p id="simulation-log" class="simulation-log"></p>
   </section>
@@ -62,20 +95,74 @@
     <div class="chart-wrap">
       <canvas id="radar-chart" width="360" height="360"></canvas>
     </div>
-    <h3>解鎖成就</h3>
+    <h3 data-i18n="results.achievementsHeader"></h3>
     <ul id="achievements-list"></ul>
-    <button id="play-again-btn" class="btn btn-primary">再玩一次</button>
+    <button id="play-again-btn" class="btn btn-primary" data-i18n="results.playAgain"></button>
+    <button id="results-home-btn" class="btn btn-secondary" data-i18n="results.backHome"></button>
   </section>
+
+  <section id="screen-achievements" class="screen">
+    <h2 data-i18n="achievementsGallery.title"></h2>
+    <ul id="achievements-gallery-list" class="gallery-list"></ul>
+    <button id="achievements-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
+  </section>
+
+  <section id="screen-settings" class="screen">
+    <h2 data-i18n="settings.title"></h2>
+
+    <div class="settings-row">
+      <span data-i18n="settings.language"></span>
+      <div class="lang-buttons">
+        <button type="button" class="btn btn-secondary lang-btn" data-lang="zh">中文</button>
+        <button type="button" class="btn btn-secondary lang-btn" data-lang="en">English</button>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <span data-i18n="settings.sound"></span>
+      <label class="switch">
+        <input type="checkbox" id="settings-sound-toggle" />
+        <span class="switch-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <span data-i18n="settings.volume"></span>
+      <input type="range" id="settings-volume-slider" min="0" max="1" step="0.05" />
+    </div>
+
+    <button id="settings-reset-btn" class="btn btn-secondary" data-i18n="settings.resetProgress"></button>
+    <button id="settings-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
+  </section>
+
+  <div id="tutorial-overlay" class="tutorial-overlay hidden">
+    <div class="tutorial-card">
+      <div class="tutorial-avatar">🤖</div>
+      <div class="tutorial-body">
+        <div id="tutorial-name" class="tutorial-name"></div>
+        <p id="tutorial-text" class="tutorial-text"></p>
+        <div class="tutorial-actions">
+          <button id="tutorial-skip-btn" type="button" class="btn-link"></button>
+          <button id="tutorial-next-btn" type="button" class="btn btn-primary"></button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/sound.js"></script>
 <script src="js/data.js"></script>
 <script src="js/state.js"></script>
 <script src="js/selection.js"></script>
 <script src="js/simulation.js"></script>
 <script src="js/results.js"></script>
 <script src="js/achievements.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/tutorial.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// 任務模擬：階段判定邏輯 + 模擬畫面動畫
+// 任務模擬：階段判定邏輯（不變）+ 火箭飛行動畫（視角固定、背景捲動）
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,20 +89,44 @@ async function runSimulation() {
   return { stageReachedIndex, overallSuccess, failedStage };
 }
 
-// ---------- 模擬畫面 DOM：火箭飛行動畫 ----------
+// ---------- 飛行動畫：視角固定在畫面中心，背景場景（地面→雲層→大氣層→太空）往下捲動 ----------
 
-// 每個階段「成功完成後」火箭在飛行軌道上的高度（bottom %）
 const FLIGHT_START_PERCENT = 4;
 const STAGE_TARGET_PERCENTS = [18, 40, 62, 78, 92];
 
-function resetFlightView() {
+function sceneTopForPercent(percent) {
+  const scene = document.getElementById("flight-scene");
+  const track = document.getElementById("flight-track");
+  return -(scene.offsetHeight - track.offsetHeight) * (1 - percent / 100);
+}
+
+function setSceneProgress(percent, durationMs) {
+  const scene = document.getElementById("flight-scene");
+  scene.style.transition = `top ${durationMs}ms ease-in-out`;
+  scene.style.top = `${sceneTopForPercent(percent)}px`;
+  return sleep(durationMs);
+}
+
+function setRocketFlying(on) {
+  document.getElementById("rocket").classList.toggle("flying", on);
+  document.getElementById("exhaust").classList.toggle("active", on);
+}
+
+function setRocketExploding(on) {
   const rocket = document.getElementById("rocket");
-  rocket.style.transition = "none";
-  rocket.style.bottom = `${FLIGHT_START_PERCENT}%`;
-  rocket.textContent = "🚀";
-  rocket.classList.remove("exploding");
-  void rocket.offsetHeight; // 強制 reflow，確保下一次移動會套用 transition
-  rocket.style.transition = "";
+  rocket.classList.toggle("exploding", on);
+  rocket.textContent = on ? "💥" : "🚀";
+}
+
+function resetFlightView() {
+  const scene = document.getElementById("flight-scene");
+  scene.style.transition = "none";
+  scene.style.top = `${sceneTopForPercent(FLIGHT_START_PERCENT)}px`;
+  void scene.offsetHeight; // 強制 reflow，確保下一次移動會套用 transition
+
+  setRocketFlying(false);
+  setRocketExploding(false);
+  scene.style.transition = "";
 
   document.getElementById("simulation-log").textContent = "";
 
@@ -112,16 +136,9 @@ function resetFlightView() {
     const dot = document.createElement("span");
     dot.className = "stage-dot";
     dot.id = `stage-dot-${i}`;
-    dot.title = stage.name;
+    dot.title = t("stage." + stage.id);
     dotsWrap.appendChild(dot);
   });
-}
-
-function setRocketBottom(percent, durationMs) {
-  const rocket = document.getElementById("rocket");
-  rocket.style.transition = `bottom ${durationMs}ms ease-in-out`;
-  rocket.style.bottom = `${percent}%`;
-  return sleep(durationMs);
 }
 
 function setDotState(index, state) {
@@ -142,25 +159,30 @@ async function animateStageAttempt(stage, index) {
   const midPercent = prevPercent + (targetPercent - prevPercent) * 0.55;
 
   setDotState(index, "active");
-  document.getElementById("simulation-log").textContent = `正在檢定：${stage.name} ...`;
-  await setRocketBottom(midPercent, 900);
+  document.getElementById("simulation-log").textContent = t("simulation.checking", { stage: t("stage." + stage.id) });
+
+  setRocketFlying(true);
+  await setSceneProgress(midPercent, 900);
 }
 
 async function animateStageResolve(stage, index, result) {
   const log = document.getElementById("simulation-log");
   const targetPercent = STAGE_TARGET_PERCENTS[index];
+  const stageName = t("stage." + stage.id);
 
   if (result.passed) {
     setDotState(index, "pass");
-    log.textContent = `${stage.name}：通過`;
-    await setRocketBottom(targetPercent, 500);
+    log.textContent = t("simulation.passed", { stage: stageName });
+    sfxPass();
+    await setSceneProgress(targetPercent, 500);
+    setRocketFlying(false);
     await sleep(300);
   } else {
-    const rocket = document.getElementById("rocket");
-    rocket.textContent = "💥";
-    rocket.classList.add("exploding");
+    setRocketFlying(false);
+    setRocketExploding(true);
     setDotState(index, "fail");
-    log.textContent = `${stage.name}：失敗！`;
+    log.textContent = t("simulation.failed", { stage: stageName });
+    sfxFail();
     markRemainingDotsSkipped(index);
     await sleep(1000);
   }

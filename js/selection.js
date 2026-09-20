@@ -17,7 +17,7 @@ function renderRocketGroup() {
   group.className = "part-group";
 
   const title = document.createElement("h3");
-  title.textContent = "火箭";
+  title.textContent = t("selection.rocketGroup");
   group.appendChild(title);
 
   const cardsWrap = document.createElement("div");
@@ -29,10 +29,16 @@ function renderRocketGroup() {
     card.className = "part-card";
     if (gameState.rocket && gameState.rocket.id === rocket.id) card.classList.add("selected");
 
+    const stats = t("selection.rocketStats", {
+      cost: rocket.cost,
+      maxPayload: rocket.maxPayload,
+      reliability: rocket.reliability,
+    });
+
     card.innerHTML = `
       <div class="swatch swatch-rocket"></div>
-      <div class="part-name">${rocket.name}</div>
-      <div class="part-stats">Cost ${rocket.cost} · 酬載上限 ${rocket.maxPayload} · 可靠度 ${rocket.reliability}</div>
+      <div class="part-name">${t("rocket." + rocket.id)}</div>
+      <div class="part-stats">${stats}</div>
     `;
 
     card.addEventListener("click", () => {
@@ -53,7 +59,7 @@ function renderSubsystemGroup(key) {
   group.className = "part-group";
 
   const title = document.createElement("h3");
-  title.textContent = def.name;
+  title.textContent = t("subsystem." + key);
   group.appendChild(title);
 
   const cardsWrap = document.createElement("div");
@@ -65,10 +71,12 @@ function renderSubsystemGroup(key) {
     card.className = "part-card";
     if (gameState.parts[key] && gameState.parts[key].id === tier.id) card.classList.add("selected");
 
+    const stats = t("selection.partStats", { cost: tier.cost, mass: tier.mass, value: tier.value });
+
     card.innerHTML = `
       <div class="swatch swatch-${key}"></div>
-      <div class="part-name">${tier.name}</div>
-      <div class="part-stats">Cost ${tier.cost} · Mass ${tier.mass} · 數值 ${tier.value}</div>
+      <div class="part-name">${t("tier." + tier.id)}</div>
+      <div class="part-stats">${stats}</div>
     `;
 
     card.addEventListener("click", () => {
@@ -111,10 +119,10 @@ function updateMeters() {
   if (overBudget || overMass) {
     warning.textContent =
       overBudget && overMass
-        ? "超出預算且超重，無法發射！"
+        ? t("selection.warningBoth")
         : overBudget
-        ? "超出預算，無法發射！"
-        : "超出火箭酬載上限，無法發射！";
+        ? t("selection.warningBudget")
+        : t("selection.warningMass");
     warning.classList.remove("hidden");
   } else {
     warning.classList.add("hidden");
