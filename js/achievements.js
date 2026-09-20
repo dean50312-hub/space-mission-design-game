@@ -50,9 +50,15 @@ function renderAchievementsGallery() {
     const unlocked = storageIsAchievementUnlocked(a.id);
     const li = document.createElement("li");
     li.className = `gallery-item ${unlocked ? "unlocked" : "locked"}`;
+
+    const textHtml = unlocked
+      ? `<div class="gallery-name">${t(`achievement.${a.id}.name`)}</div>
+         <div class="gallery-story"><span class="gallery-story-label">${t("achievementsGallery.storyLabel")}</span>${t(`achievement.${a.id}.story`)}</div>`
+      : `<div class="gallery-name">${t("achievementsGallery.locked")}</div>`;
+
     li.innerHTML = `
       <span class="gallery-icon">${unlocked ? a.icon : "❔"}</span>
-      <span class="gallery-name">${unlocked ? t(`achievement.${a.id}`) : t("achievementsGallery.locked")}</span>
+      <div class="gallery-text">${textHtml}</div>
     `;
     list.appendChild(li);
   });

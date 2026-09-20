@@ -92,14 +92,32 @@ const STRINGS = {
       deployment: "部署機構",
     },
     achievement: {
-      first_orbit: "首次入軌成功",
-      under_budget: "精打細算",
-      storm_survivor: "力抗風暴",
-      all_rounder: "全能設計",
-      glorious_failure: "雖敗猶榮",
-      never_give_up: "屢敗屢戰",
+      first_orbit: {
+        name: "首次入軌成功",
+        story: "1969 年 7 月 20 日，阿波羅 11 號的尼爾・阿姆斯壯成為第一位踏上月球的人類，他說出了那句名言：「這是我個人的一小步，卻是全人類的一大步。」",
+      },
+      under_budget: {
+        name: "精打細算",
+        story: "2013 年，印度的「曼加里安號」火星軌道探測器以僅約 7,400 萬美元的成本成功入軌，是史上最便宜的星際任務之一，還讓印度成為第一個首次嘗試就成功抵達火星的國家。",
+      },
+      storm_survivor: {
+        name: "力抗風暴",
+        story: "1972 年 8 月，一場強烈的太陽風暴恰好發生在阿波羅 16 號與 17 號任務之間。如果當時有太空人正在月球表面，這場風暴的輻射劑量可能會對他們造成嚴重傷害——他們只是運氣好，躲過了這一劫。",
+      },
+      all_rounder: {
+        name: "全能設計",
+        story: "1977 年發射的航海家一號與二號，原本只是設計來探索木星和土星的任務，工程餘裕卻好到讓航海家二號一路飛越天王星、海王星，兩艘探測器至今仍在星際空間持續傳回資料，是工程「面面俱到」的最佳典範。",
+      },
+      glorious_failure: {
+        name: "雖敗猶榮",
+        story: "1967 年 4 月 24 日，蘇聯太空人弗拉基米爾・科馬洛夫在聯合號一號任務返航時，因降落傘故障不幸罹難，成為第一位在太空任務中犧牲的太空人。他的犧牲讓後續的太空計畫更加重視安全冗餘設計。",
+      },
+      never_give_up: {
+        name: "屢敗屢戰",
+        story: "SpaceX 的獵鷹一號火箭曾連續三次發射失敗，公司一度瀕臨破產。直到 2008 年 9 月第四次發射終於成功，不但拯救了公司，也開啟了 SpaceX 後來的傳奇。",
+      },
     },
-    achievementsGallery: { title: "成就展示", locked: "尚未解鎖" },
+    achievementsGallery: { title: "成就展示", locked: "尚未解鎖", storyLabel: "📖 太空史小知識" },
     settings: {
       title: "設定",
       language: "語言",
@@ -230,14 +248,32 @@ const STRINGS = {
       deployment: "Deployment Mechanism",
     },
     achievement: {
-      first_orbit: "First Orbit Achieved",
-      under_budget: "Frugal Engineer",
-      storm_survivor: "Storm Survivor",
-      all_rounder: "All-Rounder",
-      glorious_failure: "Glorious Failure",
-      never_give_up: "Never Give Up",
+      first_orbit: {
+        name: "First Orbit Achieved",
+        story: 'On July 20, 1969, Apollo 11\'s Neil Armstrong became the first human to set foot on the Moon, famously saying: "That\'s one small step for man, one giant leap for mankind."',
+      },
+      under_budget: {
+        name: "Frugal Engineer",
+        story: "In 2013, India's Mars Orbiter Mission (Mangalyaan) reached Mars orbit for about $74 million — one of the cheapest interplanetary missions ever — making India the first nation to succeed at Mars on its very first attempt.",
+      },
+      storm_survivor: {
+        name: "Storm Survivor",
+        story: "In August 1972, a massive solar storm struck right between the Apollo 16 and Apollo 17 missions. Had astronauts been on the lunar surface at the time, the radiation could have posed a serious danger — they simply got lucky with the timing.",
+      },
+      all_rounder: {
+        name: "All-Rounder",
+        story: "Launched in 1977, Voyager 1 and 2 were originally designed to explore Jupiter and Saturn, but thanks to remarkable engineering margins, Voyager 2 went on to fly past Uranus and Neptune as well — and both probes are still transmitting from interstellar space today.",
+      },
+      glorious_failure: {
+        name: "Glorious Failure",
+        story: "On April 24, 1967, Soviet cosmonaut Vladimir Komarov died when Soyuz 1's parachute failed during reentry, becoming the first person to die during an actual spaceflight. His loss pushed later space programs to take safety margins far more seriously.",
+      },
+      never_give_up: {
+        name: "Never Give Up",
+        story: "SpaceX's Falcon 1 rocket failed three launches in a row, nearly bankrupting the company. Its fourth attempt in September 2008 finally succeeded — saving SpaceX and kicking off its legendary run.",
+      },
     },
-    achievementsGallery: { title: "Achievements", locked: "Locked" },
+    achievementsGallery: { title: "Achievements", locked: "Locked", storyLabel: "📖 Space History" },
     settings: {
       title: "Settings",
       language: "Language",

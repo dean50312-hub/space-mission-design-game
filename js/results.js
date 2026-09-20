@@ -110,7 +110,7 @@ function renderResultsScreen(simResult, scores, achievements) {
   } else {
     achievements.forEach((a) => {
       const li = document.createElement("li");
-      li.textContent = `${a.icon} ${t("achievement." + a.id)}`;
+      li.textContent = `${a.icon} ${t("achievement." + a.id + ".name")}`;
       achList.appendChild(li);
     });
   }
