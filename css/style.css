@@ -314,16 +314,12 @@ h1, h2, .btn, .stage-name {
 .planet-neptune { width: 18px; height: 18px; background: #3f5fd9; }
 .planet-pluto { width: 8px; height: 8px; background: #b0a090; }
 
-.planet-saturn::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -30%;
-  width: 160%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  transform: translateY(-50%) rotate(-15deg);
+.planet-saturn {
+  width: 46px;
+  height: 46px;
+  background: none;
+  border-radius: 0;
+  image-rendering: pixelated;
 }
 
 .cloud {
