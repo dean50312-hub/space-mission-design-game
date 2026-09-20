@@ -93,6 +93,8 @@ function finishMission(simResult) {
     budget: gameState.budget,
     event: gameState.event,
     failCountBeforeThis,
+    rocket: gameState.rocket,
+    parts: gameState.parts,
   });
 
   if (simResult.overallSuccess) sfxSuccess();

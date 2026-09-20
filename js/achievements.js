@@ -34,12 +34,55 @@ const ACHIEVEMENTS = [
     icon: "🔁",
     check: (ctx) => ctx.simResult.overallSuccess && ctx.failCountBeforeThis >= 5,
   },
+  {
+    id: "bare_bones",
+    icon: "🛠️",
+    check: (ctx) =>
+      ctx.simResult.overallSuccess &&
+      ctx.rocket.id === "light" &&
+      SUBSYSTEM_KEYS.every((key) => ctx.parts[key].id === "economy"),
+  },
+  {
+    id: "top_of_the_line",
+    icon: "💎",
+    check: (ctx) => ctx.simResult.overallSuccess && SUBSYSTEM_KEYS.every((key) => ctx.parts[key].id === "premium"),
+  },
+  {
+    id: "so_close",
+    icon: "💔",
+    check: (ctx) =>
+      !ctx.simResult.overallSuccess &&
+      ctx.simResult.failedStage &&
+      ["insertion", "deployment", "operation"].includes(ctx.simResult.failedStage.id),
+  },
+  {
+    id: "crisis_management",
+    icon: "🧯",
+    check: (ctx) => ctx.simResult.overallSuccess && ctx.event.id === "budget_cut",
+  },
+  {
+    id: "flawless_mission",
+    icon: "🎯",
+    check: (ctx) => ctx.simResult.overallSuccess && Object.values(ctx.scores).every((v) => v >= 95),
+  },
+  {
+    id: "space_polymath",
+    icon: "👑",
+    meta: true,
+    check: () => ACHIEVEMENTS.filter((a) => !a.meta).every((a) => storageIsAchievementUnlocked(a.id)),
+  },
 ];
 
 function evaluateAchievements(ctx) {
-  const unlocked = ACHIEVEMENTS.filter((a) => a.check(ctx));
+  const unlocked = ACHIEVEMENTS.filter((a) => !a.meta && a.check(ctx)).filter(
+    (a) => !storageIsAchievementUnlocked(a.id)
+  );
   unlocked.forEach((a) => storageUnlockAchievement(a.id));
-  return unlocked;
+
+  const meta = ACHIEVEMENTS.filter((a) => a.meta && !storageIsAchievementUnlocked(a.id) && a.check(ctx));
+  meta.forEach((a) => storageUnlockAchievement(a.id));
+
+  return [...unlocked, ...meta];
 }
 
 function renderAchievementsGallery() {
@@ -54,7 +97,7 @@ function renderAchievementsGallery() {
     const textHtml = unlocked
       ? `<div class="gallery-name">${t(`achievement.${a.id}.name`)}</div>
          <div class="gallery-story"><span class="gallery-story-label">${t("achievementsGallery.storyLabel")}</span>${t(`achievement.${a.id}.story`)}</div>`
-      : `<div class="gallery-name">${t("achievementsGallery.locked")}</div>`;
+      : `<div class="gallery-name">${t("achievementsGallery.locked")} <span class="gallery-hint">(${t(`achievement.${a.id}.hint`)})</span></div>`;
 
     li.innerHTML = `
       <span class="gallery-icon">${unlocked ? a.icon : "❔"}</span>

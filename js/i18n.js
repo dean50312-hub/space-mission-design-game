@@ -94,27 +94,63 @@ const STRINGS = {
     achievement: {
       first_orbit: {
         name: "首次入軌成功",
+        hint: "成功完成一次任務",
         story: "1969 年 7 月 20 日，阿波羅 11 號的尼爾・阿姆斯壯成為第一位踏上月球的人類，他說出了那句名言：「這是我個人的一小步，卻是全人類的一大步。」",
       },
       under_budget: {
         name: "精打細算",
+        hint: "任務成功且花費低於預算的 60%",
         story: "2013 年，印度的「曼加里安號」火星軌道探測器以僅約 7,400 萬美元的成本成功入軌，是史上最便宜的星際任務之一，還讓印度成為第一個首次嘗試就成功抵達火星的國家。",
       },
       storm_survivor: {
         name: "力抗風暴",
+        hint: "在太陽閃焰或地磁暴事件中任務成功",
         story: "1972 年 8 月，一場強烈的太陽風暴恰好發生在阿波羅 16 號與 17 號任務之間。如果當時有太空人正在月球表面，這場風暴的輻射劑量可能會對他們造成嚴重傷害——他們只是運氣好，躲過了這一劫。",
       },
       all_rounder: {
         name: "全能設計",
+        hint: "雷達圖六項數值都達到 80 以上且任務成功",
         story: "1977 年發射的航海家一號與二號，原本只是設計來探索木星和土星的任務，工程餘裕卻好到讓航海家二號一路飛越天王星、海王星，兩艘探測器至今仍在星際空間持續傳回資料，是工程「面面俱到」的最佳典範。",
       },
       glorious_failure: {
         name: "雖敗猶榮",
+        hint: "在發射或穿越大氣層階段失敗",
         story: "1967 年 4 月 24 日，蘇聯太空人弗拉基米爾・科馬洛夫在聯合號一號任務返航時，因降落傘故障不幸罹難，成為第一位在太空任務中犧牲的太空人。他的犧牲讓後續的太空計畫更加重視安全冗餘設計。",
       },
       never_give_up: {
         name: "屢敗屢戰",
+        hint: "累積失敗 5 次後任務成功",
         story: "SpaceX 的獵鷹一號火箭曾連續三次發射失敗，公司一度瀕臨破產。直到 2008 年 9 月第四次發射終於成功，不但拯救了公司，也開啟了 SpaceX 後來的傳奇。",
+      },
+      bare_bones: {
+        name: "克難精神",
+        hint: "火箭選輕型、5 個部件都選經濟檔，且任務成功",
+        story: "1957 年 10 月 4 日，蘇聯發射的史普尼克一號只是一顆直徑 58 公分、裝了四根天線的簡單金屬球，沒有任何科學儀器，卻靠著這樣的陽春設計成為人類第一顆人造衛星，正式揭開太空時代的序幕。",
+      },
+      top_of_the_line: {
+        name: "不計成本",
+        hint: "5 個部件都選高階檔，且任務成功",
+        story: "詹姆斯・韋伯太空望遠鏡耗資超過 100 億美元，是有史以來最昂貴的太空科學任務，但也換來了能看穿宇宙塵埃、直窺早期宇宙誕生的頂級觀測能力，證明有些時候貴是真的有貴的道理。",
+      },
+      so_close: {
+        name: "功虧一簣",
+        hint: "在軌道插入、展開部署或任務運作階段失敗",
+        story: "1999 年，NASA 的火星氣候探測者號在即將進入火星軌道時失聯——事後調查發現，是因為地面團隊一邊用公制、一邊用英制單位計算推力，導致探測器以錯誤的高度衝入大氣層解體。只差臨門一腳的教訓，讓「單位換算」從此成為工程界的經典警世故事。",
+      },
+      crisis_management: {
+        name: "危機處理",
+        hint: "在「預算臨時緊縮」事件中任務成功",
+        story: "1970 年，阿波羅 13 號在飛往月球途中氧氣槽爆炸，任務被迫放棄登月。但地面團隊與太空人在資源嚴重受限的情況下臨機應變，成功讓三名太空人安全返回地球，被譽為「成功的失敗」，也是太空史上最經典的危機處理案例。",
+      },
+      flawless_mission: {
+        name: "完美無瑕",
+        hint: "雷達圖六項數值都達到 95 以上且任務成功",
+        story: "2021 年，NASA 的毅力號火星車要在短短 7 分鐘內獨立完成降落傘展開、反推噴射、「空中吊車」垂降等一連串高難度動作，中間任何一個環節出錯都會導致任務失敗——史稱「恐怖七分鐘」。最終每個步驟都完美執行，堪稱工程精算的極致展現。",
+      },
+      space_polymath: {
+        name: "太空全才",
+        hint: "解鎖其他所有成就",
+        story: "從史普尼克一號到航海家號、從阿波羅計畫到現代的火星探測，太空探索的每個里程碑背後都是無數次的精算、取捨與偶爾的運氣。你已經體驗過這些故事的縮影——真正的太空任務，往往就是這樣一步步走出來的。",
       },
     },
     achievementsGallery: { title: "成就展示", locked: "尚未解鎖", storyLabel: "📖 太空史小知識" },
@@ -250,27 +286,63 @@ const STRINGS = {
     achievement: {
       first_orbit: {
         name: "First Orbit Achieved",
+        hint: "Complete a mission successfully",
         story: 'On July 20, 1969, Apollo 11\'s Neil Armstrong became the first human to set foot on the Moon, famously saying: "That\'s one small step for man, one giant leap for mankind."',
       },
       under_budget: {
         name: "Frugal Engineer",
+        hint: "Succeed while spending under 60% of your budget",
         story: "In 2013, India's Mars Orbiter Mission (Mangalyaan) reached Mars orbit for about $74 million — one of the cheapest interplanetary missions ever — making India the first nation to succeed at Mars on its very first attempt.",
       },
       storm_survivor: {
         name: "Storm Survivor",
+        hint: "Succeed during a Solar Flare or Geomagnetic Storm event",
         story: "In August 1972, a massive solar storm struck right between the Apollo 16 and Apollo 17 missions. Had astronauts been on the lunar surface at the time, the radiation could have posed a serious danger — they simply got lucky with the timing.",
       },
       all_rounder: {
         name: "All-Rounder",
+        hint: "Succeed with all six radar stats at 80+",
         story: "Launched in 1977, Voyager 1 and 2 were originally designed to explore Jupiter and Saturn, but thanks to remarkable engineering margins, Voyager 2 went on to fly past Uranus and Neptune as well — and both probes are still transmitting from interstellar space today.",
       },
       glorious_failure: {
         name: "Glorious Failure",
+        hint: "Fail during Liftoff or Atmospheric Ascent",
         story: "On April 24, 1967, Soviet cosmonaut Vladimir Komarov died when Soyuz 1's parachute failed during reentry, becoming the first person to die during an actual spaceflight. His loss pushed later space programs to take safety margins far more seriously.",
       },
       never_give_up: {
         name: "Never Give Up",
+        hint: "Succeed after accumulating 5 failures",
         story: "SpaceX's Falcon 1 rocket failed three launches in a row, nearly bankrupting the company. Its fourth attempt in September 2008 finally succeeded — saving SpaceX and kicking off its legendary run.",
+      },
+      bare_bones: {
+        name: "Bare Bones",
+        hint: "Succeed using the Light rocket with all-Economy parts",
+        story: "On October 4, 1957, the Soviet Union's Sputnik 1 — a simple 58 cm metal sphere with four antennas and no scientific instruments at all — became humanity's first artificial satellite, kicking off the Space Age with the bare minimum.",
+      },
+      top_of_the_line: {
+        name: "Top of the Line",
+        hint: "Succeed with all-Premium parts",
+        story: "The James Webb Space Telescope cost over $10 billion, making it the most expensive science mission ever flown — but it bought unmatched observing power that lets us peer through cosmic dust to see the universe's earliest galaxies. Sometimes you really do get what you pay for.",
+      },
+      so_close: {
+        name: "So Close",
+        hint: "Fail during Orbit Insertion, Deployment, or Operation",
+        story: "In 1999, NASA's Mars Climate Orbiter went silent right as it approached Mars orbit insertion. The investigation found the cause: one team used metric units, another used imperial — the mismatch sent the probe in at the wrong altitude, and it broke apart in the atmosphere. A lesson learned one step from success, and now a classic cautionary tale in engineering.",
+      },
+      crisis_management: {
+        name: "Crisis Management",
+        hint: "Succeed during a Last-Minute Budget Cut event",
+        story: 'In 1970, an oxygen tank explosion forced Apollo 13 to abandon its Moon landing mid-flight. With severely limited resources, mission control and the crew improvised their way through the crisis and brought all three astronauts home safely — remembered as a "successful failure" and one of the greatest crisis-management stories in spaceflight history.',
+      },
+      flawless_mission: {
+        name: "Flawless Mission",
+        hint: "Succeed with all six radar stats at 95+",
+        story: 'In 2021, NASA\'s Perseverance rover had to autonomously execute a parachute deployment, retro-rocket burn, and "sky crane" descent — all within seven minutes, with zero margin for error. Nicknamed the "seven minutes of terror," every single step went exactly as planned — a masterclass in engineering precision.',
+      },
+      space_polymath: {
+        name: "Space Polymath",
+        hint: "Unlock every other achievement",
+        story: "From Sputnik to Voyager, from Apollo to modern Mars rovers, every milestone in space exploration was built on countless calculations, trade-offs, and the occasional stroke of luck. You've now lived a taste of all of it — real space missions are built exactly this way, one hard decision at a time.",
       },
     },
     achievementsGallery: { title: "Achievements", locked: "Locked", storyLabel: "📖 Space History" },
