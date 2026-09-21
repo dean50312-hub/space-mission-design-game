@@ -11,7 +11,7 @@ function getStageValue(stageId, statOverride) {
     case "ascent":
       return gameState.parts.structure.value;
     case "insertion":
-      return gameState.parts.propulsion.value;
+      return fuelPropulsionValue();
     case "deployment":
       return (gameState.parts.power.value + gameState.parts.comm.value) / 2;
     case "operation":
@@ -66,11 +66,41 @@ function runStageCheck(stage) {
   return { passed, checks };
 }
 
+function runFuelingCheck() {
+  gameState.incidentPenalty = 0;
+  if (!gameState.fuel || !gameState.fuel.toxic || gameState.hazmatPurchased) {
+    return { relevant: false, incident: false };
+  }
+  const incident = Math.random() < HAZMAT_INCIDENT_CHANCE;
+  if (incident) gameState.incidentPenalty = HAZMAT_INCIDENT_PENALTY;
+  return { relevant: true, incident };
+}
+
+async function animateFuelingCheck() {
+  const fuelingResult = runFuelingCheck();
+  if (!fuelingResult.relevant) return;
+
+  const log = document.getElementById("simulation-log");
+  log.textContent = t("simulation.fueling");
+  await sleep(900);
+
+  if (fuelingResult.incident) {
+    log.textContent = t("simulation.fuelingIncident");
+    sfxFail();
+  } else {
+    log.textContent = t("simulation.fuelingOk");
+    sfxPass();
+  }
+  await sleep(900);
+}
+
 async function runSimulation() {
   let stageReachedIndex = -1;
   let overallSuccess = true;
   let failedStage = null;
   let failedChecks = [];
+
+  await animateFuelingCheck();
 
   for (let i = 0; i < STAGES.length; i++) {
     const stage = STAGES[i];

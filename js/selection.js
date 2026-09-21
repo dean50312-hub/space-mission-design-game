@@ -8,6 +8,7 @@ function renderSelectionScreen() {
   SUBSYSTEM_KEYS.forEach((key) => {
     container.appendChild(renderSubsystemGroup(key));
   });
+  container.appendChild(renderFuelGroup());
 
   updateMeters();
 }
@@ -89,6 +90,105 @@ function renderSubsystemGroup(key) {
 
   group.appendChild(cardsWrap);
   return group;
+}
+
+function renderFuelGroup() {
+  const group = document.createElement("div");
+  group.className = "part-group";
+
+  const title = document.createElement("h3");
+  title.textContent = t("selection.fuelGroup");
+  group.appendChild(title);
+
+  const cardsWrap = document.createElement("div");
+  cardsWrap.className = "cards";
+
+  FUELS.forEach((fuel) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "part-card";
+    if (gameState.fuel && gameState.fuel.id === fuel.id) card.classList.add("selected");
+
+    const stats = t("selection.fuelStats", {
+      isp: fuel.isp,
+      type: fuel.electric ? t("selection.fuelTypeElectric") : t("selection.fuelTypeChemical"),
+    });
+
+    card.innerHTML = `
+      <div class="swatch swatch-fuel"></div>
+      <div class="part-name">${t("fuel." + fuel.id)}</div>
+      <div class="part-stats">${stats}</div>
+    `;
+
+    card.addEventListener("click", () => {
+      gameState.fuel = fuel;
+      if (!fuel.toxic) gameState.hazmatPurchased = false;
+      renderSelectionScreen();
+    });
+
+    cardsWrap.appendChild(card);
+  });
+
+  group.appendChild(cardsWrap);
+
+  if (gameState.fuel) {
+    group.appendChild(renderFuelControls());
+  }
+
+  return group;
+}
+
+function renderFuelControls() {
+  const wrap = document.createElement("div");
+  wrap.className = "fuel-controls";
+
+  wrap.innerHTML = `
+    <div class="meter-label"><span>${t("selection.fuelPercentLabel")}</span><span id="fuel-percent-value">${gameState.fuelPercent}%</span></div>
+    <input type="range" id="fuel-percent-slider" class="fuel-slider" min="0" max="100" step="5" value="${gameState.fuelPercent}" />
+    <p id="fuel-summary" class="fuel-summary"></p>
+  `;
+
+  const slider = wrap.querySelector("#fuel-percent-slider");
+  slider.addEventListener("input", (e) => {
+    gameState.fuelPercent = Number(e.target.value);
+    document.getElementById("fuel-percent-value").textContent = `${gameState.fuelPercent}%`;
+    updateFuelSummary();
+    updateMeters();
+  });
+
+  if (gameState.fuel.toxic) {
+    const hazmatRow = document.createElement("div");
+    hazmatRow.className = "hazmat-row";
+    hazmatRow.innerHTML = `
+      <label class="hazmat-check">
+        <input type="checkbox" id="hazmat-checkbox" ${gameState.hazmatPurchased ? "checked" : ""} />
+        ${t("selection.hazmatCheckbox", { cost: HAZMAT_COST })}
+      </label>
+      <p class="hazmat-warning">${t("selection.hazmatWarning", {
+        chance: Math.round(HAZMAT_INCIDENT_CHANCE * 100),
+        penalty: HAZMAT_INCIDENT_PENALTY,
+      })}</p>
+    `;
+    const checkbox = hazmatRow.querySelector("#hazmat-checkbox");
+    checkbox.addEventListener("change", (e) => {
+      gameState.hazmatPurchased = e.target.checked;
+      renderSelectionScreen();
+    });
+    wrap.appendChild(hazmatRow);
+  }
+
+  requestAnimationFrame(updateFuelSummary);
+  return wrap;
+}
+
+function updateFuelSummary() {
+  const summary = document.getElementById("fuel-summary");
+  if (!summary) return;
+  summary.textContent = t("selection.fuelSummary", {
+    mass: Math.round(fuelMass() * 10) / 10,
+    cost: Math.round(fuelCost() * 10) / 10,
+    propulsion: Math.round(fuelPropulsionValue()),
+  });
 }
 
 function updateMeters() {

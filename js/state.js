@@ -4,7 +4,11 @@ const gameState = {
   event: null,
   budget: BUDGET_TOTAL,
   rocket: null,
-  parts: { power: null, comm: null, science: null, propulsion: null, structure: null },
+  parts: { power: null, comm: null, science: null, structure: null },
+  fuel: null,
+  fuelPercent: 50,
+  hazmatPurchased: false,
+  incidentPenalty: 0,
   failCount: 0,
 };
 
@@ -12,7 +16,32 @@ function resetForNewGame() {
   gameState.event = pickRandomEvent();
   gameState.budget = BUDGET_TOTAL + (gameState.event.effect.budgetDelta || 0);
   gameState.rocket = null;
-  gameState.parts = { power: null, comm: null, science: null, propulsion: null, structure: null };
+  gameState.parts = { power: null, comm: null, science: null, structure: null };
+  gameState.fuel = null;
+  gameState.fuelPercent = 50;
+  gameState.hazmatPurchased = false;
+  gameState.incidentPenalty = 0;
+}
+
+function fuelMass() {
+  if (!gameState.fuel) return 0;
+  return (FUEL_BASE_MASS_AT_FULL * gameState.fuelPercent) / 100 * gameState.fuel.massCoef;
+}
+
+function fuelCost() {
+  if (!gameState.fuel) return 0;
+  let cost = ((FUEL_BASE_COST_AT_FULL * gameState.fuelPercent) / 100) * gameState.fuel.costCoef;
+  if (gameState.fuel.toxic && gameState.hazmatPurchased) cost += HAZMAT_COST;
+  return cost;
+}
+
+function fuelPropulsionValue() {
+  if (!gameState.fuel) return 0;
+  let value = (FUEL_BASE_PROPULSION_AT_FULL * gameState.fuelPercent) / 100;
+  if (gameState.fuel.electric && (!gameState.parts.power || gameState.parts.power.id === "economy")) {
+    value *= ELECTRIC_UNDERPOWERED_MULTIPLIER;
+  }
+  return value;
 }
 
 function currentCostUsed() {
@@ -20,6 +49,7 @@ function currentCostUsed() {
   for (const key of SUBSYSTEM_KEYS) {
     if (gameState.parts[key]) cost += gameState.parts[key].cost;
   }
+  cost += fuelCost();
   return cost;
 }
 
@@ -28,11 +58,16 @@ function currentMassUsed() {
   for (const key of SUBSYSTEM_KEYS) {
     if (gameState.parts[key]) mass += gameState.parts[key].mass;
   }
+  mass += fuelMass();
   return mass;
 }
 
 function isSelectionComplete() {
-  return Boolean(gameState.rocket) && SUBSYSTEM_KEYS.every((key) => gameState.parts[key] !== null);
+  return (
+    Boolean(gameState.rocket) &&
+    Boolean(gameState.fuel) &&
+    SUBSYSTEM_KEYS.every((key) => gameState.parts[key] !== null)
+  );
 }
 
 function isOverBudget() {

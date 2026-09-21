@@ -14,11 +14,11 @@ function computeRadarScores(simResult) {
 
   const power = reachedIndex >= 3 ? parts.power.value : 0;
   const comm = reachedIndex >= 3 ? parts.comm.value : 0;
-  const orbital = reachedIndex >= 2 ? parts.propulsion.value : 0;
+  const orbital = reachedIndex >= 2 ? fuelPropulsionValue() : 0;
   const science = reachedIndex >= 4 ? parts.science.value : 0;
 
   const massRatio = currentMassUsed() / gameState.rocket.maxPayload;
-  const costRatio = currentCostUsed() / gameState.budget;
+  const costRatio = (currentCostUsed() + gameState.incidentPenalty) / gameState.budget;
 
   return {
     mass: Math.round(sweetSpotScore(massRatio)),

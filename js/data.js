@@ -31,13 +31,6 @@ const SUBSYSTEMS = {
       { id: "premium", cost: 28, mass: 16, value: 90 },
     ],
   },
-  propulsion: {
-    tiers: [
-      { id: "economy", cost: 10, mass: 7, value: 35 },
-      { id: "standard", cost: 18, mass: 11, value: 65 },
-      { id: "premium", cost: 30, mass: 16, value: 90 },
-    ],
-  },
   structure: {
     tiers: [
       { id: "economy", cost: 8, mass: 6, value: 35 },
@@ -47,7 +40,27 @@ const SUBSYSTEMS = {
   },
 };
 
-const SUBSYSTEM_KEYS = ["power", "comm", "science", "propulsion", "structure"];
+const SUBSYSTEM_KEYS = ["power", "comm", "science", "structure"];
+
+// 燃料系統：燃料類型（決定質量/成本效率）× 填充量（0~100% 滑桿）
+// 質量係數 = 220（聯胺比衝，基準）÷ 該燃料實際比衝，數字越小代表同樣推進力所需質量越輕
+const FUEL_BASE_MASS_AT_FULL = 17; // MU，填充量 100% 時的基礎質量（尚未乘上燃料係數）
+const FUEL_BASE_COST_AT_FULL = 22; // C，填充量 100% 時的基礎成本（尚未乘上燃料係數）
+const FUEL_BASE_PROPULSION_AT_FULL = 90; // 填充量 100% 時的推進貢獻值
+
+const FUELS = [
+  { id: "hydrazine", isp: 220, massCoef: 1.0, costCoef: 1.0, electric: false, toxic: true },
+  { id: "af_m315e", isp: 245, massCoef: 0.9, costCoef: 1.3, electric: false, toxic: false },
+  { id: "hydrogen_peroxide", isp: 160, massCoef: 1.4, costCoef: 0.7, electric: false, toxic: false },
+  { id: "ion", isp: 3000, massCoef: 0.07, costCoef: 1.8, electric: true, toxic: false },
+  { id: "hall", isp: 1600, massCoef: 0.14, costCoef: 1.5, electric: true, toxic: false },
+];
+
+const HAZMAT_COST = 12; // C，聯胺毒氣危害處理加購成本
+const HAZMAT_INCIDENT_CHANCE = 0.8; // 不加購時的工安事故機率
+const HAZMAT_INCIDENT_PENALTY = 20; // C，事故發生時的額外清理成本（計入預算效率分數，不影響選件畫面的預算）
+
+const ELECTRIC_UNDERPOWERED_MULTIPLIER = 0.6; // 電推進但電力系統 < 標準檔時的推進值懲罰倍率
 
 const STAGES = [
   { id: "liftoff", baseThreshold: 50 },

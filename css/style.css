@@ -229,7 +229,7 @@ h1, h2, .btn, .stage-name {
 .swatch-power { background: var(--c-power); }
 .swatch-comm { background: var(--c-comm); }
 .swatch-science { background: var(--c-science); }
-.swatch-propulsion { background: var(--c-propulsion); }
+.swatch-fuel { background: var(--c-propulsion); }
 .swatch-structure { background: var(--c-structure); }
 
 .part-name {
@@ -241,6 +241,46 @@ h1, h2, .btn, .stage-name {
 .part-stats {
   font-size: 11px;
   color: var(--text-dim);
+}
+
+.fuel-controls {
+  background: var(--panel);
+  border: 1px solid var(--panel-light);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-top: 4px;
+}
+
+.fuel-slider {
+  width: 100%;
+  margin: 6px 0 10px;
+}
+
+.fuel-summary {
+  font-size: 12px;
+  color: var(--accent);
+  margin: 0;
+}
+
+.hazmat-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--panel-light);
+}
+
+.hazmat-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.hazmat-warning {
+  font-size: 11px;
+  color: var(--warn);
+  margin: 6px 0 0;
+  line-height: 1.5;
 }
 
 /* ---------- Simulation screen：視角固定，背景場景捲動 ---------- */

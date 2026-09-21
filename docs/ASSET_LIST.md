@@ -31,7 +31,7 @@ image/
 | 電力系統×3 | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | 64×64 | 太陽能板/電池，經濟→高階建議畫面板越大越多片 |
 | 通訊系統×3 | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | 64×64 | 天線/收發器 |
 | 科學酬載×3 | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | 64×64 | 科學儀器 |
-| 推進/姿態控制×3 | `parts/propulsion-economy.png`<br>`parts/propulsion-standard.png`<br>`parts/propulsion-premium.png` | 64×64 | 推進器 |
+| 燃料類型×5 | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-hydrogen_peroxide.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 取代原本的推進/姿態控制部件；聯胺/AF-M315E/雙氧水是化學推進器造型，離子/霍爾推進建議畫成帶藍色電漿光暈的電推造型以區隔 |
 | 結構與屏蔽×3 | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 結構/屏蔽板 |
 | 水星 | `Stars/mercury.png` | 來源尺寸不拘（比照 Saturn.png 風格） | 顯示時會縮到約 10px |
 | 金星 | `Stars/venus.png` | 同上 | 顯示約 16px |
@@ -69,6 +69,7 @@ image/
 | 星星 | `effects/star.png` | 8×8 或更小 | 目前 CSS 光點已經夠用，除非想要更有造型的星星 |
 | 按鈕 hover 樣式 | `ui/button-frame-hover.png` | 同按鈕外框 | 滑鼠移過去的變化樣式 |
 | 計量條外框 | `ui/progress-bar-frame.png` | 依版面 | 預算/質量條的裝飾外框 |
+| 毒氣防護圖示 | `icons/hazmat-suit.png` | 32×32 | 加購毒氣危害處理旁的小圖示，取代目前純文字 checkbox |
 
 ---
 

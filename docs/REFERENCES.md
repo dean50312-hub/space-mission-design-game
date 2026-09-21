@@ -6,6 +6,18 @@
 
 - [NASA Space Apps Challenge 2026 — Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/) — 官方挑戰頁面，本專案的需求與難度定位依據
 
+## 燃料系統的比衝（Isp）數據
+
+用於計算燃料質量係數，數字已查證：
+
+- 聯胺（220s）：[A Survey of Hydrazine Monopropellant Thrusters](https://arc.aiaa.org/doi/10.2514/6.2026-3090) — 一般型號穩態比衝約 215–235s
+- AF-M315E（245s）：[Green Propellant Infusion Mission (GPIM) Overview — NASA](https://www.nasa.gov/missions/tech-demonstration/green-propellant-infusion-mission-gpim-overview/) — 比聯胺高約 12%
+- 雙氧水（160s）：[Development of Hydrogen Peroxide Monopropellant Rockets — ESA](https://www.esa.int/gsp/ACT/doc/PRO/ACT-RPR-PRO-JPC2006-HP%20Rockets%202006-5239.pdf) — 實測值約 150–170s
+- 離子推進 NSTAR（3000s）：[NSTAR — Astronautix](http://www.astronautix.com/n/nstar.html)；[Deep Space 1 — Wikipedia](https://en.wikipedia.org/wiki/Deep_Space_1) — 依功率在 1900–3100s 之間，取高功率端數值
+- 霍爾推進 SPT-100（1600s）：[Hall-effect thruster — Wikipedia](https://en.wikipedia.org/wiki/Hall-effect_thruster) — 此類型比衝約 1600s
+
+> 成本係數（不同於質量係數）是遊戲平衡數字，反映各技術的相對複雜度／成熟度，非物理量，不對應特定引用。
+
 ## 成就對應的太空史料
 
 ### 🏆 首次入軌成功 — 阿波羅 11 號
