@@ -8,6 +8,9 @@ function defaultSave() {
     failCount: 0,
     tutorialSeen: {},
     settings: { lang: "zh", soundOn: true, volume: 0.6 },
+    campaign: { currentLevel: 1, completed: false },
+    skillPoints: 0,
+    unlockedSkills: [],
   };
 }
 
@@ -23,6 +26,8 @@ function loadSave() {
       settings: { ...base.settings, ...(parsed.settings || {}) },
       tutorialSeen: { ...base.tutorialSeen, ...(parsed.tutorialSeen || {}) },
       unlockedAchievements: Array.isArray(parsed.unlockedAchievements) ? parsed.unlockedAchievements : [],
+      campaign: { ...base.campaign, ...(parsed.campaign || {}) },
+      unlockedSkills: Array.isArray(parsed.unlockedSkills) ? parsed.unlockedSkills : [],
     };
   } catch (e) {
     return defaultSave();
@@ -85,4 +90,49 @@ function storageUpdateSettings(partial) {
 function storageResetProgress() {
   saveData = { ...defaultSave(), settings: saveData.settings };
   writeSave(saveData);
+}
+
+// ---------- 戰役關卡進度 ----------
+
+function storageGetCampaignLevel() {
+  return saveData.campaign.currentLevel;
+}
+
+function storageIsCampaignComplete() {
+  return saveData.campaign.completed;
+}
+
+function storageCompleteCampaignLevel(level) {
+  if (level >= saveData.campaign.currentLevel) {
+    saveData.campaign.currentLevel = level + 1;
+  }
+  if (level >= 4) {
+    saveData.campaign.completed = true;
+  }
+  writeSave(saveData);
+}
+
+// ---------- 技能點數／技能樹（節點內容之後再做，先保留存檔欄位） ----------
+
+function storageGetSkillPoints() {
+  return saveData.skillPoints;
+}
+
+function storageAddSkillPoints(amount) {
+  saveData.skillPoints += amount;
+  writeSave(saveData);
+  return saveData.skillPoints;
+}
+
+function storageIsSkillUnlocked(id) {
+  return saveData.unlockedSkills.includes(id);
+}
+
+function storageUnlockSkill(id, cost) {
+  if (storageIsSkillUnlocked(id)) return true;
+  if (saveData.skillPoints < cost) return false;
+  saveData.skillPoints -= cost;
+  saveData.unlockedSkills.push(id);
+  writeSave(saveData);
+  return true;
 }

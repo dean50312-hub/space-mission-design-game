@@ -1,6 +1,10 @@
 // 遊戲狀態管理
 
 const gameState = {
+  campaignLevel: null, // null = 自由遊玩（全機制開放）；1~4 = 戰役關卡
+  features: getCampaignFeatures(null),
+  missionObjective: null,
+  orbit: null,
   event: null,
   budget: BUDGET_TOTAL,
   rocket: null,
@@ -13,14 +17,35 @@ const gameState = {
 };
 
 function resetForNewGame() {
-  gameState.event = pickRandomEvent();
-  gameState.budget = BUDGET_TOTAL + (gameState.event.effect.budgetDelta || 0);
+  gameState.features = getCampaignFeatures(gameState.campaignLevel);
+
+  gameState.missionObjective = gameState.features.orbit
+    ? MISSION_OBJECTIVES[Math.floor(Math.random() * MISSION_OBJECTIVES.length)]
+    : null;
+  gameState.orbit = null;
+
+  gameState.event = gameState.features.events ? pickRandomEvent(gameState.features.forcedEventId) : null;
+
   gameState.rocket = null;
   gameState.parts = { power: null, comm: null, science: null, structure: null };
   gameState.fuel = null;
   gameState.fuelPercent = 50;
   gameState.hazmatPurchased = false;
   gameState.incidentPenalty = 0;
+
+  recomputeBudget();
+}
+
+function recomputeBudget() {
+  const eventDelta = gameState.event && gameState.event.effect.budgetDelta ? gameState.event.effect.budgetDelta : 0;
+  const orbitDelta = gameState.orbit ? gameState.orbit.budgetDelta : 0;
+  gameState.budget = BUDGET_TOTAL + eventDelta + orbitDelta;
+}
+
+function isOrbitMismatched() {
+  if (!gameState.features.orbit) return false;
+  if (!gameState.missionObjective || !gameState.orbit) return false;
+  return gameState.orbit.id !== gameState.missionObjective.correctOrbit;
 }
 
 function fuelMass() {
@@ -63,11 +88,11 @@ function currentMassUsed() {
 }
 
 function isSelectionComplete() {
-  return (
-    Boolean(gameState.rocket) &&
-    Boolean(gameState.fuel) &&
-    SUBSYSTEM_KEYS.every((key) => gameState.parts[key] !== null)
-  );
+  if (!gameState.rocket) return false;
+  if (!SUBSYSTEM_KEYS.every((key) => gameState.parts[key] !== null)) return false;
+  if (gameState.features.fuel && !gameState.fuel) return false;
+  if (gameState.features.orbit && !gameState.orbit) return false;
+  return true;
 }
 
 function isOverBudget() {

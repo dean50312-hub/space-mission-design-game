@@ -66,6 +66,10 @@ h1, h2, .btn, .stage-name {
   margin-bottom: 24px;
 }
 
+.event-card.hidden {
+  display: none;
+}
+
 .event-icon {
   font-size: 48px;
   margin-bottom: 8px;
@@ -230,6 +234,7 @@ h1, h2, .btn, .stage-name {
 .swatch-comm { background: var(--c-comm); }
 .swatch-science { background: var(--c-science); }
 .swatch-fuel { background: var(--c-propulsion); }
+.swatch-orbit { background: var(--c-comm); }
 .swatch-structure { background: var(--c-structure); }
 
 .part-name {
@@ -488,6 +493,24 @@ h1, h2, .btn, .stage-name {
 }
 
 .result-reason.hidden {
+  display: none;
+}
+
+.orbit-warning {
+  color: var(--warn) !important;
+}
+
+.campaign-note {
+  background: rgba(87, 227, 137, 0.12);
+  border: 1px solid var(--success);
+  color: var(--success);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin: -8px 0 16px;
+}
+
+.campaign-note.hidden {
   display: none;
 }
 

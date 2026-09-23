@@ -4,13 +4,59 @@ function renderSelectionScreen() {
   const container = document.getElementById("selection-groups");
   container.innerHTML = "";
 
+  if (gameState.features.orbit) {
+    container.appendChild(renderOrbitGroup());
+  }
+
   container.appendChild(renderRocketGroup());
   SUBSYSTEM_KEYS.forEach((key) => {
     container.appendChild(renderSubsystemGroup(key));
   });
-  container.appendChild(renderFuelGroup());
+
+  if (gameState.features.fuel) {
+    container.appendChild(renderFuelGroup());
+  }
 
   updateMeters();
+}
+
+function renderOrbitGroup() {
+  const group = document.createElement("div");
+  group.className = "part-group";
+
+  const title = document.createElement("h3");
+  title.textContent = t("selection.orbitGroup");
+  group.appendChild(title);
+
+  const cardsWrap = document.createElement("div");
+  cardsWrap.className = "cards";
+
+  ORBITS.forEach((orbit) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "part-card";
+    if (gameState.orbit && gameState.orbit.id === orbit.id) card.classList.add("selected");
+
+    const bonusNote = orbit.liftoffBonus > 0 ? t("selection.orbitLiftoffNote", { bonus: orbit.liftoffBonus }) : "";
+
+    card.innerHTML = `
+      <div class="swatch swatch-orbit"></div>
+      <div class="part-name">${t("orbit." + orbit.id)}</div>
+      <div class="part-stats">${t("selection.orbitStats", { budget: BUDGET_TOTAL + orbit.budgetDelta })}</div>
+      ${bonusNote ? `<div class="part-stats orbit-warning">${bonusNote}</div>` : ""}
+    `;
+
+    card.addEventListener("click", () => {
+      gameState.orbit = orbit;
+      recomputeBudget();
+      renderSelectionScreen();
+    });
+
+    cardsWrap.appendChild(card);
+  });
+
+  group.appendChild(cardsWrap);
+  return group;
 }
 
 function renderRocketGroup() {

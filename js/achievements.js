@@ -14,7 +14,7 @@ const ACHIEVEMENTS = [
   {
     id: "storm_survivor",
     icon: "🛡️",
-    check: (ctx) => ctx.simResult.overallSuccess && ["solar_flare", "geomagnetic_storm"].includes(ctx.event.id),
+    check: (ctx) => ctx.simResult.overallSuccess && Boolean(ctx.event) && ["solar_flare", "geomagnetic_storm"].includes(ctx.event.id),
   },
   {
     id: "all_rounder",
@@ -58,7 +58,7 @@ const ACHIEVEMENTS = [
   {
     id: "crisis_management",
     icon: "🧯",
-    check: (ctx) => ctx.simResult.overallSuccess && ctx.event.id === "budget_cut",
+    check: (ctx) => ctx.simResult.overallSuccess && Boolean(ctx.event) && ctx.event.id === "budget_cut",
   },
   {
     id: "flawless_mission",

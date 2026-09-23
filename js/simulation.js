@@ -1,4 +1,4 @@
-// 任務模擬：階段判定邏輯（不變）+ 火箭飛行動畫（視角固定、背景捲動）
+// 任務模擬：階段判定邏輯（依戰役關卡開放的機制動態調整）+ 火箭飛行動畫（視角固定、背景捲動）
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,11 +25,19 @@ function getStageValue(stageId, statOverride) {
 }
 
 function getThresholdBonus(stageId, statKey) {
+  let bonus = 0;
+
   const effect = gameState.event && gameState.event.effect;
-  if (!effect || effect.stage !== stageId) return 0;
-  if (effect.stat && effect.stat === statKey) return effect.bonus || 0;
-  if (!effect.stat && !effect.addCheck) return effect.bonus || 0;
-  return 0;
+  if (effect && effect.stage === stageId) {
+    if (effect.stat && effect.stat === statKey) bonus += effect.bonus || 0;
+    else if (!effect.stat && !effect.addCheck) bonus += effect.bonus || 0;
+  }
+
+  if (gameState.orbit && stageId === "liftoff" && statKey === "reliability") {
+    bonus += gameState.orbit.liftoffBonus || 0;
+  }
+
+  return bonus;
 }
 
 function evalCheck(statKey, value, threshold) {
@@ -39,10 +47,18 @@ function evalCheck(statKey, value, threshold) {
   return { statKey, value, threshold, margin, failRate, failed };
 }
 
+function orbitMismatchCheck() {
+  if (!isOrbitMismatched()) return null;
+  return { statKey: "orbit_mismatch", value: 0, threshold: 0, margin: -1, failRate: 1, failed: true };
+}
+
 function runStageCheck(stage) {
   const checks = [];
 
   if (stage.id === "operation") {
+    const mismatch = orbitMismatchCheck();
+    if (mismatch) checks.push(mismatch);
+
     ["power", "comm"].forEach((statKey) => {
       const value = getStageValue("operation", statKey);
       const threshold = stage.baseThreshold + getThresholdBonus("operation", statKey);
@@ -102,12 +118,12 @@ async function runSimulation() {
 
   await animateFuelingCheck();
 
-  for (let i = 0; i < STAGES.length; i++) {
-    const stage = STAGES[i];
+  for (let i = 0; i < currentStages.length; i++) {
+    const stage = currentStages[i];
     await animateStageAttempt(stage, i);
 
     const result = runStageCheck(stage);
-    stageReachedIndex = i;
+    stageReachedIndex = STAGES.findIndex((s) => s.id === stage.id);
     await animateStageResolve(stage, i, result);
 
     if (!result.passed) {
@@ -124,7 +140,7 @@ async function runSimulation() {
 // ---------- 飛行動畫：視角固定在畫面中心，背景場景（地面→雲層→大氣層→太空）往下捲動 ----------
 
 const FLIGHT_START_PERCENT = 4;
-const STAGE_TARGET_PERCENTS = [18, 40, 62, 78, 92];
+let currentStages = STAGES;
 
 function sceneTopForPercent(percent) {
   const scene = document.getElementById("flight-scene");
@@ -151,6 +167,8 @@ function setRocketExploding(on) {
 }
 
 function resetFlightView() {
+  currentStages = activeStagesForFeatures(gameState.features);
+
   const scene = document.getElementById("flight-scene");
   scene.style.transition = "none";
   scene.style.top = `${sceneTopForPercent(FLIGHT_START_PERCENT)}px`;
@@ -164,7 +182,7 @@ function resetFlightView() {
 
   const dotsWrap = document.getElementById("stage-dots");
   dotsWrap.innerHTML = "";
-  STAGES.forEach((stage, i) => {
+  currentStages.forEach((stage, i) => {
     const dot = document.createElement("span");
     dot.className = "stage-dot";
     dot.id = `stage-dot-${i}`;
@@ -180,14 +198,14 @@ function setDotState(index, state) {
 }
 
 function markRemainingDotsSkipped(failedIndex) {
-  for (let i = failedIndex + 1; i < STAGES.length; i++) {
+  for (let i = failedIndex + 1; i < currentStages.length; i++) {
     setDotState(i, "skipped");
   }
 }
 
 async function animateStageAttempt(stage, index) {
-  const prevPercent = index === 0 ? FLIGHT_START_PERCENT : STAGE_TARGET_PERCENTS[index - 1];
-  const targetPercent = STAGE_TARGET_PERCENTS[index];
+  const prevPercent = index === 0 ? FLIGHT_START_PERCENT : STAGE_TARGET_PERCENT_BY_ID[currentStages[index - 1].id];
+  const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
   const midPercent = prevPercent + (targetPercent - prevPercent) * 0.55;
 
   setDotState(index, "active");
@@ -199,7 +217,7 @@ async function animateStageAttempt(stage, index) {
 
 async function animateStageResolve(stage, index, result) {
   const log = document.getElementById("simulation-log");
-  const targetPercent = STAGE_TARGET_PERCENTS[index];
+  const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
   const stageName = t("stage." + stage.id);
 
   if (result.passed) {

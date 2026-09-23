@@ -75,6 +75,13 @@ function composeFailureReason(failedChecks) {
   if (!failedChecks || failedChecks.length === 0) return "";
   return failedChecks
     .map((c) => {
+      if (c.statKey === "orbit_mismatch") {
+        return t("results.reasonOrbitMismatch", {
+          objective: t("objective." + gameState.missionObjective.id + ".short"),
+          correctOrbit: t("orbit." + gameState.missionObjective.correctOrbit),
+          chosenOrbit: t("orbit." + gameState.orbit.id),
+        });
+      }
       const stat = t("stat." + c.statKey);
       return c.margin < 0
         ? t("results.reasonShortfall", { stat, value: c.value, threshold: c.threshold })
@@ -83,10 +90,11 @@ function composeFailureReason(failedChecks) {
     .join("；");
 }
 
-function renderResultsScreen(simResult, scores, achievements) {
+function renderResultsScreen(simResult, scores, achievements, campaignAward) {
   const title = document.getElementById("result-title");
   const subtitle = document.getElementById("result-subtitle");
   const reason = document.getElementById("result-reason");
+  const campaignNote = document.getElementById("result-campaign-note");
 
   title.textContent = simResult.overallSuccess ? t("results.successTitle") : t("results.failTitle");
   subtitle.textContent = simResult.overallSuccess
@@ -98,6 +106,16 @@ function renderResultsScreen(simResult, scores, achievements) {
     reason.classList.remove("hidden");
   } else {
     reason.classList.add("hidden");
+  }
+
+  if (campaignAward) {
+    campaignNote.textContent =
+      campaignAward.level >= 4
+        ? t("results.campaignAllComplete", { points: campaignAward.points })
+        : t("results.campaignLevelComplete", { level: campaignAward.level, points: campaignAward.points });
+    campaignNote.classList.remove("hidden");
+  } else {
+    campaignNote.classList.add("hidden");
   }
 
   renderRadarChart(scores);

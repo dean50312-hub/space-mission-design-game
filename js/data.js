@@ -70,6 +70,47 @@ const STAGES = [
   { id: "operation", baseThreshold: 30 },
 ];
 
+// 火箭升空動畫每個階段抵達後的場景高度（% ），依 stage id 查詢，
+// 這樣即使某個關卡跳過某個階段（例如第一關沒有軌道插入），其餘階段的動畫位置也不用重算。
+const STAGE_TARGET_PERCENT_BY_ID = {
+  liftoff: 18,
+  ascent: 40,
+  insertion: 62,
+  deployment: 78,
+  operation: 92,
+};
+
+// 軌道：低軌（LEO）／同步軌道（GEO）。GEO 預算higher但發射門檻也更高，
+// 輕型火箭在 GEO 任務會直接必敗（60 可靠度 - 70 門檻 = margin -10），不用另外鎖介面。
+const ORBITS = [
+  { id: "leo", budgetDelta: 0, liftoffBonus: 0 },
+  { id: "geo", budgetDelta: 40, liftoffBonus: 20 },
+];
+
+// 任務目標：決定「正確」軌道。軌道選錯會讓任務運作階段必定失敗。
+const MISSION_OBJECTIVES = [
+  { id: "science", correctOrbit: "leo" },
+  { id: "remote_sensing", correctOrbit: "leo" },
+  { id: "comms", correctOrbit: "geo" },
+  { id: "weather", correctOrbit: "geo" },
+];
+
+// 戰役關卡的 feature flag：依關卡決定開放哪些機制。level 為 null/undefined 代表自由遊玩（全開）。
+function getCampaignFeatures(level) {
+  if (!level) return { orbit: true, fuel: true, events: true, forcedEventId: null };
+  return {
+    orbit: level >= 1,
+    fuel: level >= 2,
+    events: level >= 3,
+    forcedEventId: level === 3 ? "solar_flare" : null,
+  };
+}
+
+// 依 feature flag 決定這局要跑哪些任務階段（例如第一關還沒有燃料，軌道插入直接跳過）
+function activeStagesForFeatures(features) {
+  return STAGES.filter((stage) => features.fuel || stage.id !== "insertion");
+}
+
 const EVENTS = [
   { id: "solar_flare", icon: "☀️", weight: 1, effect: { stage: "operation", stat: "comm", bonus: 25 } },
   { id: "geomagnetic_storm", icon: "🌩️", weight: 1, effect: { stage: "operation", stat: "power", bonus: 25 } },
@@ -91,7 +132,9 @@ function failureRateFromMargin(margin) {
   return 0.02;
 }
 
-function pickRandomEvent() {
+function pickRandomEvent(forcedId) {
+  if (forcedId) return EVENTS.find((e) => e.id === forcedId) || EVENTS[EVENTS.length - 1];
+
   const totalWeight = EVENTS.reduce((sum, e) => sum + e.weight, 0);
   let roll = Math.random() * totalWeight;
   for (const event of EVENTS) {
