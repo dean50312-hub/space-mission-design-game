@@ -122,7 +122,7 @@ function renderSubsystemGroup(key) {
     const stats = t("selection.partStats", { cost: tier.cost, mass: tier.mass, value: tier.value });
 
     card.innerHTML = `
-      <div class="swatch swatch-${key}"></div>
+      <img class="swatch swatch-part" src="image/parts/${key}-${tier.id}.png" alt="${t("tier." + tier.id)}" />
       <div class="part-name">${t("tier." + tier.id)}</div>
       <div class="part-stats">${stats}</div>
       <div class="part-proto">${t("partProto." + key + "." + tier.id)}</div>

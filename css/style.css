@@ -243,12 +243,14 @@ h1, h2, .btn, .stage-name {
   background: var(--bg);
 }
 
-.swatch-power { background: var(--c-power); }
-.swatch-comm { background: var(--c-comm); }
-.swatch-science { background: var(--c-science); }
 .swatch-fuel { background: var(--c-propulsion); }
 .swatch-orbit { background: var(--c-comm); }
-.swatch-structure { background: var(--c-structure); }
+
+.swatch-part {
+  height: 56px;
+  object-fit: contain;
+  background: var(--bg);
+}
 
 .part-name {
   font-size: 13px;
