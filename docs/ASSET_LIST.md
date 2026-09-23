@@ -34,6 +34,7 @@ image/
 | ~~輕型火箭~~ ✅ | `rocket/rocket-light.png` | — | 已完成：致敬 Rocket Lab Electron（碳纖維黑色小型火箭） |
 | ~~中型火箭~~ ✅ | `rocket/rocket-medium.png` | — | 已完成：致敬 SpaceX Falcon 9（白色機身+柵格翼） |
 | ~~重型火箭~~ ✅ | `rocket/rocket-heavy.png` | — | 已完成：致敬 SpaceX Falcon Heavy（中央核心+雙側助推器） |
+| ~~火箭圖紙×3~~ ✅ | `rocket/blueprint-light.png`<br>`rocket/blueprint-medium.png`<br>`rocket/blueprint-heavy.png` | 240×480 | 已完成：程式碼生成的純線條技術圖紙版火箭，供選件畫面的「圖紙+熱點」互動使用 |
 | ~~電力系統×3~~ ✅ | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | — | 已完成：程式碼生成（小型面板/大型陣列/帶散熱片+熱光暈的 RTG） |
 | ~~通訊系統×3~~ ✅ | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | — | 已完成：程式碼生成（簡易天線/拋物面天線/雙碟+太陽翼） |
 | ~~科學酬載×3~~ ✅ | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | — | 已完成：程式碼生成（感測管/相機鏡頭/JWST 金色六角鏡） |
@@ -79,6 +80,7 @@ image/
 - [x] 火箭 3 檔（致敬 Electron / Falcon 9 / Falcon Heavy，程式碼生成）
 - [x] 火箭＋4 個子系統（電力/通訊/科學/結構）的真實原型文字簡介，已接進選件畫面
 - [x] 4 個子系統×3 檔＝12 張部件圖示（程式碼生成，已接進選件畫面）
+- [x] 3 張火箭圖紙（程式碼生成純線條技術圖），選件畫面改為「先選火箭→下方出現圖紙→點部件熱點展開選單」的互動方式
 - [ ] 5 個燃料圖示
 - [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×10、成就圖示×7
 - [ ] P2 項目（雲朵、地面裝飾等）

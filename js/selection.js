@@ -1,4 +1,14 @@
-// 選件畫面：渲染火箭與部件卡片、預算/質量計量表
+// 選件畫面：軌道/火箭卡片 + 火箭圖紙上的部件熱點、預算/質量計量表
+
+const HOTSPOT_DEFS = [
+  { key: "science", icon: "🔬", top: 15, left: 50 },
+  { key: "comm", icon: "📡", top: 30, left: 34 },
+  { key: "power", icon: "🔋", top: 47, left: 66 },
+  { key: "structure", icon: "🛡️", top: 63, left: 34 },
+  { key: "fuel", icon: "⛽", top: 84, left: 50 },
+];
+
+let activeHotspot = null;
 
 function renderSelectionScreen() {
   const container = document.getElementById("selection-groups");
@@ -9,13 +19,7 @@ function renderSelectionScreen() {
   }
 
   container.appendChild(renderRocketGroup());
-  SUBSYSTEM_KEYS.forEach((key) => {
-    container.appendChild(renderSubsystemGroup(key));
-  });
-
-  if (gameState.features.fuel) {
-    container.appendChild(renderFuelGroup());
-  }
+  container.appendChild(renderBlueprintPanel());
 
   updateMeters();
 }
@@ -101,15 +105,102 @@ function renderRocketGroup() {
   return group;
 }
 
-function renderSubsystemGroup(key) {
-  const def = SUBSYSTEMS[key];
-  const group = document.createElement("div");
-  group.className = "part-group";
+function hotspotLabel(key) {
+  return key === "fuel" ? t("selection.fuelGroup") : t("subsystem." + key);
+}
+
+function isHotspotFilled(key) {
+  return key === "fuel" ? Boolean(gameState.fuel) : Boolean(gameState.parts[key]);
+}
+
+function renderBlueprintPanel() {
+  const wrap = document.createElement("div");
+  wrap.className = "blueprint-panel";
 
   const title = document.createElement("h3");
-  title.textContent = t("subsystem." + key);
-  group.appendChild(title);
+  title.textContent = t("selection.blueprintTitle");
+  wrap.appendChild(title);
 
+  if (!gameState.rocket) {
+    const hint = document.createElement("p");
+    hint.className = "blueprint-hint";
+    hint.textContent = t("selection.blueprintHint");
+    wrap.appendChild(hint);
+    return wrap;
+  }
+
+  const frame = document.createElement("div");
+  frame.className = "blueprint-frame";
+
+  const img = document.createElement("img");
+  img.className = "blueprint-img";
+  img.src = `image/rocket/blueprint-${gameState.rocket.id}.png`;
+  img.alt = t("rocket." + gameState.rocket.id + ".name");
+  frame.appendChild(img);
+
+  const hotspots = HOTSPOT_DEFS.filter((h) => h.key !== "fuel" || gameState.features.fuel);
+
+  hotspots.forEach((h) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hotspot";
+    btn.style.top = h.top + "%";
+    btn.style.left = h.left + "%";
+    if (isHotspotFilled(h.key)) btn.classList.add("selected");
+    if (activeHotspot === h.key) btn.classList.add("active");
+
+    btn.innerHTML = `
+      <span class="hotspot-icon">${h.icon}</span>
+      <span class="hotspot-label">${hotspotLabel(h.key)}</span>
+    `;
+
+    btn.addEventListener("click", () => {
+      activeHotspot = activeHotspot === h.key ? null : h.key;
+      renderSelectionScreen();
+    });
+
+    frame.appendChild(btn);
+  });
+
+  wrap.appendChild(frame);
+
+  if (activeHotspot) {
+    wrap.appendChild(renderHotspotDetail(activeHotspot));
+  }
+
+  return wrap;
+}
+
+function renderHotspotDetail(key) {
+  const detail = document.createElement("div");
+  detail.className = "blueprint-detail";
+
+  const header = document.createElement("div");
+  header.className = "blueprint-detail-header";
+
+  const heading = document.createElement("h4");
+  heading.textContent = hotspotLabel(key);
+  header.appendChild(heading);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "blueprint-detail-close";
+  closeBtn.textContent = "×";
+  closeBtn.setAttribute("aria-label", t("selection.blueprintCloseBtn"));
+  closeBtn.addEventListener("click", () => {
+    activeHotspot = null;
+    renderSelectionScreen();
+  });
+  header.appendChild(closeBtn);
+
+  detail.appendChild(header);
+  detail.appendChild(key === "fuel" ? renderFuelCards() : renderSubsystemCards(key));
+
+  return detail;
+}
+
+function renderSubsystemCards(key) {
+  const def = SUBSYSTEMS[key];
   const cardsWrap = document.createElement("div");
   cardsWrap.className = "cards";
 
@@ -130,23 +221,18 @@ function renderSubsystemGroup(key) {
 
     card.addEventListener("click", () => {
       gameState.parts[key] = tier;
+      activeHotspot = null;
       renderSelectionScreen();
     });
 
     cardsWrap.appendChild(card);
   });
 
-  group.appendChild(cardsWrap);
-  return group;
+  return cardsWrap;
 }
 
-function renderFuelGroup() {
-  const group = document.createElement("div");
-  group.className = "part-group";
-
-  const title = document.createElement("h3");
-  title.textContent = t("selection.fuelGroup");
-  group.appendChild(title);
+function renderFuelCards() {
+  const wrap = document.createElement("div");
 
   const cardsWrap = document.createElement("div");
   cardsWrap.className = "cards";
@@ -177,13 +263,13 @@ function renderFuelGroup() {
     cardsWrap.appendChild(card);
   });
 
-  group.appendChild(cardsWrap);
+  wrap.appendChild(cardsWrap);
 
   if (gameState.fuel) {
-    group.appendChild(renderFuelControls());
+    wrap.appendChild(renderFuelControls());
   }
 
-  return group;
+  return wrap;
 }
 
 function renderFuelControls() {

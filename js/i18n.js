@@ -106,6 +106,9 @@ const STRINGS = {
       orbitGroup: "軌道",
       orbitStats: "預算 {budget} C",
       orbitLiftoffNote: "⚠️ 發射門檻 +{bonus}（需要更可靠的火箭）",
+      blueprintTitle: "火箭圖紙",
+      blueprintHint: "請先選擇火箭，圖紙才會出現",
+      blueprintCloseBtn: "收合",
     },
     simulation: {
       title: "任務模擬中...",
@@ -357,6 +360,9 @@ const STRINGS = {
       orbitGroup: "Orbit",
       orbitStats: "Budget {budget} C",
       orbitLiftoffNote: "⚠️ Liftoff threshold +{bonus} (needs a more reliable rocket)",
+      blueprintTitle: "Rocket Blueprint",
+      blueprintHint: "Select a rocket above to reveal its blueprint",
+      blueprintCloseBtn: "Close",
     },
     simulation: {
       title: "Simulating Mission...",
