@@ -389,6 +389,14 @@ h1, h2, .btn, .stage-name {
   box-shadow: 0 0 0 5px rgba(79, 209, 255, 0.45);
 }
 
+.hotspot-icon-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
 .hotspot-label {
   position: absolute;
   top: 100%;

@@ -113,6 +113,20 @@ function isHotspotFilled(key) {
   return key === "fuel" ? Boolean(gameState.fuel) : Boolean(gameState.parts[key]);
 }
 
+function hotspotIconMarkup(h) {
+  if (h.key === "fuel") {
+    if (gameState.fuel) {
+      return `<img class="hotspot-icon-img" src="image/parts/fuel-${gameState.fuel.id}.png" alt="" />`;
+    }
+    return `<span class="hotspot-icon">${h.icon}</span>`;
+  }
+  const tier = gameState.parts[h.key];
+  if (tier) {
+    return `<img class="hotspot-icon-img" src="image/parts/${h.key}-${tier.id}.png" alt="" />`;
+  }
+  return `<span class="hotspot-icon">${h.icon}</span>`;
+}
+
 function renderBlueprintPanel() {
   const wrap = document.createElement("div");
   wrap.className = "blueprint-panel";
@@ -150,7 +164,7 @@ function renderBlueprintPanel() {
     if (activeHotspot === h.key) btn.classList.add("active");
 
     btn.innerHTML = `
-      <span class="hotspot-icon">${h.icon}</span>
+      ${hotspotIconMarkup(h)}
       <span class="hotspot-label">${hotspotLabel(h.key)}</span>
     `;
 
