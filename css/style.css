@@ -243,7 +243,6 @@ h1, h2, .btn, .stage-name {
   background: var(--bg);
 }
 
-.swatch-fuel { background: var(--c-propulsion); }
 .swatch-orbit { background: var(--c-comm); }
 
 .swatch-part {

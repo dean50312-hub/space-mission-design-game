@@ -249,7 +249,7 @@ function renderFuelCards() {
     });
 
     card.innerHTML = `
-      <div class="swatch swatch-fuel"></div>
+      <img class="swatch swatch-part" src="image/parts/fuel-${fuel.id}.png" alt="${t("fuel." + fuel.id)}" />
       <div class="part-name">${t("fuel." + fuel.id)}</div>
       <div class="part-stats">${stats}</div>
     `;
