@@ -16,6 +16,23 @@
 - 離子推進 NSTAR（3000s）：[NSTAR — Astronautix](http://www.astronautix.com/n/nstar.html)；[Deep Space 1 — Wikipedia](https://en.wikipedia.org/wiki/Deep_Space_1) — 依功率在 1900–3100s 之間，取高功率端數值
 - 霍爾推進 SPT-100（1600s）：[Hall-effect thruster — Wikipedia](https://en.wikipedia.org/wiki/Hall-effect_thruster) — 此類型比衝約 1600s
 
+## 火箭三檔的原型數據
+
+- 輕型／Rocket Lab Electron：[Rocket Lab Electron — Wikipedia](https://en.wikipedia.org/wiki/Rocket_Lab_Electron) — 高 18m，酬載 300kg 至低軌
+- 中型／SpaceX Falcon 9：[Falcon 9 — Wikipedia](https://en.wikipedia.org/wiki/Falcon_9) — 高 69.8m，酬載 22,800kg 至低軌（一級不回收）
+- 重型／SpaceX Falcon Heavy：[Falcon Heavy — Wikipedia](https://en.wikipedia.org/wiki/Falcon_Heavy) — 高 70m，3 具獵鷹 9 號一級並聯，酬載 63,800kg 至低軌
+
+## 4 個子系統的原型數據
+
+- 電力-經濟／Vanguard 1：[Vanguard 1 — Wikipedia](https://en.wikipedia.org/wiki/Vanguard_1)；[NSSDCA — NASA](https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1958-002B) — 1958 年發射，6 片太陽能電池共約 1 瓦，現存最古老人造衛星
+- 電力-高階／RTG：一般性技術描述，航海家號、好奇號、毅力號皆採用（見成就故事的 Voyager 引用）
+- 通訊-經濟／Telstar 1：一般公認為人類第一顆主動式通訊衛星（1962），完成首次跨大西洋電視訊號中繼
+- 通訊-高階／TDRS：[Tracking and Data Relay Satellite System — Wikipedia](https://en.wikipedia.org/wiki/Tracking_and_Data_Relay_Satellite_System)；[NASA TDRS](https://www.nasa.gov/mission/tracking-and-data-relay-satellites/) — 單向最高約 800 Mbps（Ku/Ka 頻段），服務哈伯太空望遠鏡等 25+ 任務
+- 科學-經濟／Explorer 1 蓋革計數器：[A Short History of Earth's Radiation Belts — NASA](https://www.nasa.gov/history/a-short-history-of-earths-radiation-belts/) — 1958 年發現范艾倫輻射帶
+- 科學-高階／JWST NIRCam：JWST 官方任務資料（見成就故事的 James Webb Space Telescope 引用）
+- 結構-標準／Whipple Shield：[Whipple shield — Wikipedia](https://en.wikipedia.org/wiki/Whipple_shield) — 犧牲層分散微隕石衝擊能量，ISS 關鍵艙段採用
+- 結構-高階／JWST 遮陽罩：[The Sunshield — NASA/Webb](https://jwst.nasa.gov/content/observatory/sunshield.html) — 5 層 Kapton 薄膜，展開約 21.2m × 14.2m（網球場大小）
+
 > 成本係數（不同於質量係數）是遊戲平衡數字，反映各技術的相對複雜度／成熟度，非物理量，不對應特定引用。
 
 ## 成就對應的太空史料

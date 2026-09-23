@@ -30,15 +30,15 @@ image/
 | 項目 | 檔名 | 建議尺寸 | 說明 |
 |---|---|---|---|
 | 遊戲標題 Logo | `ui/title-logo.png` | 寬 500~700px，高按比例 | 「太空精算師」手繪美術字，取代目前純文字標題。整張圖，不用切割。 |
-| 按鈕外框 | `ui/button-frame.png` | 32×32，四角各留 8px 不可縮放邊框 | 九宮格（9-slice）素材：中間可平舖延伸，四角固定不變形，這樣不管按鈕多寬都不會糊掉。技術細節我來處理，你只要照 8px 邊框畫。 |
-| 輕型火箭 | `rocket/rocket-light.png` | 64×96（直式） | 火箭本體，選件卡片跟飛行動畫共用 |
-| 中型火箭 | `rocket/rocket-medium.png` | 64×96 | 建議比輕型看起來更大/更精緻 |
-| 重型火箭 | `rocket/rocket-heavy.png` | 64×96 | 三檔要能一眼看出等級差異 |
-| 電力系統×3 | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | 64×64 | 太陽能板/電池，經濟→高階建議畫面板越大越多片 |
-| 通訊系統×3 | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | 64×64 | 天線/收發器 |
-| 科學酬載×3 | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | 64×64 | 科學儀器 |
+| ~~按鈕外框~~ ✅ | `ui/button-frame.png` | 32×32 | 已完成：程式碼生成，機械控制台風格（拉絲金屬+四角螺絲+青色 LED 邊線），9-slice 接進 `.btn`，全站按鈕共用 |
+| ~~輕型火箭~~ ✅ | `rocket/rocket-light.png` | — | 已完成：致敬 Rocket Lab Electron（碳纖維黑色小型火箭） |
+| ~~中型火箭~~ ✅ | `rocket/rocket-medium.png` | — | 已完成：致敬 SpaceX Falcon 9（白色機身+柵格翼） |
+| ~~重型火箭~~ ✅ | `rocket/rocket-heavy.png` | — | 已完成：致敬 SpaceX Falcon Heavy（中央核心+雙側助推器） |
+| 電力系統×3 | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | 64×64 | 文字簡介已上線（致敬 Vanguard 1 / ISS 太陽能板 / RTG），圖示待畫：經濟＝早期簡易太陽能板、標準＝現代可展開翼板、高階＝RTG 放射性同位素電池造型 |
+| 通訊系統×3 | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | 64×64 | 文字簡介已上線（致敬 Telstar 1 / 標準拋物面天線 / TDRS），圖示待畫：經濟＝早期簡易天線、標準＝拋物面碟型天線、高階＝TDRS 中繼衛星造型 |
+| 科學酬載×3 | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | 64×64 | 文字簡介已上線（致敬 Explorer 1 蓋革計數器 / 多光譜成像儀 / JWST NIRCam），圖示待畫 |
 | 燃料類型×5 | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-hydrogen_peroxide.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 取代原本的推進/姿態控制部件；聯胺/AF-M315E/雙氧水是化學推進器造型，離子/霍爾推進建議畫成帶藍色電漿光暈的電推造型以區隔 |
-| 結構與屏蔽×3 | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 結構/屏蔽板 |
+| 結構與屏蔽×3 | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 文字簡介已上線（基礎鋁合金骨架 / Whipple Shield 惠普爾防護罩 / JWST 遮陽罩），圖示待畫 |
 | ~~地球~~ | ~~`Stars/earth.png`~~ | — | **不需要**——火箭本來就是從地表發射，太空背景裡再放一顆地球邏輯不通，已從清單移除 |
 
 太陽系其餘 8 顆行星（水星、金星、火星、木星、土星、天王星、海王星、冥王星）皆已完成 ✅，用 Python/Pillow 程式碼直接產生像素風圖片（圓形遮罩＋明暗分帶＋雜訊/條紋），不是手繪也不是 AI 生成，色盤跟畫風可隨時調整重繪，成本很低。
@@ -75,6 +75,9 @@ image/
 ## 進度追蹤
 
 - [x] 太陽系 8 顆行星（水星/金星/火星/木星/土星/天王星/海王星/冥王星，程式碼生成）
-- [ ] 標題 Logo、按鈕外框、火箭 3 檔、15 個部件圖示、5 個燃料圖示
-- [ ] 面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×10、成就圖示×7
+- [x] 按鈕外框（機械控制台風格，程式碼生成）
+- [x] 火箭 3 檔（致敬 Electron / Falcon 9 / Falcon Heavy，程式碼生成）
+- [x] 火箭＋4 個子系統（電力/通訊/科學/結構）的真實原型文字簡介，已接進選件畫面
+- [ ] 4 個子系統×3 檔＝12 張部件圖示（文字簡介已定案，見上表；可比照火箭的做法：先程式碼畫幾何形狀，或用 Kenney/Retro Diffusion）、5 個燃料圖示
+- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×10、成就圖示×7
 - [ ] P2 項目（雲朵、地面裝飾等）

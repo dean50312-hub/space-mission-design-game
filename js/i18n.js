@@ -55,6 +55,28 @@ const STRINGS = {
       structure: "結構與屏蔽",
     },
     tier: { economy: "經濟", standard: "標準", premium: "高階" },
+    partProto: {
+      power: {
+        economy: "致敬 Vanguard 1——1958 年發射，靠 6 片矽晶太陽能電池發電，總功率僅約 1 瓦，是第一顆太陽能供電衛星，至今仍是軌道上最古老的人造物體。",
+        standard: "致敬國際太空站太陽能板——8 組大型可展開翼板，是現代太空站與衛星最常見的供電方式。",
+        premium: "致敬放射性同位素熱電機（RTG）——靠放射性衰變產生的熱能發電，不需要陽光，航海家號、好奇號、毅力號都靠它在深空穩定運作數十年。",
+      },
+      comm: {
+        economy: "致敬 Telstar 1——1962 年發射，人類第一顆主動式通訊衛星，首次完成跨大西洋電視訊號中繼。",
+        standard: "標準拋物面天線——現今衛星最普遍的通訊方式，靠碟形天線聚焦訊號收發。",
+        premium: "致敬 NASA 追蹤與資料中繼衛星系統（TDRS）——單次連線速率最高可達 800 Mbps，幾乎全時段覆蓋低軌衛星，哈伯太空望遠鏡靠它跟地面聯繫。",
+      },
+      science: {
+        economy: "致敬 Explorer 1 的蓋革計數器——1958 年，一根簡單的蓋革-米勒管意外發現了范艾倫輻射帶，是史上最高 CP 值的科學儀器之一。",
+        standard: "標準多光譜成像儀——現代地球觀測衛星最常見的科學儀器，能同時拍攝多種波段影像。",
+        premium: "致敬詹姆斯・韋伯太空望遠鏡的近紅外相機（NIRCam）——能看穿宇宙塵埃，拍到最遙遠星系的頂級科學儀器。",
+      },
+      structure: {
+        economy: "基礎鋁合金骨架——多數人造衛星最普遍的結構材質，輕量又足夠堅固。",
+        standard: "致敬惠普爾防護罩（Whipple Shield）——用犧牲層把微隕石衝擊力打散分攤，國際太空站關鍵艙段都用這個設計。",
+        premium: "致敬詹姆斯・韋伯太空望遠鏡的遮陽罩——5 層比人類頭髮還薄的 Kapton 薄膜，展開後有網球場大，同時抵擋太陽熱輻射與微隕石。",
+      },
+    },
     stage: {
       liftoff: "發射",
       ascent: "穿越大氣層",
@@ -284,6 +306,28 @@ const STRINGS = {
       structure: "Structure & Shielding",
     },
     tier: { economy: "Economy", standard: "Standard", premium: "Premium" },
+    partProto: {
+      power: {
+        economy: "Inspired by Vanguard 1 — launched in 1958, powered by 6 silicon solar cells generating about 1 watt total. The first solar-powered satellite, and still the oldest human-made object in orbit.",
+        standard: "Inspired by the ISS solar arrays — 8 large deployable wings, the most common power source for modern space stations and satellites.",
+        premium: "Inspired by the Radioisotope Thermoelectric Generator (RTG) — generates power from radioactive decay heat, no sunlight needed. Voyager, Curiosity, and Perseverance have all run on one for decades in deep space.",
+      },
+      comm: {
+        economy: "Inspired by Telstar 1 — launched in 1962, humanity's first active communications satellite, relayed the first live transatlantic TV signal.",
+        standard: "Standard parabolic dish antenna — the most common communication method on satellites today, focusing signals through a dish reflector.",
+        premium: "Inspired by NASA's Tracking and Data Relay Satellite System (TDRS) — up to 800 Mbps per link, near-continuous coverage of low-Earth-orbit satellites. The Hubble Space Telescope talks to the ground through it.",
+      },
+      science: {
+        economy: "Inspired by Explorer 1's Geiger counter — in 1958, a single simple Geiger-Muller tube stumbled onto the discovery of the Van Allen radiation belts, one of the highest-value science instruments ever flown.",
+        standard: "Standard multispectral imager — the most common science instrument on modern Earth-observation satellites, capturing multiple wavelength bands at once.",
+        premium: "Inspired by the James Webb Space Telescope's Near-Infrared Camera (NIRCam) — a top-tier instrument that sees through cosmic dust to image the most distant galaxies.",
+      },
+      structure: {
+        economy: "Basic aluminum frame — the most common structural material for satellites: lightweight yet sturdy enough.",
+        standard: "Inspired by the Whipple Shield — a sacrificial outer layer disperses the impact energy of micrometeorites; key modules of the ISS use this design.",
+        premium: "Inspired by the James Webb Space Telescope's sunshield — five layers of Kapton film thinner than a human hair, unfolding to the size of a tennis court, blocking both solar heat and micrometeorites.",
+      },
+    },
     stage: {
       liftoff: "Liftoff",
       ascent: "Atmospheric Ascent",

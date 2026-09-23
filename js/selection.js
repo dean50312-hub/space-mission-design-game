@@ -125,6 +125,7 @@ function renderSubsystemGroup(key) {
       <div class="swatch swatch-${key}"></div>
       <div class="part-name">${t("tier." + tier.id)}</div>
       <div class="part-stats">${stats}</div>
+      <div class="part-proto">${t("partProto." + key + "." + tier.id)}</div>
     `;
 
     card.addEventListener("click", () => {
