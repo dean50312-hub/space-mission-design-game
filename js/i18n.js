@@ -211,9 +211,9 @@ const STRINGS = {
         "這會影響你等一下該往哪個方向加強配置——看仔細囉。",
       ],
       selection: [
-        "這裡要選火箭和 5 種衛星部件，每種都有經濟／標準／高階三檔可選。",
-        "上面兩條量表分別是「預算」和「質量」，兩個都超過上限就無法發射，記得留意！",
-        "選好全部部件後，按下方的「發射！」開始模擬任務。",
+        "這裡要選軌道、火箭，還有電力、通訊、科學酬載、結構這 4 個子系統，每種都有經濟／標準／高階三檔可選。",
+        "上面兩條量表分別是「預算」和「質量」，兩個都超過上限就無法發射，記得留意！同步軌道預算比較高，但發射門檻也比較高。",
+        "選好全部項目後，按下方的「發射！」開始模擬任務。",
       ],
       simulation: [
         "接下來火箭會實際飛一次，共有 5 個關卡：發射、穿越大氣層、軌道插入、展開部署、任務運作。",
@@ -436,8 +436,8 @@ const STRINGS = {
         "This affects what you should prioritize in your build — read it carefully.",
       ],
       selection: [
-        "Pick a rocket and 5 satellite subsystems, each with Economy / Standard / Premium tiers.",
-        "The two bars up top are your Budget and Mass limits — go over either one and you can't launch.",
+        "Pick an orbit, a rocket, and the 4 subsystems (Power, Comms, Science, Structure), each with Economy / Standard / Premium tiers.",
+        "The two bars up top are your Budget and Mass limits — go over either one and you can't launch. Geostationary orbit gets a bigger budget, but a higher liftoff bar too.",
         'Once everything\'s picked, hit "Launch!" below to run the simulation.',
       ],
       simulation: [
