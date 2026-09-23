@@ -17,6 +17,12 @@ image/
 
 檔名一律用**英文小寫 + 底線/連字號**，且盡量對應遊戲內部的 id（見下表「檔名」欄），這樣我串接時不用另外對照，也不會生成完才發現名字對不上。
 
+## 美術素材來源選項
+
+- **Claude 直接用程式碼生成**：適合幾何形狀類（行星、UI 按鈕/面板外框），零成本、色盤可控、改起來便宜。目前 8 顆行星已用這個方式完成。
+- **[Kenney.nl](https://kenney.nl/)**：免費 CC0 現成素材包，免註冊直接下載，可商用。跟本專案相關的有 [Planets](https://kenney.nl/assets/planets)、[Simple Space](https://kenney.nl/assets/simple-space)（火箭/太空船參考）、[UI Pack - Pixel Adventure](https://kenney.nl/assets/ui-pack-pixel-adventure)（像素風按鈕/面板，但配色偏奇幻風，可能要重新上色）。適合拿現成的，不用等生成。
+- **[Retro Diffusion](https://retrodiffusion.ai/)＋PixelLab**：專門的像素風 AI 生成工具（免費試用額度），輸出網格對齊、色盤乾淨，適合角色/有機造型（例如 ORBIT 吉祥物）這種程式碼公式畫不出來的東西。需要自行註冊帳號。
+
 ---
 
 ## P0（優先度最高：畫面核心，缺了最明顯）
@@ -33,16 +39,9 @@ image/
 | 科學酬載×3 | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | 64×64 | 科學儀器 |
 | 燃料類型×5 | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-hydrogen_peroxide.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 取代原本的推進/姿態控制部件；聯胺/AF-M315E/雙氧水是化學推進器造型，離子/霍爾推進建議畫成帶藍色電漿光暈的電推造型以區隔 |
 | 結構與屏蔽×3 | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 結構/屏蔽板 |
-| 水星 | `Stars/mercury.png` | 來源尺寸不拘（比照 Saturn.png 風格） | 顯示時會縮到約 10px |
-| 金星 | `Stars/venus.png` | 同上 | 顯示約 16px |
-| 地球 | `Stars/earth.png` | 同上 | 顯示約 18px |
-| 火星 | `Stars/mars.png` | 同上 | 顯示約 13px |
-| 木星 | `Stars/jupiter.png` | 同上 | 顯示約 30px |
-| 天王星 | `Stars/uranus.png` | 同上 | 顯示約 18px |
-| 海王星 | `Stars/neptune.png` | 同上 | 顯示約 18px |
-| 冥王星 | `Stars/pluto.png` | 同上 | 顯示約 8px |
+| ~~地球~~ | ~~`Stars/earth.png`~~ | — | **不需要**——火箭本來就是從地表發射，太空背景裡再放一顆地球邏輯不通，已從清單移除 |
 
-土星（`Stars/Saturn.png`）已完成 ✅，其餘 8 顆行星風格比照它做即可，尺寸不用精算，我這邊縮放對齊。
+太陽系其餘 8 顆行星（水星、金星、火星、木星、土星、天王星、海王星、冥王星）皆已完成 ✅，用 Python/Pillow 程式碼直接產生像素風圖片（圓形遮罩＋明暗分帶＋雜訊/條紋），不是手繪也不是 AI 生成，色盤跟畫風可隨時調整重繪，成本很低。
 
 ---
 
@@ -75,5 +74,7 @@ image/
 
 ## 進度追蹤
 
-- [x] 土星 `Stars/Saturn.png`
-- [ ] 其餘全部（完成一批就跟我說，我幫你打勾更新）
+- [x] 太陽系 8 顆行星（水星/金星/火星/木星/土星/天王星/海王星/冥王星，程式碼生成）
+- [ ] 標題 Logo、按鈕外框、火箭 3 檔、15 個部件圖示、5 個燃料圖示
+- [ ] 面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×10、成就圖示×7
+- [ ] P2 項目（雲朵、地面裝飾等）

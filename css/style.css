@@ -347,24 +347,21 @@ h1, h2, .btn, .stage-name {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  image-rendering: pixelated;
 }
 
-.planet-mercury { width: 10px; height: 10px; background: #a9a9a9; }
-.planet-venus { width: 16px; height: 16px; background: #e0c16c; }
-.planet-earth { width: 18px; height: 18px; background: #3fa9f5; }
-.planet-mars { width: 13px; height: 13px; background: #c1440e; }
-.planet-jupiter { width: 30px; height: 30px; background: #d9a066; }
-.planet-saturn { width: 26px; height: 26px; background: #e8d19c; }
-.planet-uranus { width: 18px; height: 18px; background: #9fe0e0; }
-.planet-neptune { width: 18px; height: 18px; background: #3f5fd9; }
-.planet-pluto { width: 8px; height: 8px; background: #b0a090; }
+.planet-mercury { width: 20px; height: 20px; }
+.planet-venus { width: 26px; height: 26px; }
+.planet-mars { width: 26px; height: 26px; }
+.planet-jupiter { width: 40px; height: 40px; }
+.planet-uranus { width: 27px; height: 27px; }
+.planet-neptune { width: 27px; height: 27px; }
+.planet-pluto { width: 16px; height: 16px; }
 
 .planet-saturn {
   width: 46px;
   height: 46px;
-  background: none;
   border-radius: 0;
-  image-rendering: pixelated;
 }
 
 .cloud {
