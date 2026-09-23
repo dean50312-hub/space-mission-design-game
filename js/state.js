@@ -33,6 +33,7 @@ function resetForNewGame() {
   gameState.hazmatPurchased = false;
   gameState.incidentPenalty = 0;
 
+  resetBlueprintUIState();
   recomputeBudget();
 }
 

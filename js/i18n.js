@@ -109,6 +109,7 @@ const STRINGS = {
       blueprintTitle: "火箭圖紙",
       blueprintHint: "請先選擇火箭，圖紙才會出現",
       blueprintCloseBtn: "收合",
+      changeRocketBtn: "更換火箭",
     },
     simulation: {
       title: "任務模擬中...",
@@ -363,6 +364,7 @@ const STRINGS = {
       blueprintTitle: "Rocket Blueprint",
       blueprintHint: "Select a rocket above to reveal its blueprint",
       blueprintCloseBtn: "Close",
+      changeRocketBtn: "Change Rocket",
     },
     simulation: {
       title: "Simulating Mission...",

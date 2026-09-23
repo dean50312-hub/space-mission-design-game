@@ -9,14 +9,16 @@ const HOTSPOT_DEFS = [
 ];
 
 let activeHotspot = null;
+let rocketPickerExpanded = true;
+
+function resetBlueprintUIState() {
+  activeHotspot = null;
+  rocketPickerExpanded = true;
+}
 
 function renderSelectionScreen() {
   const container = document.getElementById("selection-groups");
   container.innerHTML = "";
-
-  if (gameState.features.orbit) {
-    container.appendChild(renderOrbitGroup());
-  }
 
   container.appendChild(renderRocketGroup());
   container.appendChild(renderBlueprintPanel());
@@ -24,7 +26,7 @@ function renderSelectionScreen() {
   updateMeters();
 }
 
-function renderOrbitGroup() {
+function renderOrbitGroup(onSelect) {
   const group = document.createElement("div");
   group.className = "part-group";
 
@@ -53,7 +55,7 @@ function renderOrbitGroup() {
     card.addEventListener("click", () => {
       gameState.orbit = orbit;
       recomputeBudget();
-      renderSelectionScreen();
+      onSelect();
     });
 
     cardsWrap.appendChild(card);
@@ -67,9 +69,33 @@ function renderRocketGroup() {
   const group = document.createElement("div");
   group.className = "part-group";
 
+  const titleRow = document.createElement("div");
+  titleRow.className = "part-group-title-row";
+
   const title = document.createElement("h3");
   title.textContent = t("selection.rocketGroup");
-  group.appendChild(title);
+  titleRow.appendChild(title);
+
+  const collapsed = Boolean(gameState.rocket) && !rocketPickerExpanded;
+
+  if (collapsed) {
+    const changeBtn = document.createElement("button");
+    changeBtn.type = "button";
+    changeBtn.className = "text-link-btn";
+    changeBtn.textContent = t("selection.changeRocketBtn");
+    changeBtn.addEventListener("click", () => {
+      rocketPickerExpanded = true;
+      renderSelectionScreen();
+    });
+    titleRow.appendChild(changeBtn);
+  }
+
+  group.appendChild(titleRow);
+
+  if (collapsed) {
+    group.appendChild(renderRocketSummary());
+    return group;
+  }
 
   const cardsWrap = document.createElement("div");
   cardsWrap.className = "cards";
@@ -95,6 +121,7 @@ function renderRocketGroup() {
 
     card.addEventListener("click", () => {
       gameState.rocket = rocket;
+      rocketPickerExpanded = false;
       renderSelectionScreen();
     });
 
@@ -103,6 +130,28 @@ function renderRocketGroup() {
 
   group.appendChild(cardsWrap);
   return group;
+}
+
+function renderRocketSummary() {
+  const rocket = gameState.rocket;
+  const bar = document.createElement("div");
+  bar.className = "rocket-summary";
+
+  const stats = t("selection.rocketStats", {
+    cost: rocket.cost,
+    maxPayload: rocket.maxPayload,
+    reliability: rocket.reliability,
+  });
+
+  bar.innerHTML = `
+    <img class="rocket-summary-img" src="image/rocket/rocket-${rocket.id}.png" alt="${t("rocket." + rocket.id + ".name")}" />
+    <div class="rocket-summary-text">
+      <div class="part-name">${t("rocket." + rocket.id + ".name")}</div>
+      <div class="part-stats">${stats}</div>
+    </div>
+  `;
+
+  return bar;
 }
 
 function hotspotLabel(key) {
@@ -176,11 +225,15 @@ function renderBlueprintPanel() {
     frame.appendChild(btn);
   });
 
-  wrap.appendChild(frame);
+  const body = document.createElement("div");
+  body.className = "blueprint-body";
+  body.appendChild(frame);
 
   if (activeHotspot) {
-    wrap.appendChild(renderHotspotDetail(activeHotspot));
+    body.appendChild(renderHotspotDetail(activeHotspot));
   }
+
+  wrap.appendChild(body);
 
   return wrap;
 }

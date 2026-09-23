@@ -104,10 +104,21 @@ function renderEventScreen() {
     eventCard.classList.add("hidden");
   }
 
+  const orbitGroup = document.getElementById("event-orbit-group");
+  orbitGroup.innerHTML = "";
+  if (gameState.features.orbit) {
+    orbitGroup.appendChild(renderOrbitGroup(renderEventScreen));
+    orbitGroup.classList.remove("hidden");
+  } else {
+    orbitGroup.classList.add("hidden");
+  }
+
   const hasBudgetAdjustment = gameState.event && gameState.event.effect.budgetDelta;
   document.getElementById("event-budget-note").textContent = hasBudgetAdjustment
     ? t("event.budgetNoteAdjusted", { budget: gameState.budget })
     : t("event.budgetNoteNormal", { budget: gameState.budget });
+
+  document.getElementById("start-btn").disabled = gameState.features.orbit && !gameState.orbit;
 }
 
 function showScreen(name) {
