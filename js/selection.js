@@ -83,9 +83,10 @@ function renderRocketGroup() {
     });
 
     card.innerHTML = `
-      <div class="swatch swatch-rocket"></div>
-      <div class="part-name">${t("rocket." + rocket.id)}</div>
+      <img class="swatch swatch-rocket" src="image/rocket/rocket-${rocket.id}.png" alt="${t("rocket." + rocket.id + ".name")}" />
+      <div class="part-name">${t("rocket." + rocket.id + ".name")}</div>
       <div class="part-stats">${stats}</div>
+      <div class="part-proto">${t("rocket." + rocket.id + ".proto")}</div>
     `;
 
     card.addEventListener("click", () => {

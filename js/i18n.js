@@ -29,7 +29,11 @@ const STRINGS = {
       budget_cut: { name: "預算臨時緊縮", desc: "任務預算在最後一刻被削減。" },
       nominal: { name: "風平浪靜", desc: "目前沒有偵測到異常狀況，一切照計畫進行。" },
     },
-    rocket: { light: "輕型火箭", medium: "中型火箭", heavy: "重型火箭" },
+    rocket: {
+      light: { name: "輕型火箭", proto: "致敬 Rocket Lab Electron——高 18 公尺，碳纖維複合材質，酬載僅 300 公斤，是全球第一款採用電動幫浦推進的軌道火箭。" },
+      medium: { name: "中型火箭", proto: "致敬 SpaceX Falcon 9——高 69.8 公尺，可回收重複使用，酬載 22,800 公斤，是現今發射次數最多的火箭。" },
+      heavy: { name: "重型火箭", proto: "致敬 SpaceX Falcon Heavy——高 70 公尺，由 3 具獵鷹 9 號一級箭體並聯組成，酬載 63,800 公斤，是現役推力最強的火箭。" },
+    },
     orbit: { leo: "低軌 LEO", geo: "同步軌道 GEO" },
     objective: {
       science: { icon: "🔬", short: "科學實驗", name: "任務目標：科學實驗", desc: "團隊需要在近地環境進行微重力科學實驗。" },
@@ -254,7 +258,11 @@ const STRINGS = {
       budget_cut: { name: "Last-Minute Budget Cut", desc: "The mission budget was cut at the last minute." },
       nominal: { name: "Nominal Conditions", desc: "No anomalies detected — everything is proceeding as planned." },
     },
-    rocket: { light: "Light Rocket", medium: "Medium Rocket", heavy: "Heavy Rocket" },
+    rocket: {
+      light: { name: "Light Rocket", proto: "Inspired by Rocket Lab Electron — 18 m tall, carbon-composite, only 300 kg to orbit, the world's first orbital rocket with electric-pump-fed engines." },
+      medium: { name: "Medium Rocket", proto: "Inspired by SpaceX Falcon 9 — 69.8 m tall, reusable, 22,800 kg to LEO, the most-launched rocket flying today." },
+      heavy: { name: "Heavy Rocket", proto: "Inspired by SpaceX Falcon Heavy — 70 m tall, three Falcon 9 first stages strapped together, 63,800 kg to LEO, the most powerful rocket in active service." },
+    },
     orbit: { leo: "Low Earth Orbit (LEO)", geo: "Geostationary Orbit (GEO)" },
     objective: {
       science: { icon: "🔬", short: "Science Experiment", name: "Objective: Science Experiment", desc: "The team needs to run microgravity science experiments in a near-Earth environment." },
