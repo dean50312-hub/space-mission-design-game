@@ -162,14 +162,93 @@ const CAMPAIGN_PASS_VALUE = 0.5;
 
 // 戰役關卡的 feature flag。level 為 null 代表自由遊玩（全開）。
 function getCampaignFeatures(level) {
-  if (!level) return { orbit: true, fuel: true, events: true, forcedEventId: null };
+  if (!level) return { orbit: true, fuel: true, events: true, operations: true, forcedEventId: null };
   return {
     orbit: true,
     fuel: level >= 2,
     events: level >= 3,
+    operations: level >= 4,
     forcedEventId: level === 3 ? "solar_flare" : null,
   };
 }
+
+// ---------- 運作期：預備金、異常決策、延長任務 ----------
+
+const EXTENDED_MISSION_COST_PER_YEAR_M = 4; // 延長任務每年的地面操作成本
+const EXTENSION_MAX_FRACTION = 0.5; // 延長任務最多設計壽命的一半
+const RECOVERABLE_ANOMALY_SHARE = 0.6; // 零件故障中能靠地面團隊挽救的比例
+const OPS_EVENT_RATE_PER_YEAR = { leo: 0.3, geo: 0.1 };
+const EV_SIMULATION_RUNS = 800;
+const EV_SIMULATION_SEED = 20261115;
+
+// 零件故障的應變選項。effect 欄位：
+//   multiply：任務價值產出倍率；lifeMultiply：剩餘推進劑壽命倍率
+//   successChance + onFail：有機率失敗的修復
+const COMPONENT_ANOMALIES = {
+  power: {
+    id: "battery_fade",
+    options: [
+      { id: "reconfigure", costM: 6, effect: {} },
+      { id: "reduce_duty", costM: 0, effect: { multiply: 0.5 } },
+    ],
+  },
+  comm: {
+    id: "transmitter_fault",
+    options: [
+      { id: "big_antenna", costM: 4, effect: { multiply: 0.8 } },
+      { id: "low_gain", costM: 0, effect: { multiply: 0.25 } },
+    ],
+  },
+  payload: {
+    id: "instrument_fault",
+    options: [
+      { id: "patch", costM: 8, effect: { successChance: 0.5, onFail: { multiply: 0.78 } } },
+      { id: "degraded", costM: 0, effect: { multiply: 0.78 } },
+    ],
+  },
+  propulsion: {
+    id: "valve_stuck",
+    options: [
+      { id: "new_procedure", costM: 5, effect: {} },
+      { id: "backup_thrusters", costM: 0, effect: { lifeMultiply: 0.7 } },
+    ],
+  },
+  bus: {
+    id: "reaction_wheel",
+    options: [
+      { id: "new_software", costM: 10, effect: { multiply: 0.9 } },
+      { id: "solar_pressure", costM: 0, effect: { multiply: 0.6 } },
+    ],
+  },
+};
+
+// 非故障的運作期事件
+const OPS_EVENTS = [
+  {
+    id: "conjunction",
+    weight: { leo: 3, geo: 1 },
+    options: [
+      { id: "maneuver", costM: 0, effect: { dvCostKmS: 0.01 } },
+      { id: "accept_risk", costM: 0, effect: { fatalChance: 0.002 } },
+    ],
+  },
+  {
+    id: "storm_warning",
+    weight: { leo: 2, geo: 2 },
+    options: [
+      { id: "safe_mode", costM: 0, effect: { lostYears: 3 / 365 } },
+      { id: "keep_operating", costM: 0, effect: { anomalyChance: 0.05 } },
+    ],
+  },
+  {
+    id: "ground_outage",
+    weight: { leo: 2, geo: 0 },
+    options: [
+      { id: "rent_network", costM: 2, effect: {} },
+      { id: "wait_repair", costM: 0, effect: { lostYears: 30 / 365 } },
+    ],
+  },
+];
 
 const EVENTS = [
   { id: "solar_flare", icon: "☀️", weight: 1, effect: { radiationMultiplier: 1.5 } },

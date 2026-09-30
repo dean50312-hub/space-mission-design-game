@@ -207,8 +207,10 @@ const STRINGS = {
       power: "電力",
       data: "每日資料",
       dv: "Δv",
-      valueBreakdown: "任務價值 = 以下五項相乘",
+      valueBreakdown: "設計壽命內的任務價值 = 以下五項相乘",
       reliability: "可靠度",
+      reserve: "預備金",
+      monteCarloNote: "含故障應變與延長任務（蒙地卡羅模擬 {runs} 次）",
     },
     sheetExplain: {
       cost: "所有花費加總：火箭發射費、衛星本體（電腦、姿態控制、熱控，固定 $8M）、各部件，以及毒性推進劑的防護加注作業。超出預算就無法發射。",
@@ -220,6 +222,7 @@ const STRINGS = {
       dv_leo: "LEO 的 Δv 需求：軌道維持，加上任務結束後 5 年內離軌（美國 FCC 在 2022 年訂的新規定），共 {ops} km/s。",
       dv_geo: "火箭只把衛星送到 GTO，衛星要自己用遠地點引擎圓化成 GEO（{insert} km/s），之後 15 年還要做南北位置保持（{ops} km/s）。Δv 連圓化都不夠的話，衛星會卡在 GTO。",
       dv_geo_electric: "電推進推力太小，只能繞數百圈螺旋慢慢爬升，比一次點火多耗 Δv（{insert} km/s），還要花約 6 個月反覆穿越范艾倫輻射帶。之後的位置保持需要 {ops} km/s。",
+      reserve: "沒花完的預算會變成預備金：運作期發生故障時可以用來挽救衛星；撐完設計壽命後，剩下的錢還能延長任務（每年 {perYear}，目前最多約 {years} 年，前提是推進劑還有剩），補回故障期間損失的服務時間。NASA 規定大型計畫的預算要有 70% 的機率不超支（聯合信心水準 JCL），所以一定會保留預備金。",
     },
     factor: {
       coverage: "覆蓋",
@@ -261,11 +264,72 @@ const STRINGS = {
       launch: "發射（火箭 {rocket}）",
       deploy: "展開機構",
       ops: "運作滿 {years} 年",
+      opsNoAnomaly: "無故障運作 {years} 年",
     },
     reliabilityExplain: {
       launch: "火箭可靠度用拉普拉斯接續法則估計：（成功次數 + 1）÷（總次數 + 2）。從沒失敗過的火箭，樣本少時也不能當成 100%。再乘上衛星結構撐過發射振動的機率。",
       deploy: "太陽能板和天線入軌後要展開，每個展開機構約有 1% 失敗風險。伽利略號木星探測器的高增益天線就因為沒完全展開，只能改用傳輸速率低很多的低增益天線。",
       ops: "零件每年都有一定的故障機率：商規零件最容易壞，有冗餘備份的最可靠。GEO 的輻射比 LEO 強，屏蔽越好越耐用。統計上約四分之一的立方衛星入軌後就失聯。",
+      opsNoAnomaly: "完全沒發生零件故障的機率。有預備金和地面團隊時，約 {share} 的故障可以靠應變措施挽救，所以發生故障不一定代表任務結束。",
+    },
+    anomalyUi: {
+      meta: "任務第 {year} 年 · 可用預備金 {reserve}",
+      hint: "精算估計＝選了這個選項後，預期之後還能交付的任務價值（已考慮未來的故障機率，以及剩下的預備金能延長多久任務）。",
+      free: "免費",
+      estimate: "精算估計：之後還能交付約 {value} 任務價值",
+      cannotAfford: "預備金不足",
+    },
+    anomaly: {
+      battery_fade: {
+        name: "電池容量衰退",
+        desc: "衛星電池經過大量充放電後老化（LEO 衛星每天繞地球約 15 圈，一年要充放電約 5,500 次），已經撐不住所有儀器同時運作。",
+      },
+      transmitter_fault: {
+        name: "主發射機故障",
+        desc: "主要的通訊發射機故障，地面只收得到非常微弱的訊號。",
+      },
+      instrument_fault: {
+        name: "酬載故障",
+        desc: "任務酬載的關鍵零件故障。2003 年 Landsat 7 的掃描線校正器也發生過類似故障，修復沒有成功，但衛星以缺少約 22% 影像的降級模式，又繼續服務了將近 20 年。",
+      },
+      valve_stuck: {
+        name: "推進系統閥門異常",
+        desc: "推進系統的閥門開得非常慢。2016 年朱諾號木星探測器也遇到同樣的問題，NASA 最後決定不冒險點火，讓它留在原本的軌道上繼續完成任務。",
+      },
+      reaction_wheel: {
+        name: "反作用輪故障",
+        desc: "控制衛星指向的反作用輪壞了一個。2013 年克卜勒太空望遠鏡壞了第二個反作用輪，工程師想出用太陽光壓平衡姿態的方法，讓它以 K2 任務又觀測了 4 年。",
+      },
+      conjunction: {
+        name: "碰撞預警",
+        desc: "地面追蹤發現一塊太空碎片會非常接近衛星，碰撞機率約 1/500。NASA 的標準是碰撞機率超過 1/10,000 就要閃避。",
+      },
+      storm_warning: {
+        name: "太陽風暴警報",
+        desc: "美國海洋暨大氣總署（NOAA）的太空天氣預報中心發布強烈地磁暴警報。很多衛星營運商會讓衛星暫時進入安全模式。",
+      },
+      ground_outage: {
+        name: "地面站故障",
+        desc: "主要地面站的天線故障，要一個月才能修好。",
+      },
+    },
+    anomalyOption: {
+      reconfigure: { label: "重新配置電池組", effect: "工程團隊分析電池狀態，調整充放電策略與電源管理軟體，恢復正常運作。" },
+      reduce_duty: { label: "縮減酬載工作時間", effect: "只在電力足夠時開機，之後的任務價值產出剩一半。" },
+      big_antenna: { label: "改用大型地面天線接收", effect: "租用更大的地面天線接收微弱訊號（NASA 深空網路最大的天線直徑 70 公尺），恢復 80% 的產出。" },
+      low_gain: { label: "改用低增益天線", effect: "只靠低速備援天線維持聯繫，之後只剩約 25% 的產出。" },
+      patch: { label: "上傳修補程式並重新校正", effect: "50% 機率完全修好；失敗的話仍以降級模式運作（剩 78%）。" },
+      degraded: { label: "以降級模式繼續", effect: "接受部分資料缺失，之後的任務價值產出剩 78%。" },
+      new_procedure: { label: "設計新的閥門操作程序", effect: "工程團隊研究出安全的操作方式，推進系統恢復正常。" },
+      backup_thrusters: { label: "改用小型備用推進器", effect: "效率較差，剩餘推進劑能撐的年限少 30%。" },
+      new_software: { label: "開發新的姿態控制軟體", effect: "用剩下的零件重寫姿態控制（類似哈伯太空望遠鏡 2024 年改用單陀螺儀模式），恢復 90% 的產出。" },
+      solar_pressure: { label: "改用太陽光壓平衡", effect: "像克卜勒 K2 任務一樣用太陽光壓穩住姿態，之後只剩 60% 的產出。" },
+      maneuver: { label: "執行閃避機動", effect: "消耗 0.01 km/s 的 Δv，剩餘壽命會稍微縮短。" },
+      accept_risk: { label: "不閃避", effect: "保留推進劑，但有 0.2% 的機率被撞毀。" },
+      safe_mode: { label: "進入安全模式 3 天", effect: "暫停酬載 3 天，損失一點點任務價值，但不必冒險。" },
+      keep_operating: { label: "照常運作", effect: "不損失任何時間，但有 5% 的機率造成電力系統損傷。" },
+      rent_network: { label: "租用商業地面站網路", effect: "向商業地面站網路（例如 KSAT、AWS Ground Station）租用天線，資料照常傳回。" },
+      wait_repair: { label: "等待維修", effect: "一個月內傳不回資料，損失這段時間的任務價值。" },
     },
     simulation: {
       title: "任務模擬中...",
@@ -273,6 +337,11 @@ const STRINGS = {
       passed: "{stage}：成功",
       failed: "{stage}：失敗！",
       operatingYear: "🛰️ 運作中：第 {year} / {total} 年",
+      extensionYear: "⏳ 延長任務中：第 {year} 年（設計壽命 {total} 年）",
+      extensionStart: "🎉 衛星撐完設計壽命了！動用預備金延長任務 {years} 年",
+      fixSucceeded: "✅ 修復成功，衛星恢復正常運作",
+      fixFailed: "❌ 修復失敗，改以降級模式繼續運作",
+      decisionApplied: "已執行：{option}",
       flavor: {
         liftoff: "主引擎點火，火箭離開發射台……",
         ascent: "穿越最大動壓區（Max-Q），箭體承受最強烈的氣動力與振動……",
@@ -307,8 +376,11 @@ const STRINGS = {
       campaignLevelComplete: "🎉 劇情關卡 {level} 過關！獲得 {points} 技能點數",
       campaignAllComplete: "🎉 恭喜完成全部劇情關卡！獲得 {points} 技能點數，自由遊玩模式已解鎖！",
       campaignRetry: "劇情關卡過關需要交付至少 {target} 的任務價值，再試一次！",
+      extensionNote: "（含延長任務 {years} 年）",
+      decisionsHeader: "運作期決策（剩餘預備金 {reserve}）",
     },
     cause: {
+      collision: "被太空碎片撞毀。2009 年，運作中的銥 33 號衛星和廢棄的俄羅斯 Cosmos 2251 衛星相撞，是史上第一次兩顆完整的衛星在軌道上相撞。",
       launch_vehicle: "火箭本身故障。即使是可靠度 {reliability} 的 {rocket} 也不是萬無一失——Falcon 9 在 2015 年的 CRS-7 任務就曾在爬升途中解體。",
       launch_loads: "衛星結構沒撐過發射時的劇烈振動。真實的衛星在發射前都要上振動台測試，就是為了避免這種事。",
       insufficient_dv: "推進劑不夠，衛星無法從 GTO 圓化成 GEO，卡在轉移軌道上。1997 年 AsiaSat 3 因火箭上面級故障被困在錯誤的軌道，後來靠兩次繞月飛行才救回來。",
@@ -395,6 +467,11 @@ const STRINGS = {
         hint: "交付 95% 以上的任務價值",
         story: "2021 年，NASA 的毅力號火星車要在短短 7 分鐘內獨立完成降落傘展開、反推噴射、「空中吊車」垂降等一連串高難度動作，中間任何一個環節出錯都會導致任務失敗——史稱「恐怖七分鐘」。最終每個步驟都完美執行，堪稱工程精算的極致展現。",
       },
+      extended_mission: {
+        name: "延長任務",
+        hint: "動用預備金延長任務 2 年以上",
+        story: "2004 年登陸火星的機會號探測車，原本只設計運作 90 個火星日，卻一路撐到 2018 年，工作了超過 14 年、行駛超過 45 公里。延長任務的經費，讓它成為史上最長壽的火星車之一。",
+      },
       space_polymath: {
         name: "太空全才",
         hint: "解鎖其他所有成就",
@@ -437,6 +514,10 @@ const STRINGS = {
       results: [
         "任務報告會比較「實際交付的價值」和「發射前的期望值」。",
         "下面的「事後精算」會告訴你：如果只改一個選擇，怎麼改最能提升期望值。",
+      ],
+      operations: [
+        "任務控制中心回報異常！衛星運作期間，零件故障或太空環境變化時，要由你來做決定。",
+        "花預備金可以挽救衛星；但省下來的預備金，在設計壽命結束後可以用來延長任務。每個選項都有「精算估計」——想想哪個期望值最高。",
       ],
     },
   },
@@ -647,8 +728,10 @@ const STRINGS = {
       power: "Power",
       data: "Daily data",
       dv: "Δv",
-      valueBreakdown: "Mission value = these five multiplied",
+      valueBreakdown: "Design-life mission value = these five multiplied",
       reliability: "Reliability",
+      reserve: "Reserve",
+      monteCarloNote: "Includes anomaly response and mission extension ({runs} Monte Carlo runs)",
     },
     sheetExplain: {
       cost: "Everything added up: launch price, the satellite bus (computer, attitude control, thermal — a fixed $8M), every part, and protected fueling for toxic propellants. Over budget means no launch.",
@@ -660,6 +743,7 @@ const STRINGS = {
       dv_leo: "LEO Δv needs: orbit maintenance plus deorbiting within 5 years of mission end (the US FCC rule adopted in 2022), {ops} km/s total.",
       dv_geo: "The rocket only delivers you to GTO; the satellite's own apogee engine must circularize into GEO ({insert} km/s), then do north–south station-keeping for 15 years ({ops} km/s). Without enough Δv to circularize, the satellite is stranded in GTO.",
       dv_geo_electric: "Electric thrusters are too weak for a single burn: they spiral up over hundreds of orbits, which costs more Δv ({insert} km/s) and takes about 6 months of repeated passes through the Van Allen belts. Station-keeping afterwards needs {ops} km/s.",
+      reserve: "Unspent budget becomes a reserve: it can rescue the satellite when something breaks, and whatever is left at the end of the design life can fund an extended mission ({perYear} per year — up to about {years} years, as long as propellant remains) to make up service time lost to failures. NASA requires large projects to budget at a 70% probability of not overrunning (the Joint Confidence Level), so reserves are always held back.",
     },
     factor: {
       coverage: "Coverage",
@@ -701,11 +785,72 @@ const STRINGS = {
       launch: "Launch (rocket {rocket})",
       deploy: "Deployment mechanisms",
       ops: "Operating all {years} years",
+      opsNoAnomaly: "{years} years with no failures",
     },
     reliabilityExplain: {
       launch: "Rocket reliability is estimated with Laplace's rule of succession: (successes + 1) ÷ (flights + 2). A rocket that has never failed still can't be counted as 100% when it has few flights. This is multiplied by the chance the satellite's structure survives launch vibration.",
       deploy: "Solar arrays and antennas must unfold in orbit, and each mechanism carries about a 1% risk. The Galileo Jupiter probe's high-gain antenna never fully opened, forcing it onto a far slower low-gain antenna.",
       ops: "Every part has some chance of failing each year: COTS parts fail most, redundant ones least. GEO radiation is harsher than LEO, and better shielding helps. Statistically about a quarter of CubeSats go silent right after reaching orbit.",
+      opsNoAnomaly: "The chance that no part fails at all. With a reserve and a ground team, about {share} of failures can be worked around, so a failure doesn't necessarily end the mission.",
+    },
+    anomalyUi: {
+      meta: "Mission year {year} · Reserve available {reserve}",
+      hint: "Actuarial estimate = the mission value you can still expect to deliver after choosing this option (accounting for future failure odds and how long your remaining reserve could extend the mission).",
+      free: "Free",
+      estimate: "Actuarial estimate: about {value} of mission value still to come",
+      cannotAfford: "Not enough reserve",
+    },
+    anomaly: {
+      battery_fade: {
+        name: "Battery Degradation",
+        desc: "The batteries have aged after countless charge cycles (a LEO satellite circles Earth about 15 times a day — roughly 5,500 cycles a year) and can no longer power every instrument at once.",
+      },
+      transmitter_fault: {
+        name: "Primary Transmitter Failure",
+        desc: "The main comms transmitter has failed; the ground can only pick up a very faint signal.",
+      },
+      instrument_fault: {
+        name: "Payload Fault",
+        desc: "A key part of the payload has failed. In 2003 Landsat 7's Scan Line Corrector failed the same way; repairs didn't work, but the satellite kept serving for nearly 20 more years in a degraded mode missing about 22% of each image.",
+      },
+      valve_stuck: {
+        name: "Propulsion Valve Anomaly",
+        desc: "Propulsion valves are opening far too slowly. NASA's Juno hit the same problem at Jupiter in 2016 and decided not to risk the burn, staying in its orbit to finish the mission.",
+      },
+      reaction_wheel: {
+        name: "Reaction Wheel Failure",
+        desc: "One of the reaction wheels that point the satellite has failed. When Kepler lost its second wheel in 2013, engineers balanced it against sunlight pressure and kept it observing for 4 more years as K2.",
+      },
+      conjunction: {
+        name: "Collision Warning",
+        desc: "Tracking shows a piece of debris will pass extremely close, with about a 1-in-500 chance of collision. NASA's standard is to maneuver whenever the odds exceed 1 in 10,000.",
+      },
+      storm_warning: {
+        name: "Solar Storm Warning",
+        desc: "NOAA's Space Weather Prediction Center has issued a severe geomagnetic storm warning. Many operators put their satellites into safe mode until it passes.",
+      },
+      ground_outage: {
+        name: "Ground Station Failure",
+        desc: "The main ground station's antenna has failed and will take a month to repair.",
+      },
+    },
+    anomalyOption: {
+      reconfigure: { label: "Reconfigure the batteries", effect: "Engineers analyze the cells and update charge strategy and power software — back to normal." },
+      reduce_duty: { label: "Cut payload operating time", effect: "Only run when there's enough power: mission value output is halved from now on." },
+      big_antenna: { label: "Use a large ground antenna", effect: "Rent bigger dishes to catch the faint signal (NASA's Deep Space Network has 70 m antennas), restoring 80% of output." },
+      low_gain: { label: "Switch to the low-gain antenna", effect: "Stay in touch through the slow backup antenna only: about 25% of output remains." },
+      patch: { label: "Upload a patch and recalibrate", effect: "50% chance of a full fix; if it fails, keep running in degraded mode (78%)." },
+      degraded: { label: "Continue in degraded mode", effect: "Accept some missing data: mission value output drops to 78%." },
+      new_procedure: { label: "Develop a new valve procedure", effect: "Engineers work out a safe way to operate the valves — propulsion back to normal." },
+      backup_thrusters: { label: "Switch to backup thrusters", effect: "Less efficient: the remaining propellant lasts 30% fewer years." },
+      new_software: { label: "Write new attitude-control software", effect: "Rebuild pointing around the remaining hardware (like Hubble's 2024 one-gyro mode), restoring 90% of output." },
+      solar_pressure: { label: "Balance on sunlight pressure", effect: "Hold attitude with solar pressure like Kepler's K2: only 60% of output remains." },
+      maneuver: { label: "Perform an avoidance maneuver", effect: "Spend 0.01 km/s of Δv, shortening the remaining life slightly." },
+      accept_risk: { label: "Don't maneuver", effect: "Save propellant, but accept a 0.2% chance of destruction." },
+      safe_mode: { label: "Enter safe mode for 3 days", effect: "Pause the payload for 3 days — a tiny loss of value, zero risk." },
+      keep_operating: { label: "Keep operating", effect: "Lose no time, but take a 5% chance of power-system damage." },
+      rent_network: { label: "Rent a commercial ground network", effect: "Lease antennas from a commercial network (e.g. KSAT, AWS Ground Station) and keep data flowing." },
+      wait_repair: { label: "Wait for repairs", effect: "No data comes down for a month, losing that month's value." },
     },
     simulation: {
       title: "Simulating Mission...",
@@ -713,6 +858,11 @@ const STRINGS = {
       passed: "{stage}: Success",
       failed: "{stage}: Failed!",
       operatingYear: "🛰️ Operating: year {year} of {total}",
+      extensionYear: "⏳ Extended mission: year {year} (design life {total} years)",
+      extensionStart: "🎉 The satellite outlived its design life! Using the reserve to extend the mission by {years} years",
+      fixSucceeded: "✅ Fix succeeded — the satellite is back to normal",
+      fixFailed: "❌ Fix failed — continuing in degraded mode",
+      decisionApplied: "Done: {option}",
       flavor: {
         liftoff: "Main engines ignite and the rocket clears the pad...",
         ascent: "Passing Max-Q, where aerodynamic loads and vibration peak...",
@@ -747,8 +897,11 @@ const STRINGS = {
       campaignLevelComplete: "🎉 Campaign Level {level} complete! Earned {points} skill points",
       campaignAllComplete: "🎉 Congratulations, you've completed the whole campaign! Earned {points} skill points, and Free Play is now unlocked!",
       campaignRetry: "Campaign levels require delivering at least {target} mission value — try again!",
+      extensionNote: "(including a {years}-year extended mission)",
+      decisionsHeader: "Operations decisions (reserve left: {reserve})",
     },
     cause: {
+      collision: "Destroyed by space debris. In 2009 the active Iridium 33 collided with the defunct Russian satellite Cosmos 2251 — the first collision between two intact satellites in orbit.",
       launch_vehicle: "The rocket itself failed. Even {rocket} at {reliability} reliability isn't foolproof — a Falcon 9 broke apart during ascent on the CRS-7 mission in 2015.",
       launch_loads: "The satellite's structure didn't survive the violent launch vibrations. Real satellites are shaken on vibration tables before launch to prevent exactly this.",
       insufficient_dv: "Not enough propellant to circularize from GTO into GEO, so the satellite is stranded in transfer orbit. In 1997, AsiaSat 3 was left in the wrong orbit by an upper-stage failure and was only rescued with two lunar flybys.",
@@ -835,6 +988,11 @@ const STRINGS = {
         hint: "Deliver 95%+ of the mission value",
         story: 'In 2021, NASA\'s Perseverance rover had to autonomously execute a parachute deployment, retro-rocket burn, and "sky crane" descent — all within seven minutes, with zero margin for error. Nicknamed the "seven minutes of terror," every single step went exactly as planned — a masterclass in engineering precision.',
       },
+      extended_mission: {
+        name: "Extended Mission",
+        hint: "Use your reserve to extend the mission by 2+ years",
+        story: "NASA's Opportunity rover landed on Mars in 2004 designed to last 90 Martian days — and kept going until 2018, working more than 14 years and driving over 45 km. Extended-mission funding made it one of the longest-lived Mars rovers ever.",
+      },
       space_polymath: {
         name: "Space Polymath",
         hint: "Unlock every other achievement",
@@ -877,6 +1035,10 @@ const STRINGS = {
       results: [
         "The mission report compares the value you actually delivered with the expected value at launch.",
         "The Hindsight line below shows the single change that would have raised your expected value the most.",
+      ],
+      operations: [
+        "Mission control reports an anomaly! During operations, you make the call when parts fail or space weather changes.",
+        "Spending reserve can save the satellite — but reserve you keep can extend the mission after its design life ends. Every option shows an actuarial estimate: pick the highest expected value.",
       ],
     },
   },

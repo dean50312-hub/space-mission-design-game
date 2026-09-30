@@ -761,6 +761,12 @@ h1, h2, .btn, .stage-name {
   transform: scale(1.3);
 }
 
+#rocket.dead {
+  animation: none;
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
 @keyframes rocketTilt {
   from { transform: rotate(-6deg); }
   to { transform: rotate(6deg); }
@@ -892,6 +898,19 @@ h1, h2, .btn, .stage-name {
 
 .report-hindsight {
   color: var(--accent);
+}
+
+.report-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 12px 0 4px;
+}
+
+.report-decisions {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .campaign-note {
@@ -1084,6 +1103,107 @@ h1, h2, .btn, .stage-name {
 
 .tutorial-overlay.hidden {
   display: none;
+}
+
+#anomaly-overlay {
+  align-items: center;
+}
+
+.anomaly-card {
+  background: var(--panel);
+  border: 2px solid var(--warn);
+  border-radius: 10px;
+  padding: 18px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.anomaly-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.anomaly-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--warn);
+}
+
+.anomaly-badge {
+  font-size: 24px;
+}
+
+.anomaly-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 12px 0 6px;
+}
+
+.anomaly-meta {
+  font-size: 12px;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+
+.anomaly-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.anomaly-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  background: var(--bg);
+  border: 2px solid var(--panel-light);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.anomaly-option:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.anomaly-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.anomaly-option-head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.anomaly-option-cost {
+  color: var(--c-power);
+}
+
+.anomaly-option-effect {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.anomaly-option-estimate {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.anomaly-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 12px 0 0;
 }
 
 .tutorial-card {

@@ -234,7 +234,7 @@ function isLaunchBlocked(analysis) {
 
 // 事後分析：只改一個選項（換火箭／換某個零件等級／換推進系統），找出期望價值提升最多的那個
 function bestSingleChange(design, features) {
-  const base = analyzeDesign(design);
+  const baseScore = computeExpectedValue(design, features);
   let best = null;
 
   // 換零件會改變乾質量，所以同時評估「推進劑不變」與「推進劑重新計算」兩種做法
@@ -248,8 +248,9 @@ function bestSingleChange(design, features) {
     candidates.forEach(({ variant: v, autoPropellant }) => {
       const a = analyzeDesign(v);
       if (isLaunchBlocked(a)) return;
-      if (!best || a.expectedValue > best.analysis.expectedValue) {
-        best = { change: { ...change, autoPropellant, propellantKg: v.propellantKg }, analysis: a };
+      const score = computeExpectedValue(v, features, a);
+      if (!best || score > best.score) {
+        best = { change: { ...change, autoPropellant, propellantKg: v.propellantKg }, score };
       }
     });
   };
@@ -271,6 +272,6 @@ function bestSingleChange(design, features) {
     consider({ ...design }, { kind: "propellant" });
   }
 
-  if (!best || best.analysis.expectedValue <= base.expectedValue + 0.01) return null;
-  return { ...best, baseValue: base.expectedValue };
+  if (!best || best.score <= baseScore + 0.01) return null;
+  return { ...best, baseScore };
 }

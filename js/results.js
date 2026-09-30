@@ -63,13 +63,18 @@ function outcomeKind(simResult) {
 function resultSubtitle(simResult) {
   const kind = outcomeKind(simResult);
   const years = fmtNum(simResult.serviceYears, 1);
+  let text;
   if (kind === "success") {
-    return simResult.propellantDepleted
+    text = simResult.propellantDepleted
       ? t("results.subtitleDepleted", { years })
       : t("results.subtitleSuccess", { years });
+  } else if (kind === "partial") {
+    text = t("results.subtitlePartial", { years: fmtNum(simResult.serviceYears + simResult.extensionYears, 1) });
+  } else {
+    return t("results.subtitleFail", { stage: t("stage." + simResult.failedStage.id) });
   }
-  if (kind === "partial") return t("results.subtitlePartial", { years });
-  return t("results.subtitleFail", { stage: t("stage." + simResult.failedStage.id) });
+  if (simResult.extensionYears > 0) text += " " + t("results.extensionNote", { years: fmtNum(simResult.extensionYears, 1) });
+  return text;
 }
 
 function causeExplanation(simResult) {
@@ -94,8 +99,8 @@ function hindsightText(simResult) {
   if (!suggestion) return t("hindsight.optimal");
   let text = t("hindsight.suggest", {
     change: changeDescription(suggestion.change),
-    from: fmtPct(suggestion.baseValue),
-    to: fmtPct(suggestion.analysis.expectedValue),
+    from: fmtPct(suggestion.baseScore),
+    to: fmtPct(suggestion.score),
   });
   if (suggestion.change.autoPropellant && suggestion.change.kind !== "propellant" && gameState.features.fuel) {
     text += t("hindsight.withPropellant", { kg: fmtNum(suggestion.change.propellantKg) });
@@ -104,9 +109,22 @@ function hindsightText(simResult) {
 }
 
 function luckComment(simResult) {
-  const diff = simResult.deliveredValue - simResult.analysis.expectedValue;
+  const diff = simResult.deliveredValue - simResult.expectedValue;
   if (Math.abs(diff) < 0.05) return t("results.luckAsExpected");
   return diff > 0 ? t("results.luckGood") : t("results.luckBad");
+}
+
+function decisionSummary(simResult) {
+  if (!simResult.decisions || simResult.decisions.length === 0) return "";
+  const items = simResult.decisions
+    .map((d) => {
+      const outcome = d.succeeded === null ? "" : d.succeeded ? ` ✅` : ` ❌`;
+      return `<li>${t("anomaly." + d.source + ".name")} → ${t("anomalyOption." + d.option + ".label")}${outcome}</li>`;
+    })
+    .join("");
+  return `
+    <p class="report-subtitle">${t("results.decisionsHeader", { reserve: fmtMoney(Math.round(simResult.reserveLeftM * 10) / 10) })}</p>
+    <ul class="report-decisions">${items}</ul>`;
 }
 
 function renderResultsScreen(simResult, achievements, campaignAward) {
@@ -127,10 +145,11 @@ function renderResultsScreen(simResult, achievements, campaignAward) {
       </div>
       <div class="report-number">
         <span class="report-number-label">${t("results.expected")}</span>
-        <span class="report-number-value dim">${fmtPct(simResult.analysis.expectedValue)}</span>
+        <span class="report-number-value dim">${fmtPct(simResult.expectedValue)}</span>
       </div>
     </div>
     <p class="report-luck">${luckComment(simResult)}</p>
+    ${decisionSummary(simResult)}
     <p class="report-hindsight">💡 ${hindsightText(simResult)}</p>
   `;
 

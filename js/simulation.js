@@ -1,104 +1,127 @@
-// 任務模擬：依任務模型的機率擲骰決定結果，再播放火箭飛行動畫（視角固定、背景捲動）
+// 任務模擬畫面：驅動任務時間軸（js/operations.js），播放火箭飛行動畫，並在運作期異常時請玩家做決定
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function sampleExponential(rate) {
-  if (rate <= 0) return Infinity;
-  return -Math.log(1 - Math.random()) / rate;
-}
-
-function pickWeighted(weights) {
-  const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
-  let roll = Math.random() * total;
-  for (const [key, w] of Object.entries(weights)) {
-    roll -= w;
-    if (roll <= 0) return key;
-  }
-  return Object.keys(weights)[0];
-}
-
-// 依任務模型的機率決定整趟任務的結果；各階段的機率和選件畫面顯示的數字完全一致
-function rollMissionOutcome(analysis, design) {
-  const rel = analysis.reliability;
-  const fail = (stageId, cause, extra = {}) => ({ failedStageId: stageId, cause, serviceYears: 0, ...extra });
-
-  const rocketFailure = 1 - rel.rocket;
-  const liftoffFailure = rocketFailure * LIFTOFF_SHARE_OF_LAUNCH_FAILURE;
-  if (Math.random() < liftoffFailure) return fail("liftoff", "launch_vehicle");
-
-  const ascentRocketPass = (1 - rocketFailure) / (1 - liftoffFailure);
-  if (Math.random() > ascentRocketPass) return fail("ascent", "launch_vehicle");
-  if (Math.random() > design.parts.structure.launchSurvival) return fail("ascent", "launch_loads");
-
-  if (analysis.stranded) return fail("insertion", "insufficient_dv");
-
-  const failureTime = sampleExponential(rel.hazardPerYear);
-  if (failureTime < rel.beltYears) return fail("insertion", "radiation_belts");
-
-  const deployables = [];
-  for (let i = 0; i < design.parts.power.deployables; i++) deployables.push("array");
-  for (let i = 0; i < design.parts.comm.deployables; i++) deployables.push("antenna");
-  for (const mechanism of deployables) {
-    if (Math.random() > DEPLOY_MECHANISM_RELIABILITY) return fail("deployment", "deployment_" + mechanism);
-  }
-
-  let serviceYears = rel.lifeYears;
-  let cause = null;
-
-  const componentFailureYears = failureTime - rel.beltYears;
-  if (componentFailureYears < serviceYears) {
-    serviceYears = componentFailureYears;
-    cause = "component_" + pickWeighted(rel.hazardBreakdown);
-  }
-  if (Math.random() < rel.impactRisk) {
-    const impactYears = Math.random() * rel.lifeYears;
-    if (impactYears < serviceYears) {
-      serviceYears = impactYears;
-      cause = "impact";
-    }
-  }
-
-  return { failedStageId: cause ? "operation" : null, cause, serviceYears };
-}
-
-function deliveredValueFor(analysis, design, serviceYears) {
-  return (analysis.coreValue * analysis.delayFactor * serviceYears) / design.orbit.designLifeYears;
-}
-
 async function runSimulation() {
   const design = currentDesign();
   const analysis = analyzeDesign(design);
-  const outcome = rollMissionOutcome(analysis, design);
+  const features = gameState.features;
+  const expectedValue = computeExpectedValue(design, features, analysis);
+  const gen = missionTimeline(analysis, design, features, makeRng((Math.random() * 2 ** 32) >>> 0));
 
-  let stageReachedIndex = -1;
-  for (let i = 0; i < STAGES.length; i++) {
-    const stage = STAGES[i];
-    await animateStageAttempt(stage, i, design, analysis);
-    stageReachedIndex = i;
+  const log = document.getElementById("simulation-log");
+  const yearStepMs = Math.max(90, Math.round(1600 / design.orbit.designLifeYears));
+  let stageIndex = -1;
+  let step = gen.next();
 
-    if (stage.id === "operation") {
-      await animateOperationYears(design, analysis, outcome);
+  while (!step.done) {
+    const ev = step.value;
+    let reply;
+
+    if (ev.kind === "stageStart") {
+      stageIndex = STAGES.findIndex((s) => s.id === ev.stageId);
+      await animateStageAttempt(STAGES[stageIndex], stageIndex, design, analysis);
+      if (ev.stageId === "operation") setRocketFlying(false);
+    } else if (ev.kind === "stageEnd") {
+      await animateStageResolve(STAGES[stageIndex], stageIndex, true);
+    } else if (ev.kind === "year") {
+      log.textContent = ev.phase === "extension"
+        ? t("simulation.extensionYear", { year: ev.year, total: design.orbit.designLifeYears })
+        : t("simulation.operatingYear", { year: ev.year, total: design.orbit.designLifeYears });
+      await sleep(yearStepMs);
+    } else if (ev.kind === "decision") {
+      reply = await showAnomalyDecision(ev, design);
+    } else if (ev.kind === "decisionResult") {
+      log.textContent = decisionResultText(ev);
+      await sleep(900);
+    } else if (ev.kind === "extensionStart") {
+      log.textContent = t("simulation.extensionStart", { years: fmtNum(ev.years, 1) });
+      sfxPass();
+      await sleep(1200);
     }
 
-    const passed = outcome.failedStageId !== stage.id;
-    await animateStageResolve(stage, i, passed);
-    if (!passed) break;
+    step = gen.next(reply);
   }
 
+  const outcome = step.value;
   const overallSuccess = outcome.failedStageId === null;
+  const failedIndex = overallSuccess ? STAGES.length - 1 : STAGES.findIndex((s) => s.id === outcome.failedStageId);
+  await animateStageResolve(STAGES[failedIndex], failedIndex, overallSuccess);
+
   return {
     design,
     analysis,
+    expectedValue,
     overallSuccess,
-    stageReachedIndex,
-    failedStage: overallSuccess ? null : STAGES.find((s) => s.id === outcome.failedStageId),
+    stageReachedIndex: failedIndex,
+    failedStage: overallSuccess ? null : STAGES[failedIndex],
     cause: outcome.cause,
     serviceYears: outcome.serviceYears,
-    deliveredValue: deliveredValueFor(analysis, design, outcome.serviceYears),
-    propellantDepleted: overallSuccess && analysis.dvLifeFactor < 1,
+    extensionYears: outcome.extensionYears,
+    deliveredValue: Math.max(0, outcome.deliveredValue),
+    propellantDepleted: overallSuccess && outcome.propellantDepleted,
+    decisions: outcome.decisions,
+    reserveLeftM: outcome.reserveLeftM,
   };
+}
+
+// ---------- 運作期異常決策視窗 ----------
+
+function anomalyTextKey(source) {
+  return "anomaly." + source.id;
+}
+
+function optionEffectText(option) {
+  return t("anomalyOption." + option.id + ".effect");
+}
+
+function decisionResultText(ev) {
+  if (ev.succeeded === true) return t("simulation.fixSucceeded");
+  if (ev.succeeded === false) return t("simulation.fixFailed");
+  return t("simulation.decisionApplied", { option: t("anomalyOption." + ev.option.id + ".label") });
+}
+
+async function showAnomalyDecision(ev, design) {
+  await showTutorialIfNeeded("operations");
+  sfxFail();
+
+  const overlay = document.getElementById("anomaly-overlay");
+  document.getElementById("anomaly-title").textContent = t(anomalyTextKey(ev.source) + ".name");
+  document.getElementById("anomaly-desc").textContent = t(anomalyTextKey(ev.source) + ".desc");
+  document.getElementById("anomaly-meta").textContent = t("anomalyUi.meta", {
+    year: fmtNum(ev.time, 1),
+    reserve: fmtMoney(Math.round(ev.reserveM * 10) / 10),
+  });
+  document.getElementById("anomaly-hint").textContent = t("anomalyUi.hint");
+
+  const list = document.getElementById("anomaly-options");
+  list.innerHTML = "";
+
+  return new Promise((resolve) => {
+    ev.choices.forEach((choice, index) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "anomaly-option";
+      btn.disabled = !choice.affordable;
+      const cost = choice.option.costM > 0 ? fmtMoney(choice.option.costM) : t("anomalyUi.free");
+      btn.innerHTML = `
+        <span class="anomaly-option-head"><span>${t("anomalyOption." + choice.option.id + ".label")}</span><span class="anomaly-option-cost">${cost}</span></span>
+        <span class="anomaly-option-effect">${optionEffectText(choice.option)}</span>
+        <span class="anomaly-option-estimate">${choice.affordable
+          ? t("anomalyUi.estimate", { value: fmtPct(Math.max(0, choice.estimate), choice.estimate < 0.1 ? 1 : 0) })
+          : t("anomalyUi.cannotAfford")}</span>
+      `;
+      btn.addEventListener("click", () => {
+        sfxClick();
+        overlay.classList.add("hidden");
+        resolve(index);
+      });
+      list.appendChild(btn);
+    });
+    overlay.classList.remove("hidden");
+  });
 }
 
 // ---------- 飛行動畫：視角固定在畫面中心，背景場景（地面→雲層→大氣層→太空）往下捲動 ----------
@@ -123,10 +146,11 @@ function setRocketFlying(on) {
   document.getElementById("exhaust").classList.toggle("active", on);
 }
 
-function setRocketExploding(on) {
+function setRocketState(state) {
   const rocket = document.getElementById("rocket");
-  rocket.classList.toggle("exploding", on);
-  rocket.textContent = on ? "💥" : "🚀";
+  rocket.classList.toggle("exploding", state === "exploded");
+  rocket.classList.toggle("dead", state === "dead");
+  rocket.textContent = state === "exploded" ? "💥" : state === "dead" ? "🛰️" : "🚀";
 }
 
 function resetFlightView() {
@@ -136,7 +160,7 @@ function resetFlightView() {
   void scene.offsetHeight; // 強制 reflow，確保下一次移動會套用 transition
 
   setRocketFlying(false);
-  setRocketExploding(false);
+  setRocketState("normal");
   scene.style.transition = "";
 
   document.getElementById("simulation-log").textContent = "";
@@ -188,19 +212,6 @@ async function animateStageAttempt(stage, index, design, analysis) {
   await setSceneProgress(midPercent, 900);
 }
 
-async function animateOperationYears(design, analysis, outcome) {
-  const log = document.getElementById("simulation-log");
-  setRocketFlying(false);
-  const plannedYears = design.orbit.designLifeYears;
-  const lastYear = outcome.failedStageId === "operation" ? outcome.serviceYears : analysis.reliability.lifeYears;
-  const stepMs = Math.max(90, Math.round(1600 / plannedYears));
-
-  for (let year = 1; year <= Math.floor(lastYear); year++) {
-    log.textContent = t("simulation.operatingYear", { year, total: plannedYears });
-    await sleep(stepMs);
-  }
-}
-
 async function animateStageResolve(stage, index, passed) {
   const log = document.getElementById("simulation-log");
   const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
@@ -215,7 +226,7 @@ async function animateStageResolve(stage, index, passed) {
     await sleep(300);
   } else {
     setRocketFlying(false);
-    setRocketExploding(true);
+    setRocketState(stage.id === "operation" ? "dead" : "exploded");
     setDotState(index, "fail");
     log.textContent = t("simulation.failed", { stage: stageName });
     sfxFail();

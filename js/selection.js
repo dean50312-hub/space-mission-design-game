@@ -538,6 +538,20 @@ function renderBudgetLines(analysis) {
     }));
   }
 
+  if (gameState.features.operations) {
+    const reserve = Math.max(0, analysis.budgetM - analysis.costM);
+    const extensionYears = Math.min(reserve / EXTENDED_MISSION_COST_PER_YEAR_M, orbit.designLifeYears * EXTENSION_MAX_FRACTION);
+    lines.push(sheetLine({
+      icon: "🧰",
+      labelKey: "sheet.reserve",
+      valueText: fmtMoney(Math.round(reserve * 10) / 10),
+      ratio: reserve / analysis.budgetM,
+      status: "ok",
+      explainKey: "sheetExplain.reserve",
+      explainParams: { perYear: fmtMoney(EXTENDED_MISSION_COST_PER_YEAR_M), years: fmtNum(extensionYears, 1) },
+    }));
+  }
+
   if (gameState.fuel && analysis.dvRequired) {
     lines.push(sheetLine({
       icon: "🚀",
@@ -607,9 +621,9 @@ function renderReliabilityRows(analysis) {
     { key: "launch", value: rel.launch, params: { rocket: fmtPct(rel.rocket, 1) } },
     { key: "deploy", value: rel.deploy, params: {} },
     {
-      key: "ops",
+      key: gameState.features.operations ? "opsNoAnomaly" : "ops",
       value: rel.surviveBelts * rel.surviveLife * (1 - rel.impactRisk),
-      params: { years: fmtNum(gameState.orbit.designLifeYears) },
+      params: { years: fmtNum(gameState.orbit.designLifeYears), share: fmtPct(RECOVERABLE_ANOMALY_SHARE) },
     },
   ];
   return rows
@@ -625,16 +639,22 @@ function renderReliabilityRows(analysis) {
 
 function updateBudgetSheet() {
   syncAutoPropulsion();
-  const analysis = analyzeDesign(currentDesign());
+  const design = currentDesign();
+  const analysis = analyzeDesign(design);
   const sheet = document.getElementById("budget-sheet");
 
   if (sheet) {
     const openKeys = new Set([...sheet.querySelectorAll("details[open]")].map((d) => d.dataset.key));
+    const expectedValue = analysis.complete ? computeExpectedValue(design, gameState.features, analysis) : 0;
+    const methodNote = gameState.features.operations
+      ? `<div class="sheet-sub">${t("sheet.monteCarloNote", { runs: fmtNum(EV_SIMULATION_RUNS) })}</div>`
+      : "";
     const headline = analysis.complete
       ? `
         <div class="sheet-headline">
-          <div class="sheet-ev"><span class="sheet-ev-label">${t("sheet.expectedValue")}</span><span class="sheet-ev-number">${fmtPct(analysis.expectedValue)}</span></div>
+          <div class="sheet-ev"><span class="sheet-ev-label">${t("sheet.expectedValue")}</span><span class="sheet-ev-number">${fmtPct(expectedValue)}</span></div>
           <div class="sheet-sub">${t("sheet.fullSuccess", { pct: fmtPct(analysis.fullSuccess) })}</div>
+          ${methodNote}
         </div>`
       : `<div class="sheet-headline pending">${t("sheet.pending")}</div>`;
 

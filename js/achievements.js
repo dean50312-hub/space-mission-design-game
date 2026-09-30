@@ -66,6 +66,11 @@ const ACHIEVEMENTS = [
     check: (ctx) => ctx.simResult.deliveredValue >= 0.95,
   },
   {
+    id: "extended_mission",
+    icon: "⏳",
+    check: (ctx) => ctx.simResult.extensionYears >= 2,
+  },
+  {
     id: "space_polymath",
     icon: "👑",
     meta: true,

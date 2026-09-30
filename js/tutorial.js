@@ -1,6 +1,6 @@
 // ORBIT 劇情引導：每個畫面第一次出現時，用對話框帶新手認識該畫面
 
-const TUTORIAL_SCREENS = ["home", "event", "selection", "simulation", "results"];
+const TUTORIAL_SCREENS = ["home", "event", "selection", "simulation", "results", "operations"];
 
 let tutorialActiveScreen = null;
 let tutorialLineIndex = 0;

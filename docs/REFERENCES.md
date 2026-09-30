@@ -63,6 +63,16 @@
 
 > 零件等級的年故障率（商規 90% / 太空級 97% / 冗餘 99.5% 撐過 5 年 LEO）、展開機構 99%、GEO 輻射倍率 1.5、結構屏蔽倍率為**遊戲估算值**：方向與量級符合工程常識（商規零件在 GEO 最脆弱、冗餘最可靠），但不對應單一引用。成本（百萬美元）同樣是量級估算，用於呈現相對取捨。
 
+### 運作期：預備金與異常應變
+
+- NASA 聯合成本與時程信心水準（JCL）70% 政策、未分配預備金（UFE）：[GAO-16-620](https://www.gao.gov/assets/680/678704.pdf)；[SPD-19 — NASA](https://discovery.larc.nasa.gov/PDF_FILES/SPD-19_PI-ledmissions_70JCL.pdf)
+- 碰撞機率 1/10,000 為業界閃避門檻（NASA CARA、ISS 紅線）：[NASA NTRS 20180007756](https://ntrs.nasa.gov/api/citations/20180007756/downloads/20180007756.pdf)
+- 朱諾號 2016 年氦氣止回閥異常，決定留在 53 天軌道：[NASA's Juno to Remain in Current Orbit — NASA JPL](https://www.jpl.nasa.gov/news/nasas-juno-to-remain-in-current-orbit-at-jupiter/)
+- Landsat 7 掃描線校正器 2003 年失效、修復未成功，每張影像缺約 22%：[Landsat 7 — USGS](https://www.usgs.gov/landsat-missions/landsat-7)
+- 克卜勒 2013 年第二個反作用輪失效後以太陽光壓平衡進行 K2 任務（2014–2018）、哈伯 2024 年改用單陀螺儀模式、機會號（設計 90 火星日，運作至 2018 年）、2009 年銥 33／Cosmos 2251 相撞：廣為記載的太空史事件
+
+> 可挽救故障比例 60%、各應變選項的成本與效果、運作期事件頻率、延長任務每年 $4M，皆為**遊戲估算值**。
+
 ### 事件的真實案例
 
 - 2022 年 2 月地磁暴導致 38 顆 Starlink 墜入大氣層：[Starlink to lose about 40 satellites — Light Reading](https://www.lightreading.com/satellite/starlink-to-lose-about-40-satellites-in-wake-of-geomagnetic-storm/d/d-id/775200)
