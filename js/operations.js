@@ -133,36 +133,52 @@ function* missionTimeline(analysis, design, features, rng) {
     return outcome;
   };
 
-  // 發射與爬升
-  yield { kind: "stageStart", stageId: "liftoff" };
+  // 每個離散階段：先公布成功機率，擲骰後再揭曉（動畫版用來製造懸念，蒙地卡羅版直接略過）
+  const rollStage = function* (stageId, odds, failureCause) {
+    yield { kind: "stageStart", stageId, odds };
+    const cause = failureCause();
+    yield { kind: "stageRoll", stageId, odds, passed: !cause };
+    if (cause) return cause;
+    yield { kind: "stageEnd", stageId };
+    return null;
+  };
+
   const rocketFailure = 1 - rel.rocket;
   const liftoffFailure = rocketFailure * LIFTOFF_SHARE_OF_LAUNCH_FAILURE;
-  if (rng() < liftoffFailure) return fail("liftoff", "launch_vehicle");
-  yield { kind: "stageEnd", stageId: "liftoff" };
+  const ascentRocketPass = (1 - rocketFailure) / (1 - liftoffFailure);
+  const launchSurvival = design.parts.structure.launchSurvival;
 
-  yield { kind: "stageStart", stageId: "ascent" };
-  if (rng() > (1 - rocketFailure) / (1 - liftoffFailure)) return fail("ascent", "launch_vehicle");
-  if (rng() > design.parts.structure.launchSurvival) return fail("ascent", "launch_loads");
-  yield { kind: "stageEnd", stageId: "ascent" };
+  let cause = yield* rollStage("liftoff", 1 - liftoffFailure, () => (rng() < liftoffFailure ? "launch_vehicle" : null));
+  if (cause) return fail("liftoff", cause);
+
+  cause = yield* rollStage("ascent", ascentRocketPass * launchSurvival, () => {
+    if (rng() > ascentRocketPass) return "launch_vehicle";
+    if (rng() > launchSurvival) return "launch_loads";
+    return null;
+  });
+  if (cause) return fail("ascent", cause);
 
   // 入軌（含 GTO 圓化或電推螺旋爬升穿越輻射帶）
-  yield { kind: "stageStart", stageId: "insertion" };
-  if (analysis.stranded) return fail("insertion", "insufficient_dv");
-  if (rng() < 1 - rel.surviveBelts) return fail("insertion", "radiation_belts");
-  yield { kind: "stageEnd", stageId: "insertion" };
+  cause = yield* rollStage("insertion", analysis.stranded ? 0 : rel.surviveBelts, () => {
+    if (analysis.stranded) return "insufficient_dv";
+    if (rng() < 1 - rel.surviveBelts) return "radiation_belts";
+    return null;
+  });
+  if (cause) return fail("insertion", cause);
 
   // 展開
-  yield { kind: "stageStart", stageId: "deployment" };
   const mechanisms = [];
   for (let i = 0; i < design.parts.power.deployables; i++) mechanisms.push("array");
   for (let i = 0; i < design.parts.comm.deployables; i++) mechanisms.push("antenna");
-  for (const m of mechanisms) {
-    if (rng() > DEPLOY_MECHANISM_RELIABILITY) return fail("deployment", "deployment_" + m);
-  }
-  yield { kind: "stageEnd", stageId: "deployment" };
+  cause = yield* rollStage("deployment", rel.deploy, () => {
+    for (const m of mechanisms) {
+      if (rng() > DEPLOY_MECHANISM_RELIABILITY) return "deployment_" + m;
+    }
+    return null;
+  });
+  if (cause) return fail("deployment", cause);
 
   // 運作
-  yield { kind: "stageStart", stageId: "operation" };
   const life = design.orbit.designLifeYears;
   const ctx = {
     analysis,
@@ -177,6 +193,7 @@ function* missionTimeline(analysis, design, features, rng) {
   const dvReq = analysis.dvRequired;
   const dvYears = dvPerYear > 0 ? Math.max(0, (analysis.dv - dvReq.insert) / dvPerYear) : Infinity;
   state = { time: 0, multiplier: 1, reserveM: outcome.reserveLeftM, dvYears, dvPerYear, delivered: 0 };
+  yield { kind: "stageStart", stageId: "operation", valueCap: ctx.valueCap, designLife: life };
 
   const hazards = Object.entries(rel.hazardBreakdown);
   const componentRate = rel.hazardPerYear;
@@ -194,18 +211,21 @@ function* missionTimeline(analysis, design, features, rng) {
   };
 
   const accrueTo = function* (target) {
-    const years = Math.max(0, target - state.time);
-    addValue(ctx.baseRate * state.multiplier * years);
-    state.time = target;
-    while (lastYearTick + 1 <= state.time + 1e-9) {
-      lastYearTick += 1;
-      yield { kind: "year", year: lastYearTick, phase };
+    while (state.time < target - 1e-12) {
+      const nextTick = lastYearTick + 1;
+      const stepEnd = Math.min(target, nextTick);
+      addValue(ctx.baseRate * state.multiplier * (stepEnd - state.time));
+      state.time = stepEnd;
+      if (stepEnd >= nextTick - 1e-9) {
+        lastYearTick = nextTick;
+        yield { kind: "year", year: lastYearTick, phase, delivered: state.delivered, multiplier: state.multiplier };
+      }
     }
   };
 
   const decide = function* (source, options) {
     const choices = decisionOptions(ctx, state, options);
-    const index = yield { kind: "decision", source, choices, reserveM: state.reserveM, time: state.time };
+    const index = yield { kind: "decision", source, choices, reserveM: state.reserveM, time: state.time, delivered: state.delivered };
     const chosen = choices[index].option;
     state.reserveM -= chosen.costM;
     const record = { source: source.id, option: chosen.id, succeeded: null };
@@ -238,10 +258,14 @@ function* missionTimeline(analysis, design, features, rng) {
       yield* accrueTo(end);
 
       if (phase === "design" && features.operations && end >= life - 1e-9) {
+        // 只延長到補回損失的價值為止，任務目標達成就收工
+        const rate = ctx.baseRate * state.multiplier;
+        const neededYears = rate > 0 ? (ctx.valueCap - state.delivered) / rate : 0;
         const extYears = Math.min(
           state.reserveM / EXTENDED_MISSION_COST_PER_YEAR_M,
           life * EXTENSION_MAX_FRACTION,
-          Math.max(0, state.dvYears - life)
+          Math.max(0, state.dvYears - life),
+          neededYears
         );
         if (extYears >= 0.25) {
           state.reserveM -= extYears * EXTENDED_MISSION_COST_PER_YEAR_M;

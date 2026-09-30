@@ -752,6 +752,193 @@ h1, h2, .btn, .stage-name {
   transform-origin: 50% 70%;
 }
 
+#rocket img {
+  display: block;
+  height: 96px;
+  image-rendering: pixelated;
+}
+
+#rocket.exploding img {
+  height: 110px;
+}
+
+#flight-track.maxq #rocket img {
+  animation: vibrate 0.07s linear infinite;
+}
+
+#flight-track.shake {
+  animation: shake 0.45s ease-in-out;
+}
+
+@keyframes vibrate {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(1px, -1px); }
+  50% { transform: translate(-1px, 1px); }
+  75% { transform: translate(1px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(5px, -4px); }
+  60% { transform: translate(-4px, -2px); }
+  80% { transform: translate(3px, 2px); }
+}
+
+/* ---------- 運作期軌道畫面 ---------- */
+
+.orbit-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  image-rendering: pixelated;
+}
+
+#flight-track.orbit-mode .orbit-canvas {
+  display: block;
+}
+
+#flight-track.orbit-mode #flight-scene,
+#flight-track.orbit-mode #rocket-wrap {
+  display: none;
+}
+
+.ops-hud,
+.orbit-caption {
+  display: none;
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  z-index: 6;
+}
+
+#flight-track.orbit-mode .ops-hud,
+#flight-track.orbit-mode .orbit-caption {
+  display: block;
+}
+
+.ops-hud {
+  top: 10px;
+  background: rgba(7, 10, 36, 0.8);
+  border: 1px solid var(--panel-light);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.ops-hud-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+#ops-hud-value {
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+  color: var(--success);
+}
+
+.ops-hud-bar {
+  position: relative;
+  height: 10px;
+  background: var(--bg);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.ops-hud-fill {
+  height: 100%;
+  width: 0;
+  background: var(--success);
+  transition: width 0.35s ease;
+}
+
+.ops-hud-fill.extension {
+  background: var(--c-power);
+}
+
+.ops-hud-cap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+
+.ops-hud-status {
+  margin-top: 4px;
+  color: var(--text-dim);
+}
+
+.ops-hud-status.live {
+  color: var(--success);
+}
+
+.orbit-caption {
+  bottom: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ---------- 各階段成功率判定條 ---------- */
+
+.roll-meter {
+  max-width: 420px;
+  margin: 4px auto 10px;
+}
+
+.roll-meter.hidden {
+  visibility: hidden;
+}
+
+.roll-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.roll-verdict.pass {
+  color: var(--success);
+  font-weight: bold;
+}
+
+.roll-verdict.fail {
+  color: var(--warn);
+  font-weight: bold;
+}
+
+.roll-bar {
+  position: relative;
+  height: 14px;
+  background: rgba(255, 85, 102, 0.7);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.roll-success {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--success);
+}
+
+.roll-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 6px #fff;
+  transition: left 0.14s ease-in-out;
+}
+
 #rocket.flying {
   animation: rocketTilt 0.5s ease-in-out infinite alternate;
 }

@@ -54,7 +54,7 @@ image/
 | 面板外框 | `ui/panel-frame.png` | 32×32，8px 邊框（九宮格同按鈕） | 事件卡片、部件卡片、設定列共用的外框裝飾 |
 | ORBIT 吉祥物 | `mascot/orbit.png` | 96×96 以上 | 教學對話框用，取代目前的 🤖 emoji |
 | 噴射尾焰 | `effects/exhaust-1.png`<br>`effects/exhaust-2.png` | 32×48 | 兩格輪播做火焰閃爍，取代目前 CSS 漸層 |
-| 爆炸效果 | `rocket/explosion-1.png`<br>`rocket/explosion-2.png`<br>`rocket/explosion-3.png` | 96×96 | 任務失敗時播放，建議 2~3 格 |
+| ~~爆炸效果~~ ✅ | `rocket/explosion-1.png`<br>`rocket/explosion-2.png`<br>`rocket/explosion-3.png` | 64×64 | 已完成：程式碼生成 3 格（亮核心→火球→煙塵與碎片），發射／爬升失敗時播放 |
 | 事件圖示×9 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`micrometeorite.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🌤️）。v2 移除風切、低溫，新增質量增長 |
 | 成就圖示×7 | `icons/achievements/first_orbit.png`<br>`under_budget.png`<br>`storm_survivor.png`<br>`all_rounder.png`<br>`glorious_failure.png`<br>`never_give_up.png`<br>`locked.png` | 48×48 | 最後一個是「尚未解鎖」的問號/鎖頭圖示 |
 
@@ -84,5 +84,6 @@ image/
 - [x] 5 個燃料圖示（程式碼生成，已接進選件畫面）
 - [x] v2 真實模型新增：ROSA 太陽能板、雙組元推進、通訊轉發器×3（程式碼生成）
 - [ ] 光學酬載高階重畫成長鏡筒望遠鏡（目前 JWST 六角鏡造型與 WorldView-3 不符）
-- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×9、成就圖示×7
+- [x] 爆炸效果 3 格（程式碼生成）；運作期的地球改用 canvas 即時繪製（北極俯視、比例正確），不需要圖檔
+- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、事件圖示×9、成就圖示×8
 - [ ] P2 項目（雲朵、地面裝飾等）

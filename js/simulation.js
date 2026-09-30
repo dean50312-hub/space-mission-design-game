@@ -4,6 +4,8 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const OPERATIONS_ANIMATION_MS = 9000;
+
 async function runSimulation() {
   const design = currentDesign();
   const analysis = analyzeDesign(design);
@@ -12,7 +14,7 @@ async function runSimulation() {
   const gen = missionTimeline(analysis, design, features, makeRng((Math.random() * 2 ** 32) >>> 0));
 
   const log = document.getElementById("simulation-log");
-  const yearStepMs = Math.max(90, Math.round(1600 / design.orbit.designLifeYears));
+  const yearStepMs = Math.round(OPERATIONS_ANIMATION_MS / design.orbit.designLifeYears);
   let stageIndex = -1;
   let step = gen.next();
 
@@ -22,18 +24,31 @@ async function runSimulation() {
 
     if (ev.kind === "stageStart") {
       stageIndex = STAGES.findIndex((s) => s.id === ev.stageId);
-      await animateStageAttempt(STAGES[stageIndex], stageIndex, design, analysis);
-      if (ev.stageId === "operation") setRocketFlying(false);
+      if (ev.stageId === "operation") {
+        hideRollMeter();
+        setDotState(stageIndex, "active");
+        enterOrbitMode(design, ev.valueCap);
+        log.textContent = t("simulation.flavor.operation");
+        await sleep(900);
+      } else {
+        await animateStageAttempt(STAGES[stageIndex], stageIndex, design, analysis, ev.odds);
+      }
+    } else if (ev.kind === "stageRoll") {
+      await animateRoll(ev.odds, ev.passed);
     } else if (ev.kind === "stageEnd") {
       await animateStageResolve(STAGES[stageIndex], stageIndex, true);
     } else if (ev.kind === "year") {
+      updateOpsHud(ev.delivered, ev.phase === "extension");
       log.textContent = ev.phase === "extension"
         ? t("simulation.extensionYear", { year: ev.year, total: design.orbit.designLifeYears })
         : t("simulation.operatingYear", { year: ev.year, total: design.orbit.designLifeYears });
       await sleep(yearStepMs);
     } else if (ev.kind === "decision") {
+      updateOpsHud(ev.delivered, false);
+      OrbitView.setState("anomaly");
       reply = await showAnomalyDecision(ev, design);
     } else if (ev.kind === "decisionResult") {
+      OrbitView.setState("ok");
       log.textContent = decisionResultText(ev);
       await sleep(900);
     } else if (ev.kind === "extensionStart") {
@@ -48,6 +63,8 @@ async function runSimulation() {
   const outcome = step.value;
   const overallSuccess = outcome.failedStageId === null;
   const failedIndex = overallSuccess ? STAGES.length - 1 : STAGES.findIndex((s) => s.id === outcome.failedStageId);
+  if (outcome.failedStageId === "operation" || overallSuccess) updateOpsHud(outcome.deliveredValue, outcome.extensionYears > 0);
+  if (outcome.failedStageId === "operation") OrbitView.setState("dead");
   await animateStageResolve(STAGES[failedIndex], failedIndex, overallSuccess);
 
   return {
@@ -146,14 +163,118 @@ function setRocketFlying(on) {
   document.getElementById("exhaust").classList.toggle("active", on);
 }
 
+let explosionTimer = null;
+
 function setRocketState(state) {
   const rocket = document.getElementById("rocket");
+  const img = document.getElementById("rocket-img");
   rocket.classList.toggle("exploding", state === "exploded");
-  rocket.classList.toggle("dead", state === "dead");
-  rocket.textContent = state === "exploded" ? "💥" : state === "dead" ? "🛰️" : "🚀";
+  clearInterval(explosionTimer);
+
+  if (state === "exploded") {
+    let frame = 1;
+    img.src = "image/rocket/explosion-1.png";
+    explosionTimer = setInterval(() => {
+      frame += 1;
+      if (frame > 3) return clearInterval(explosionTimer);
+      img.src = `image/rocket/explosion-${frame}.png`;
+    }, 140);
+  } else if (gameState.rocket) {
+    img.src = `image/rocket/rocket-${gameState.rocket.id}.png`;
+  }
+}
+
+function shakeTrack() {
+  const track = document.getElementById("flight-track");
+  track.classList.remove("shake");
+  void track.offsetWidth;
+  track.classList.add("shake");
+}
+
+// ---------- 各階段成功率判定條 ----------
+
+function showRollMeter(odds) {
+  document.getElementById("roll-meter").classList.remove("hidden");
+  document.getElementById("roll-odds-label").textContent = t("simulation.rollOdds", { pct: fmtPct(odds, odds < 1 ? 1 : 0) });
+  document.getElementById("roll-success").style.width = `${odds * 100}%`;
+  const verdict = document.getElementById("roll-verdict");
+  verdict.textContent = "";
+  verdict.className = "roll-verdict";
+  const needle = document.getElementById("roll-needle");
+  needle.style.transition = "none";
+  needle.style.left = "0%";
+}
+
+function hideRollMeter() {
+  document.getElementById("roll-meter").classList.add("hidden");
+}
+
+// 指針落點依判定結果取樣：成功落在綠區、失敗落在紅區，分布和單次擲骰完全相同
+async function animateRoll(odds, passed) {
+  const needle = document.getElementById("roll-needle");
+  const verdict = document.getElementById("roll-verdict");
+  const landing = passed ? Math.random() * odds : odds + Math.random() * (1 - odds);
+  const risky = odds > 0 && odds < 0.9999;
+
+  if (risky) {
+    needle.style.transition = "left 0.14s ease-in-out";
+    for (const pos of [0.2, 0.85, 0.35, 0.95, 0.6]) {
+      needle.style.left = `${pos * 100}%`;
+      await sleep(150);
+    }
+    needle.style.transition = "left 0.45s cubic-bezier(0.2, 0.8, 0.3, 1)";
+  }
+  needle.style.left = `${landing * 100}%`;
+  await sleep(risky ? 550 : 200);
+
+  verdict.textContent = passed ? t("simulation.rollPass") : t("simulation.rollFail");
+  verdict.classList.add(passed ? "pass" : "fail");
+  await sleep(350);
+}
+
+// ---------- 運作期軌道畫面 ----------
+
+let opsValueCap = 1;
+
+function enterOrbitMode(design, valueCap) {
+  document.getElementById("flight-track").classList.add("orbit-mode");
+  opsValueCap = valueCap;
+  document.getElementById("ops-hud-label").textContent = t("simulation.hudLabel");
+  document.getElementById("ops-hud-cap").style.left = `${Math.min(100, valueCap * 100)}%`;
+  updateOpsHud(0, false);
+
+  const status = document.getElementById("ops-hud-status");
+  let lastVisible = null;
+  const info = OrbitView.start(document.getElementById("orbit-canvas"), design.orbit, (visible) => {
+    if (visible === lastVisible) return;
+    lastVisible = visible;
+    status.textContent = visible
+      ? t(design.orbit.id === "geo" ? "simulation.hudLinkGeo" : "simulation.hudLinkLeo")
+      : t("simulation.hudWaiting");
+    status.classList.toggle("live", visible);
+  });
+
+  document.getElementById("orbit-caption").textContent = t("simulation.orbitCaption", {
+    period: design.orbit.id === "geo" ? t("simulation.periodDay") : t("simulation.periodMinutes", { min: Math.round(info.periodMin) }),
+    ratio: fmtNum(info.ratio, 2),
+  });
+}
+
+function updateOpsHud(delivered, extension) {
+  const fill = document.getElementById("ops-hud-fill");
+  fill.style.width = `${Math.min(100, delivered * 100)}%`;
+  fill.classList.toggle("extension", extension);
+  document.getElementById("ops-hud-value").textContent = t("simulation.hudValue", {
+    value: fmtPct(delivered),
+    cap: fmtPct(opsValueCap),
+  });
 }
 
 function resetFlightView() {
+  OrbitView.stop();
+  document.getElementById("flight-track").classList.remove("orbit-mode", "shake", "maxq");
+  hideRollMeter();
+
   const scene = document.getElementById("flight-scene");
   scene.style.transition = "none";
   scene.style.top = `${sceneTopForPercent(FLIGHT_START_PERCENT)}px`;
@@ -199,12 +320,14 @@ function stageFlavorText(stage, design, analysis) {
   return t("simulation.flavor." + stage.id);
 }
 
-async function animateStageAttempt(stage, index, design, analysis) {
+async function animateStageAttempt(stage, index, design, analysis, odds) {
   const prevPercent = index === 0 ? FLIGHT_START_PERCENT : STAGE_TARGET_PERCENT_BY_ID[STAGES[index - 1].id];
   const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
   const midPercent = prevPercent + (targetPercent - prevPercent) * 0.55;
 
   setDotState(index, "active");
+  showRollMeter(odds);
+  document.getElementById("flight-track").classList.toggle("maxq", stage.id === "ascent");
   document.getElementById("simulation-log").textContent =
     t("simulation.checking", { stage: t("stage." + stage.id) }) + "\n" + stageFlavorText(stage, design, analysis);
 
@@ -219,14 +342,21 @@ async function animateStageResolve(stage, index, passed) {
 
   if (passed) {
     setDotState(index, "pass");
+    document.getElementById("flight-track").classList.remove("maxq");
     log.textContent = t("simulation.passed", { stage: stageName });
     sfxPass();
+    if (stage.id === "operation") {
+      await sleep(600);
+      return;
+    }
     await setSceneProgress(targetPercent, 500);
     setRocketFlying(false);
     await sleep(300);
   } else {
     setRocketFlying(false);
-    setRocketState(stage.id === "operation" ? "dead" : "exploded");
+    document.getElementById("flight-track").classList.remove("maxq");
+    if (stage.id !== "operation") setRocketState("exploded");
+    shakeTrack();
     setDotState(index, "fail");
     log.textContent = t("simulation.failed", { stage: stageName });
     sfxFail();

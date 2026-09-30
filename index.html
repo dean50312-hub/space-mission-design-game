@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=17" />
+<link rel="stylesheet" href="css/style.css?v=21" />
 </head>
 <body>
 <main id="app">
@@ -81,12 +81,24 @@
       </div>
 
       <div id="rocket-wrap">
-        <div id="rocket">🚀</div>
+        <div id="rocket"><img id="rocket-img" alt="" /></div>
         <div id="exhaust"></div>
       </div>
+
+      <canvas id="orbit-canvas" class="orbit-canvas"></canvas>
+      <div id="ops-hud" class="ops-hud">
+        <div class="ops-hud-row"><span id="ops-hud-label"></span><span id="ops-hud-value"></span></div>
+        <div class="ops-hud-bar"><div id="ops-hud-fill" class="ops-hud-fill"></div><div id="ops-hud-cap" class="ops-hud-cap"></div></div>
+        <div id="ops-hud-status" class="ops-hud-status"></div>
+      </div>
+      <div id="orbit-caption" class="orbit-caption"></div>
     </div>
 
     <div id="stage-dots" class="stage-dots"></div>
+    <div id="roll-meter" class="roll-meter hidden">
+      <div class="roll-head"><span id="roll-odds-label"></span><span id="roll-verdict" class="roll-verdict"></span></div>
+      <div class="roll-bar"><div id="roll-success" class="roll-success"></div><div id="roll-needle" class="roll-needle"></div></div>
+    </div>
     <p id="simulation-log" class="simulation-log"></p>
   </section>
 
@@ -166,19 +178,20 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=17"></script>
-<script src="js/i18n.js?v=17"></script>
-<script src="js/sound.js?v=17"></script>
-<script src="js/data.js?v=17"></script>
-<script src="js/state.js?v=17"></script>
-<script src="js/mission.js?v=17"></script>
-<script src="js/operations.js?v=17"></script>
-<script src="js/selection.js?v=17"></script>
-<script src="js/simulation.js?v=17"></script>
-<script src="js/results.js?v=17"></script>
-<script src="js/achievements.js?v=17"></script>
-<script src="js/settings.js?v=17"></script>
-<script src="js/tutorial.js?v=17"></script>
-<script src="js/main.js?v=17"></script>
+<script src="js/storage.js?v=21"></script>
+<script src="js/i18n.js?v=21"></script>
+<script src="js/sound.js?v=21"></script>
+<script src="js/data.js?v=21"></script>
+<script src="js/state.js?v=21"></script>
+<script src="js/mission.js?v=21"></script>
+<script src="js/operations.js?v=21"></script>
+<script src="js/orbitview.js?v=21"></script>
+<script src="js/selection.js?v=21"></script>
+<script src="js/simulation.js?v=21"></script>
+<script src="js/results.js?v=21"></script>
+<script src="js/achievements.js?v=21"></script>
+<script src="js/settings.js?v=21"></script>
+<script src="js/tutorial.js?v=21"></script>
+<script src="js/main.js?v=21"></script>
 </body>
 </html>
