@@ -9,7 +9,7 @@ const ACHIEVEMENTS = [
   {
     id: "under_budget",
     icon: "💰",
-    check: (ctx) => ctx.simResult.overallSuccess && ctx.cost < ctx.budget * 0.6,
+    check: (ctx) => ctx.simResult.overallSuccess && ctx.analysis.costM < ctx.analysis.budgetM * 0.6,
   },
   {
     id: "storm_survivor",
@@ -19,7 +19,7 @@ const ACHIEVEMENTS = [
   {
     id: "all_rounder",
     icon: "⭐",
-    check: (ctx) => Object.values(ctx.scores).every((v) => v >= 80),
+    check: (ctx) => ctx.simResult.overallSuccess && Object.values(ctx.analysis.factors).every((v) => v >= 0.8),
   },
   {
     id: "glorious_failure",
@@ -63,7 +63,7 @@ const ACHIEVEMENTS = [
   {
     id: "flawless_mission",
     icon: "🎯",
-    check: (ctx) => ctx.simResult.overallSuccess && Object.values(ctx.scores).every((v) => v >= 95),
+    check: (ctx) => ctx.simResult.deliveredValue >= 0.95,
   },
   {
     id: "space_polymath",

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=14" />
+<link rel="stylesheet" href="css/style.css?v=15" />
 </head>
 <body>
 <main id="app">
@@ -28,6 +28,7 @@
       <div id="objective-icon" class="event-icon"></div>
       <h2 id="objective-name"></h2>
       <p id="objective-desc"></p>
+      <p id="objective-req" class="objective-req"></p>
     </div>
 
     <div id="event-reveal-card" class="event-card hidden">
@@ -45,17 +46,6 @@
 
   <section id="screen-selection" class="screen">
     <h2 data-i18n="selection.title"></h2>
-
-    <div class="meters">
-      <div class="meter">
-        <div class="meter-label"><span data-i18n="selection.budgetLabel"></span><span id="cost-text"></span></div>
-        <div class="bar"><div id="cost-bar-fill" class="bar-fill"></div></div>
-      </div>
-      <div class="meter">
-        <div class="meter-label"><span data-i18n="selection.massLabel"></span><span id="mass-text"></span></div>
-        <div class="bar"><div id="mass-bar-fill" class="bar-fill"></div></div>
-      </div>
-    </div>
 
     <p id="selection-warning" class="warning hidden"></p>
 
@@ -104,6 +94,7 @@
     <h2 id="result-title"></h2>
     <p id="result-subtitle"></p>
     <p id="result-reason" class="result-reason hidden"></p>
+    <div id="result-report" class="result-report"></div>
     <p id="result-campaign-note" class="campaign-note hidden"></p>
     <div class="chart-wrap">
       <canvas id="radar-chart" width="360" height="360"></canvas>
@@ -165,17 +156,18 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=14"></script>
-<script src="js/i18n.js?v=14"></script>
-<script src="js/sound.js?v=14"></script>
-<script src="js/data.js?v=14"></script>
-<script src="js/state.js?v=14"></script>
-<script src="js/selection.js?v=14"></script>
-<script src="js/simulation.js?v=14"></script>
-<script src="js/results.js?v=14"></script>
-<script src="js/achievements.js?v=14"></script>
-<script src="js/settings.js?v=14"></script>
-<script src="js/tutorial.js?v=14"></script>
-<script src="js/main.js?v=14"></script>
+<script src="js/storage.js?v=15"></script>
+<script src="js/i18n.js?v=15"></script>
+<script src="js/sound.js?v=15"></script>
+<script src="js/data.js?v=15"></script>
+<script src="js/state.js?v=15"></script>
+<script src="js/mission.js?v=15"></script>
+<script src="js/selection.js?v=15"></script>
+<script src="js/simulation.js?v=15"></script>
+<script src="js/results.js?v=15"></script>
+<script src="js/achievements.js?v=15"></script>
+<script src="js/settings.js?v=15"></script>
+<script src="js/tutorial.js?v=15"></script>
+<script src="js/main.js?v=15"></script>
 </body>
 </html>

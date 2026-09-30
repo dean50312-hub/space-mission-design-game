@@ -6,34 +6,68 @@
 
 - [NASA Space Apps Challenge 2026 — Space Mission Design Game](https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/) — 官方挑戰頁面，本專案的需求與難度定位依據
 
-## 燃料系統的比衝（Isp）數據
+## 任務模型 v2 的真實數據（2026-09-30 查證）
 
-用於計算燃料質量係數，數字已查證：
+遊戲的每個機制都對應真實的太空工程原理。下列數字直接寫在 `js/data.js`，括號內是遊戲裡的用法。
 
-- 聯胺（220s）：[A Survey of Hydrazine Monopropellant Thrusters](https://arc.aiaa.org/doi/10.2514/6.2026-3090) — 一般型號穩態比衝約 215–235s
-- AF-M315E（245s）：[Green Propellant Infusion Mission (GPIM) Overview — NASA](https://www.nasa.gov/missions/tech-demonstration/green-propellant-infusion-mission-gpim-overview/) — 比聯胺高約 12%
-- 雙氧水（160s）：[Development of Hydrogen Peroxide Monopropellant Rockets — ESA](https://www.esa.int/gsp/ACT/doc/PRO/ACT-RPR-PRO-JPC2006-HP%20Rockets%202006-5239.pdf) — 實測值約 150–170s
-- 離子推進 NSTAR（3000s）：[NSTAR — Astronautix](http://www.astronautix.com/n/nstar.html)；[Deep Space 1 — Wikipedia](https://en.wikipedia.org/wiki/Deep_Space_1) — 依功率在 1900–3100s 之間，取高功率端數值
-- 霍爾推進 SPT-100（1600s）：[Hall-effect thruster — Wikipedia](https://en.wikipedia.org/wiki/Hall-effect_thruster) — 此類型比衝約 1600s
+### 火箭：價格、運力、飛行紀錄
 
-## 火箭三檔的原型數據
+- Falcon 9：[Falcon 9 — Wikipedia](https://en.wikipedia.org/wiki/Falcon_9) — 回收構型 LEO 17,500 kg、GTO 5,500 kg；2026 年商業發射價約 $74M；690 次發射、687 次成功（CRS-7 與 Starlink Group 9-3 兩次失敗、CRS-1 一次部分失敗）
+- Falcon Heavy：[Falcon Heavy — Wikipedia](https://en.wikipedia.org/wiki/Falcon_Heavy) — 三節全回收時 GTO 8 t、側助推器回收時 LEO 約 57 t；回收構型報價 $97M；13 次發射全部成功
+- Electron：[Rocket Lab Electron — Wikipedia](https://en.wikipedia.org/wiki/Rocket_Lab_Electron) — SSO 200 kg（遊戲的 LEO 任務都是地球觀測，採用 SSO 運力）、每次約 $7.5M；97 次發射（含 9 次亞軌道 HASTE），4 次失敗。遊戲只計入軌道發射：88 次、84 次成功
+- 2025 年紀錄佐證：[Rocket Lab ends 2025 with 21 launches — Barchart](https://www.barchart.com/story/news/36733390/rocket-lab-successfully-launches-for-iqps-ends-2025-with-21-launches-and-100-mission-success)
+- 可靠度估計：拉普拉斯接續法則（(成功+1)/(總次數+2)），統計學標準方法，用來說明「樣本少的火箭不能當成 100% 可靠」
 
-- 輕型／Rocket Lab Electron：[Rocket Lab Electron — Wikipedia](https://en.wikipedia.org/wiki/Rocket_Lab_Electron) — 高 18m，酬載 300kg 至低軌
-- 中型／SpaceX Falcon 9：[Falcon 9 — Wikipedia](https://en.wikipedia.org/wiki/Falcon_9) — 高 69.8m，酬載 22,800kg 至低軌（一級不回收）
-- 重型／SpaceX Falcon Heavy：[Falcon Heavy — Wikipedia](https://en.wikipedia.org/wiki/Falcon_Heavy) — 高 70m，3 具獵鷹 9 號一級並聯，酬載 63,800kg 至低軌
+> Falcon 9／Falcon Heavy 的 SSO 運力略低於 LEO，但仍遠超過遊戲中任何衛星的質量，所以直接使用 LEO 數字。
 
-## 4 個子系統的原型數據
+### 軌道力學
 
-- 電力-經濟／Vanguard 1：[Vanguard 1 — Wikipedia](https://en.wikipedia.org/wiki/Vanguard_1)；[NSSDCA — NASA](https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=1958-002B) — 1958 年發射，6 片太陽能電池共約 1 瓦，現存最古老人造衛星
-- 電力-高階／RTG：一般性技術描述，航海家號、好奇號、毅力號皆採用（見成就故事的 Voyager 引用）
-- 通訊-經濟／Telstar 1：一般公認為人類第一顆主動式通訊衛星（1962），完成首次跨大西洋電視訊號中繼
-- 通訊-高階／TDRS：[Tracking and Data Relay Satellite System — Wikipedia](https://en.wikipedia.org/wiki/Tracking_and_Data_Relay_Satellite_System)；[NASA TDRS](https://www.nasa.gov/mission/tracking-and-data-relay-satellites/) — 單向最高約 800 Mbps（Ku/Ka 頻段），服務哈伯太空望遠鏡等 25+ 任務
-- 科學-經濟／Explorer 1 蓋革計數器：[A Short History of Earth's Radiation Belts — NASA](https://www.nasa.gov/history/a-short-history-of-earths-radiation-belts/) — 1958 年發現范艾倫輻射帶
-- 科學-高階／JWST NIRCam：JWST 官方任務資料（見成就故事的 James Webb Space Telescope 引用）
-- 結構-標準／Whipple Shield：[Whipple shield — Wikipedia](https://en.wikipedia.org/wiki/Whipple_shield) — 犧牲層分散微隕石衝擊能量，ISS 關鍵艙段採用
-- 結構-高階／JWST 遮陽罩：[The Sunshield — NASA/Webb](https://jwst.nasa.gov/content/observatory/sunshield.html) — 5 層 Kapton 薄膜，展開約 21.2m × 14.2m（網球場大小）
+- GTO→GEO 圓化 1,831 m/s（卡納維爾角 28.5°）：[MIT 16.512 Rocket Propulsion, Lecture 34](https://ocw.mit.edu/courses/16-512-rocket-propulsion-fall-2005/768501e0e6a9ea6ef794c2866ea1bd63_lecture_34.pdf)
+- GEO 南北位置保持約 50 m/s/年、東西約 2–5 m/s/年：[Orbital station-keeping — Wikipedia](https://en.wikipedia.org/wiki/Orbital_station-keeping)（遊戲用 15 年 × 50 m/s = 0.75 km/s）
+- 全電推衛星轉移到 GEO 約需 6 個月：[Eutelsat 115 West B — Wikipedia](https://en.wikipedia.org/wiki/Eutelsat_115_West_B)（Boeing 702SP，2015 年與 ABS-3A 疊在同一枚 Falcon 9 發射）
+- 低推力螺旋轉移的 Δv 高於脈衝式轉移：多篇文獻指出（例：[Optimised GTO-GEO transfer using low-thrust propulsion — Strathclyde](https://pureportal.strath.ac.uk/en/publications/optimised-gto-geo-transfer-using-low-thrust-propulsion/)）。**遊戲取 1.3 倍作估算**，實際數值依軌跡最佳化而異
+- LEO 500 km：週期約 95 分鐘、蝕約 35 分鐘；太陽能板平均可用功率約為額定的 62%（340.5 W → 212 W 範例）：[EPS sizing tutorial — Valispace](https://www.valispace.com/wp-content/uploads/2018/12/EPS-sizing-tutorial-1.pdf)
+- LEO 單一地面站每天約 3–4 次、每次約 10 分鐘可通訊：[Ground station — Orbital Radar](https://orbitalradar.com/glossary/ground-station)
+- GEO 衛星看得到約 42% 的地球、南北緯 81° 以內：[Geostationary orbit — Wikipedia](https://en.wikipedia.org/wiki/Geostationary_orbit)
+- 距離 65 倍 → 訊號約弱 4,200 倍（(35,786 ÷ 550)² ≈ 4,233，約 36 dB）：平方反比定律直接計算
+- FCC 五年離軌規定（2022 年 9 月通過）：[FCC Adopts 5-Year Rule for Deorbiting Satellites — Via Satellite](https://www.satellitetoday.com/government-military/2022/09/30/fcc-adopts-5-year-rule-for-deorbiting-satellites/)
 
-> 成本係數（不同於質量係數）是遊戲平衡數字，反映各技術的相對複雜度／成熟度，非物理量，不對應特定引用。
+### 推進系統（比衝）
+
+- 聯胺約 220 s：[A Survey of Hydrazine Monopropellant Thrusters — AIAA](https://arc.aiaa.org/doi/10.2514/6.2026-3090)（穩態約 215–235 s）
+- AF-M315E 約 245 s（比聯胺高約 12%）：[Green Propellant Infusion Mission (GPIM) Overview — NASA](https://www.nasa.gov/missions/tech-demonstration/green-propellant-infusion-mission-gpim-overview/)
+- MMH/NTO 雙組元約 320 s：[Liquid apogee engine — Wikipedia](https://en.wikipedia.org/wiki/Liquid_apogee_engine)
+- 霍爾推進器 SPT-100：1,350 W、比衝 1,600 s、推力約 83 mN：[SPT-100 — Wikipedia](https://en.wikipedia.org/wiki/SPT-100)
+- 柵極離子 NSTAR 約 1,900–3,100 s（取 3,100 s）：[NSTAR — Astronautix](http://www.astronautix.com/n/nstar.html)；[Deep Space 1 — Wikipedia](https://en.wikipedia.org/wiki/Deep_Space_1)
+
+> 推進系統乾重與耗電 2,300 W（NSTAR 最大功率）為概念設計等級估算。
+
+### 酬載與子系統
+
+- Planet Dove：約 9 cm 口徑、4 波段（RGB + NIR）、GSD 3.7–4.2 m：[PlanetScope — Planet Docs](https://docs.planet.com/data/imagery/planetscope/)
+- WorldView-3：1.1 m 口徑、29 波段、31 cm 全色解析度、617 km、2,800 kg：[WorldView-3 — eoPortal](https://eoportal.org/satellite-missions/worldview-3)
+- 繞射極限驗算：1.22 × 550 nm × 617 km ÷ 1.1 m ≈ 0.38 m，與 WorldView-3 實際 0.31 m 同量級；9 cm @ 475 km ≈ 3.5 m，與 Dove 相符
+- GOES-R ABI：16 波段、0.5–2 km、每 10 分鐘全圓盤：[ABI — NOAA GOES-R](https://drupal-prod.goesr.woc.noaa.gov/spacesegment/abi.html)
+- WorldView X 頻段下傳 800 Mbps：[WorldView-1 — eoPortal](https://www.eoportal.org/satellite-missions/worldview-1)
+- 立方衛星 S 頻段下傳約 4–14 Mbps：[ISIS High Data Rate S-band Transmitter](https://www.cubesatshop.com/product/isis-txs-s-band-transmitter/)
+- SDO：選擇傾斜地球同步軌道以取得連續連線，每天 1.4 TB、Ka 頻段約 130 Mbps：[SDO — NASA NTRS](https://ntrs.nasa.gov/api/citations/20090027804/downloads/20090027804.pdf)
+- ROSA：傳統硬式太陽能板的 3 倍比功率、iROSA 每翼 20+ kW：[ROSA — Redwire](https://rdw.com/product-archive/power/rosa/)
+- Vanguard 1（機身貼附式太陽能電池，1958）：[Vanguard 1 — Wikipedia](https://en.wikipedia.org/wiki/Vanguard_1)
+- ViaSat-1 約 140 Gbps：一般公開資料（高通量衛星代表）
+- Whipple Shield：[Whipple shield — Wikipedia](https://en.wikipedia.org/wiki/Whipple_shield)
+
+### 可靠度與工程餘裕
+
+- 立方衛星約 25% 入軌即失聯、另 12% 早期失效（Swartwout 統計）：[The Space Review](https://thespacereview.com/article/3047/1)
+- 概念設計階段質量餘裕 > 30%、「Layout」12–30%：AIAA S-120 / R-020A，整理於 [NASA NTRS](https://ntrs.nasa.gov/api/citations/20120013284/downloads/20120013284.pdf)
+
+> 零件等級的年故障率（商規 90% / 太空級 97% / 冗餘 99.5% 撐過 5 年 LEO）、展開機構 99%、GEO 輻射倍率 1.5、結構屏蔽倍率為**遊戲估算值**：方向與量級符合工程常識（商規零件在 GEO 最脆弱、冗餘最可靠），但不對應單一引用。成本（百萬美元）同樣是量級估算，用於呈現相對取捨。
+
+### 事件的真實案例
+
+- 2022 年 2 月地磁暴導致 38 顆 Starlink 墜入大氣層：[Starlink to lose about 40 satellites — Light Reading](https://www.lightreading.com/satellite/starlink-to-lose-about-40-satellites-in-wake-of-geomagnetic-storm/d/d-id/775200)
+- 1993 年英仙座流星雨期間 Olympus-1 疑似遭撞擊失控：[Shooting Stars Can Shoot Down Satellites — IEEE Spectrum](https://spectrum.ieee.org/shooting-stars-can-shoot-down-satellites)
+- 其他事件與失敗原因引用的史實（Apollo 12 閃電、ADEOS-II、CRS-7、AsiaSat 3、伽利略號天線）均為廣為記載的太空史事件
 
 ## 成就對應的太空史料
 

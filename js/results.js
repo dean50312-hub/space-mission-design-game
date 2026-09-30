@@ -1,32 +1,16 @@
-// 結果畫面：雷達圖計分與渲染
+// 結果畫面：事後精算報告（交付價值 vs 期望價值、失敗原因、單一調整建議、任務指標雷達圖）
 
-const RADAR_AXES = ["mass", "power", "comm", "orbital", "science", "budget"];
+const RADAR_AXES = ["coverage", "performance", "delivery", "power", "lifetime", "reliability"];
 
-function sweetSpotScore(ratio) {
-  const diff = Math.abs(ratio - 0.9);
-  const score = 100 - Math.min(100, diff * 250);
-  return Math.max(0, score);
-}
-
-function computeRadarScores(simResult) {
-  const reachedIndex = simResult.stageReachedIndex;
-  const parts = gameState.parts;
-
-  const power = reachedIndex >= 3 ? parts.power.value : 0;
-  const comm = reachedIndex >= 3 ? parts.comm.value : 0;
-  const orbital = reachedIndex >= 2 ? fuelPropulsionValue() : 0;
-  const science = reachedIndex >= 4 ? parts.science.value : 0;
-
-  const massRatio = currentMassUsed() / gameState.rocket.maxPayload;
-  const costRatio = (currentCostUsed() + gameState.incidentPenalty) / gameState.budget;
-
+function radarScores(simResult) {
+  const a = simResult.analysis;
   return {
-    mass: Math.round(sweetSpotScore(massRatio)),
-    power: Math.round(power),
-    comm: Math.round(comm),
-    orbital: Math.round(orbital),
-    science: Math.round(science),
-    budget: Math.round(sweetSpotScore(costRatio)),
+    coverage: Math.round(a.factors.coverage * 100),
+    performance: Math.round(a.factors.performance * 100),
+    delivery: Math.round(a.factors.delivery * 100),
+    power: Math.round(a.factors.power * 100),
+    lifetime: Math.round(a.factors.lifetime * 100),
+    reliability: Math.round(a.fullSuccess * 100),
   };
 }
 
@@ -45,7 +29,7 @@ function renderRadarChart(scores) {
       labels,
       datasets: [
         {
-          label: t("results.achievementsHeader"),
+          label: t("results.radarLabel"),
           data,
           backgroundColor: "rgba(79, 209, 255, 0.3)",
           borderColor: "rgba(79, 209, 255, 1)",
@@ -71,54 +55,98 @@ function renderRadarChart(scores) {
   });
 }
 
-function composeFailureReason(failedChecks) {
-  if (!failedChecks || failedChecks.length === 0) return "";
-  return failedChecks
-    .map((c) => {
-      if (c.statKey === "orbit_mismatch") {
-        return t("results.reasonOrbitMismatch", {
-          objective: t("objective." + gameState.missionObjective.id + ".short"),
-          correctOrbit: t("orbit." + gameState.missionObjective.correctOrbit),
-          chosenOrbit: t("orbit." + gameState.orbit.id),
-        });
-      }
-      const stat = t("stat." + c.statKey);
-      return c.margin < 0
-        ? t("results.reasonShortfall", { stat, value: c.value, threshold: c.threshold })
-        : t("results.reasonBadLuck", { stat });
-    })
-    .join("；");
+function outcomeKind(simResult) {
+  if (simResult.overallSuccess) return "success";
+  return simResult.serviceYears > 0 ? "partial" : "fail";
 }
 
-function renderResultsScreen(simResult, scores, achievements, campaignAward) {
-  const title = document.getElementById("result-title");
-  const subtitle = document.getElementById("result-subtitle");
-  const reason = document.getElementById("result-reason");
-  const campaignNote = document.getElementById("result-campaign-note");
-
-  title.textContent = simResult.overallSuccess ? t("results.successTitle") : t("results.failTitle");
-  subtitle.textContent = simResult.overallSuccess
-    ? t("results.successSubtitle")
-    : t("results.failSubtitle", { stage: t("stage." + simResult.failedStage.id) });
-
-  if (!simResult.overallSuccess) {
-    reason.textContent = composeFailureReason(simResult.failedChecks);
-    reason.classList.remove("hidden");
-  } else {
-    reason.classList.add("hidden");
+function resultSubtitle(simResult) {
+  const kind = outcomeKind(simResult);
+  const years = fmtNum(simResult.serviceYears, 1);
+  if (kind === "success") {
+    return simResult.propellantDepleted
+      ? t("results.subtitleDepleted", { years })
+      : t("results.subtitleSuccess", { years });
   }
+  if (kind === "partial") return t("results.subtitlePartial", { years });
+  return t("results.subtitleFail", { stage: t("stage." + simResult.failedStage.id) });
+}
 
-  if (campaignAward) {
-    campaignNote.textContent =
-      campaignAward.level >= 4
+function causeExplanation(simResult) {
+  if (!simResult.cause) return "";
+  const rocketName = t("rocket." + simResult.design.rocket.id + ".name");
+  return t("cause." + simResult.cause, {
+    rocket: rocketName,
+    reliability: fmtPct(simResult.analysis.reliability.rocket, 1),
+  });
+}
+
+function changeDescription(change) {
+  if (change.kind === "rocket") return t("hindsight.changeRocket", { to: t("rocket." + change.to.id + ".name") });
+  if (change.kind === "fuel") return t("hindsight.changeFuel", { to: t("fuel." + change.to.id) });
+  if (change.kind === "propellant") return t("hindsight.changePropellant", { kg: fmtNum(change.propellantKg) });
+  const partName = hotspotLabel(change.key);
+  return t("hindsight.changePart", { part: partName, from: t("tier." + change.from.id), to: t("tier." + change.to.id) });
+}
+
+function hindsightText(simResult) {
+  const suggestion = bestSingleChange(simResult.design, gameState.features);
+  if (!suggestion) return t("hindsight.optimal");
+  let text = t("hindsight.suggest", {
+    change: changeDescription(suggestion.change),
+    from: fmtPct(suggestion.baseValue),
+    to: fmtPct(suggestion.analysis.expectedValue),
+  });
+  if (suggestion.change.autoPropellant && suggestion.change.kind !== "propellant" && gameState.features.fuel) {
+    text += t("hindsight.withPropellant", { kg: fmtNum(suggestion.change.propellantKg) });
+  }
+  return text;
+}
+
+function luckComment(simResult) {
+  const diff = simResult.deliveredValue - simResult.analysis.expectedValue;
+  if (Math.abs(diff) < 0.05) return t("results.luckAsExpected");
+  return diff > 0 ? t("results.luckGood") : t("results.luckBad");
+}
+
+function renderResultsScreen(simResult, achievements, campaignAward) {
+  const kind = outcomeKind(simResult);
+  document.getElementById("result-title").textContent = t("results.title_" + kind);
+  document.getElementById("result-subtitle").textContent = resultSubtitle(simResult);
+
+  const reason = document.getElementById("result-reason");
+  const cause = causeExplanation(simResult);
+  reason.textContent = cause;
+  reason.classList.toggle("hidden", !cause);
+
+  document.getElementById("result-report").innerHTML = `
+    <div class="report-numbers">
+      <div class="report-number">
+        <span class="report-number-label">${t("results.delivered")}</span>
+        <span class="report-number-value">${fmtPct(simResult.deliveredValue)}</span>
+      </div>
+      <div class="report-number">
+        <span class="report-number-label">${t("results.expected")}</span>
+        <span class="report-number-value dim">${fmtPct(simResult.analysis.expectedValue)}</span>
+      </div>
+    </div>
+    <p class="report-luck">${luckComment(simResult)}</p>
+    <p class="report-hindsight">💡 ${hindsightText(simResult)}</p>
+  `;
+
+  const campaignNote = document.getElementById("result-campaign-note");
+  if (gameState.campaignLevel) {
+    campaignNote.textContent = campaignAward
+      ? campaignAward.level >= 4
         ? t("results.campaignAllComplete", { points: campaignAward.points })
-        : t("results.campaignLevelComplete", { level: campaignAward.level, points: campaignAward.points });
+        : t("results.campaignLevelComplete", { level: campaignAward.level, points: campaignAward.points })
+      : t("results.campaignRetry", { target: fmtPct(CAMPAIGN_PASS_VALUE) });
     campaignNote.classList.remove("hidden");
   } else {
     campaignNote.classList.add("hidden");
   }
 
-  renderRadarChart(scores);
+  renderRadarChart(radarScores(simResult));
 
   const achList = document.getElementById("achievements-list");
   achList.innerHTML = "";

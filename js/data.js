@@ -1,77 +1,123 @@
-// 遊戲數值資料（對照 docs/GDD.md 第 12 節「數值平衡表 v1」）
-// 顯示用的名稱/敘述一律透過 js/i18n.js 的 t() 依 id 查詢，這裡只放數值本身。
+// 遊戲資料：所有數值都對照真實太空工程，來源記錄在 docs/REFERENCES.md。
+// 顯示用文字一律透過 js/i18n.js 的 t() 依 id 查詢，這裡只放數值。
 
-const BUDGET_TOTAL = 100;
+const G0 = 9.80665; // m/s²，標準重力加速度（火箭方程式用）
+const VISIBLE_WAVELENGTH_M = 550e-9; // 可見光波長，用於繞射極限解析度
 
-const ROCKETS = [
-  { id: "light", cost: 20, maxPayload: 50, reliability: 60 },
-  { id: "medium", cost: 35, maxPayload: 80, reliability: 75 },
-  { id: "heavy", cost: 55, maxPayload: 120, reliability: 85 },
+// 任務預算（百萬美元）依軌道而定：GEO 衛星較大、較貴
+const MISSION_BUDGET_BY_ORBIT = { leo: 210, geo: 230 };
+
+const ORBITS = [
+  {
+    id: "leo",
+    altitudeKm: 550,
+    designLifeYears: 5,
+    dvInsertKmS: 0,
+    dvOpsKmS: 0.15, // 軌道維持＋任務結束後 5 年內離軌（FCC 規定）
+    sunlightFactor: 0.62, // 每圈約 35 分鐘在地球陰影中
+    contactHoursPerDay: 0.6, // 單一地面站每天約 3–4 次、每次約 10 分鐘
+    radiationFactor: 1.0,
+    capacityKey: "leo",
+  },
+  {
+    id: "geo",
+    altitudeKm: 35786,
+    designLifeYears: 15,
+    dvInsertKmS: 1.83, // 從卡納維爾角（傾角 28.5°）的 GTO 圓化成 GEO
+    dvOpsKmS: 0.75, // 南北位置保持約 50 m/s/年 × 15 年
+    sunlightFactor: 0.85, // 幾乎全日照，但太陽能板 15 年會衰退
+    contactHoursPerDay: 24,
+    radiationFactor: 1.5, // 位於外范艾倫帶邊緣，輻射環境比 LEO 嚴苛
+    capacityKey: "gto",
+  },
 ];
+
+// 火箭：真實價格與運力（可回收構型），可靠度用飛行紀錄以拉普拉斯接續法則估計
+const ROCKETS = [
+  { id: "light", costM: 7.5, capacityKg: { leo: 200, gto: 0 }, flights: 88, successes: 84 },
+  { id: "medium", costM: 74, capacityKg: { leo: 17500, gto: 5500 }, flights: 690, successes: 687 },
+  { id: "heavy", costM: 97, capacityKg: { leo: 57000, gto: 8000 }, flights: 13, successes: 13 },
+];
+
+// 拉普拉斯接續法則：(成功次數 + 1) / (總次數 + 2)
+function rocketReliability(rocket) {
+  return (rocket.successes + 1) / (rocket.flights + 2);
+}
+
+// 衛星本體（電腦、姿態控制、熱控）：每顆衛星都需要，不讓玩家選
+const BUS_CORE = { massKg: 40, powerW: 60, costM: 8, grade: "qualified" };
+
+// 零件等級：商規（COTS）／太空級（qualified）／太空級＋冗餘備份（redundant）
+// 數值為「在 LEO 運作 5 年仍正常」的機率，其他軌道與年限依故障率換算
+const GRADE_RELIABILITY_LEO_5YR = { cots: 0.9, qualified: 0.97, redundant: 0.995 };
+const GRADE_REFERENCE_YEARS = 5;
+const DEPLOY_MECHANISM_RELIABILITY = 0.99; // 每個需要展開的機構（太陽能板、天線）
 
 const SUBSYSTEMS = {
-  power: {
-    tiers: [
-      { id: "economy", cost: 8, mass: 6, value: 35 },
-      { id: "standard", cost: 15, mass: 10, value: 65 },
-      { id: "premium", cost: 25, mass: 15, value: 90 },
-    ],
-  },
-  comm: {
-    tiers: [
-      { id: "economy", cost: 8, mass: 5, value: 35 },
-      { id: "standard", cost: 15, mass: 8, value: 65 },
-      { id: "premium", cost: 25, mass: 12, value: 90 },
-    ],
-  },
-  science: {
-    tiers: [
-      { id: "economy", cost: 8, mass: 7, value: 30 },
-      { id: "standard", cost: 16, mass: 11, value: 60 },
-      { id: "premium", cost: 28, mass: 16, value: 90 },
-    ],
-  },
-  structure: {
-    tiers: [
-      { id: "economy", cost: 8, mass: 6, value: 35 },
-      { id: "standard", cost: 14, mass: 10, value: 65 },
-      { id: "premium", cost: 24, mass: 14, value: 90 },
-    ],
-  },
+  power: [
+    { id: "economy", powerW: 150, massKg: 12, costM: 1.5, grade: "cots", deployables: 0 },
+    { id: "standard", powerW: 5000, massKg: 150, costM: 15, grade: "qualified", deployables: 1 },
+    { id: "premium", powerW: 20000, massKg: 400, costM: 40, grade: "redundant", deployables: 1 },
+  ],
+  comm: [
+    // 下傳速率（Mbps）：同樣硬體到 GEO 距離變成約 65 倍，訊號剩約 1/4,200（平方反比）
+    { id: "economy", rateMbps: { leo: 5, geo: 0.0012 }, powerW: 15, massKg: 2, costM: 0.5, grade: "cots", deployables: 0 },
+    { id: "standard", rateMbps: { leo: 800, geo: 0.19 }, powerW: 120, massKg: 25, costM: 6, grade: "qualified", deployables: 1 },
+    { id: "premium", rateMbps: { leo: 2000, geo: 130 }, powerW: 250, massKg: 60, costM: 18, grade: "redundant", deployables: 1 },
+  ],
+  structure: [
+    // 結構質量為其他乾質量的比例；輻射倍率越低代表屏蔽越好
+    { id: "economy", massFraction: 0.1, costM: 1, radiationMultiplier: 1.6, launchSurvival: 0.97, impactRisk: 0.08 },
+    { id: "standard", massFraction: 0.18, costM: 5, radiationMultiplier: 1.0, launchSurvival: 0.995, impactRisk: 0.03 },
+    { id: "premium", massFraction: 0.25, costM: 12, radiationMultiplier: 0.6, launchSurvival: 0.999, impactRisk: 0.01 },
+  ],
 };
 
-const SUBSYSTEM_KEYS = ["power", "comm", "science", "structure"];
+// 任務酬載依任務類型而不同：光學相機／望遠鏡，或通訊轉發器
+const PAYLOADS = {
+  optical: [
+    { id: "economy", apertureM: 0.09, bands: 4, dataGbitPerDay: 20, powerW: 20, massKg: 5, costM: 2, grade: "cots" },
+    { id: "standard", apertureM: 0.5, bands: 16, dataGbitPerDay: 500, powerW: 250, massKg: 200, costM: 35, grade: "qualified" },
+    { id: "premium", apertureM: 1.1, bands: 29, dataGbitPerDay: 3000, powerW: 600, massKg: 700, costM: 80, grade: "redundant" },
+  ],
+  transponder: [
+    { id: "economy", throughputGbps: 1, powerW: 1500, massKg: 250, costM: 20, grade: "cots" },
+    { id: "standard", throughputGbps: 10, powerW: 4500, massKg: 600, costM: 50, grade: "qualified" },
+    { id: "premium", throughputGbps: 100, powerW: 12000, massKg: 1400, costM: 90, grade: "redundant" },
+  ],
+};
 
-// 燃料系統：燃料類型（決定質量/成本效率）× 填充量（0~100% 滑桿）
-// 質量係數 = 220（聯胺比衝，基準）÷ 該燃料實際比衝，數字越小代表同樣推進力所需質量越輕
-const FUEL_BASE_MASS_AT_FULL = 17; // MU，填充量 100% 時的基礎質量（尚未乘上燃料係數）
-const FUEL_BASE_COST_AT_FULL = 22; // C，填充量 100% 時的基礎成本（尚未乘上燃料係數）
-const FUEL_BASE_PROPULSION_AT_FULL = 90; // 填充量 100% 時的推進貢獻值
+const SUBSYSTEM_KEYS = ["power", "comm", "payload", "structure"];
+const TIER_IDS = ["economy", "standard", "premium"];
 
+// 推進系統：比衝（Isp）決定同樣推進劑能產生多少 Δv
 const FUELS = [
-  { id: "hydrazine", isp: 220, massCoef: 1.0, costCoef: 1.0, electric: false, toxic: true },
-  { id: "af_m315e", isp: 245, massCoef: 0.9, costCoef: 1.3, electric: false, toxic: false },
-  { id: "hydrogen_peroxide", isp: 160, massCoef: 1.4, costCoef: 0.7, electric: false, toxic: false },
-  { id: "ion", isp: 3000, massCoef: 0.07, costCoef: 1.8, electric: true, toxic: false },
-  { id: "hall", isp: 1600, massCoef: 0.14, costCoef: 1.5, electric: true, toxic: false },
+  { id: "hydrazine", isp: 220, dryMassKg: 15, costM: 2, electric: false, powerW: 0, toxic: true },
+  { id: "af_m315e", isp: 245, dryMassKg: 15, costM: 3, electric: false, powerW: 0, toxic: false },
+  { id: "biprop", isp: 320, dryMassKg: 40, costM: 5, electric: false, powerW: 0, toxic: true },
+  { id: "hall", isp: 1600, dryMassKg: 35, costM: 8, electric: true, powerW: 1350, toxic: false },
+  { id: "ion", isp: 3100, dryMassKg: 50, costM: 12, electric: true, powerW: 2300, toxic: false },
 ];
 
-const HAZMAT_COST = 12; // C，聯胺毒氣危害處理加購成本
-const HAZMAT_INCIDENT_CHANCE = 0.8; // 不加購時的工安事故機率
-const HAZMAT_INCIDENT_PENALTY = 20; // C，事故發生時的額外清理成本（計入預算效率分數，不影響選件畫面的預算）
+const TOXIC_HANDLING_COST_M = 2; // 毒性推進劑加注需要 SCAPE 防護作業
+const PROPELLANT_MAX_KG = 6000;
+const PROPELLANT_STEP_KG = 25;
+const AUTO_PROPELLANT_MARGIN = 0.1; // 「自動計算」預留 10% Δv 餘量
 
-const ELECTRIC_UNDERPOWERED_MULTIPLIER = 0.6; // 電推進但電力系統 < 標準檔時的推進值懲罰倍率
+// 電推進：低推力螺旋爬升比脈衝式轉移多耗 Δv，而且要花數個月穿越范艾倫輻射帶
+const ELECTRIC_TRANSFER_DV_FACTOR = 1.3;
+const ELECTRIC_TRANSFER_YEARS = 0.5;
+const RADIATION_BELT_FACTOR = 3;
 
 const STAGES = [
-  { id: "liftoff", baseThreshold: 50 },
-  { id: "ascent", baseThreshold: 30 },
-  { id: "insertion", baseThreshold: 30 },
-  { id: "deployment", baseThreshold: 30 },
-  { id: "operation", baseThreshold: 30 },
+  { id: "liftoff" },
+  { id: "ascent" },
+  { id: "insertion" },
+  { id: "deployment" },
+  { id: "operation" },
 ];
 
-// 火箭升空動畫每個階段抵達後的場景高度（% ），依 stage id 查詢，
-// 這樣即使某個關卡跳過某個階段（例如第一關沒有軌道插入），其餘階段的動畫位置也不用重算。
+// 火箭升空動畫每個階段抵達後的場景高度（%）
 const STAGE_TARGET_PERCENT_BY_ID = {
   liftoff: 18,
   ascent: 40,
@@ -80,57 +126,62 @@ const STAGE_TARGET_PERCENT_BY_ID = {
   operation: 92,
 };
 
-// 軌道：低軌（LEO）／同步軌道（GEO）。GEO 預算higher但發射門檻也更高，
-// 輕型火箭在 GEO 任務會直接必敗（60 可靠度 - 70 門檻 = margin -10），不用另外鎖介面。
-const ORBITS = [
-  { id: "leo", budgetDelta: 0, liftoffBonus: 0 },
-  { id: "geo", budgetDelta: 40, liftoffBonus: 20 },
-];
+// 發射失敗中，約 3 成發生在剛起飛，其餘在爬升段
+const LIFTOFF_SHARE_OF_LAUNCH_FAILURE = 0.3;
 
-// 任務目標：決定「正確」軌道。軌道選錯會讓任務運作階段必定失敗。
+// 任務目標：每種任務在不同軌道的「覆蓋率」都來自真實幾何限制
 const MISSION_OBJECTIVES = [
-  { id: "science", correctOrbit: "leo" },
-  { id: "remote_sensing", correctOrbit: "leo" },
-  { id: "comms", correctOrbit: "geo" },
-  { id: "weather", correctOrbit: "geo" },
+  {
+    id: "imaging",
+    payloadKind: "optical",
+    coverage: { leo: 1, geo: 1 },
+    requirement: { type: "resolution", maxGsdM: 0.5 },
+  },
+  {
+    id: "climate",
+    payloadKind: "optical",
+    coverage: { leo: 1, geo: 0.42 }, // GEO 只看得到 42% 的地球，看不到南北緯 81° 以上
+    requirement: { type: "bands", bands: 29, maxGsdM: 1000 },
+  },
+  {
+    id: "weather",
+    payloadKind: "optical",
+    coverage: { leo: 2 / 144, geo: 1 }, // 需要每 10 分鐘一張（每天 144 張），LEO 每天只經過約 2 次
+    requirement: { type: "bands", bands: 16, maxGsdM: 2000 },
+  },
+  {
+    id: "comms",
+    payloadKind: "transponder",
+    coverage: { leo: 35 / 1440, geo: 1 }, // 單顆 LEO 衛星每天只在頭頂出現約 35 分鐘
+    requirement: { type: "throughput", gbps: 30 },
+  },
 ];
 
-// 戰役關卡的 feature flag：依關卡決定開放哪些機制。level 為 null/undefined 代表自由遊玩（全開）。
+// 劇情關卡過關門檻：交付的任務價值
+const CAMPAIGN_PASS_VALUE = 0.5;
+
+// 戰役關卡的 feature flag。level 為 null 代表自由遊玩（全開）。
 function getCampaignFeatures(level) {
   if (!level) return { orbit: true, fuel: true, events: true, forcedEventId: null };
   return {
-    orbit: level >= 1,
+    orbit: true,
     fuel: level >= 2,
     events: level >= 3,
     forcedEventId: level === 3 ? "solar_flare" : null,
   };
 }
 
-// 依 feature flag 決定這局要跑哪些任務階段（例如第一關還沒有燃料，軌道插入直接跳過）
-function activeStagesForFeatures(features) {
-  return STAGES.filter((stage) => features.fuel || stage.id !== "insertion");
-}
-
 const EVENTS = [
-  { id: "solar_flare", icon: "☀️", weight: 1, effect: { stage: "operation", stat: "comm", bonus: 25 } },
-  { id: "geomagnetic_storm", icon: "🌩️", weight: 1, effect: { stage: "operation", stat: "power", bonus: 25 } },
-  { id: "bad_weather", icon: "☁️", weight: 1, effect: { stage: "liftoff", stat: "reliability", bonus: 20 } },
-  { id: "wind_shear", icon: "💨", weight: 1, effect: { stage: "ascent", stat: "structure", bonus: 25 } },
-  { id: "micrometeorite", icon: "🌠", weight: 1, effect: { stage: "operation", addCheck: "structure", threshold: 30 } },
-  { id: "orbital_congestion", icon: "🛰️", weight: 1, effect: { stage: "insertion", stat: "propulsion", bonus: 20 } },
-  { id: "limited_ground_station", icon: "📡", weight: 1, effect: { stage: "operation", stat: "comm", bonus: 20 } },
-  { id: "cold_snap", icon: "❄️", weight: 1, effect: { stage: "deployment", bonus: 20 } },
-  { id: "budget_cut", icon: "💰", weight: 1, effect: { budgetDelta: -20 } },
+  { id: "solar_flare", icon: "☀️", weight: 1, effect: { radiationMultiplier: 1.5 } },
+  { id: "geomagnetic_storm", icon: "🌩️", weight: 1, effect: { leoExtraDvKmS: 0.05, geoPowerHazardMultiplier: 2 } },
+  { id: "bad_weather", icon: "⛈️", weight: 1, effect: { budgetDeltaM: -5 } },
+  { id: "micrometeorite", icon: "🌠", weight: 1, effect: { impactCheck: true } },
+  { id: "orbital_congestion", icon: "🛰️", weight: 1, effect: { leoExtraDvKmS: 0.03 } },
+  { id: "limited_ground_station", icon: "📡", weight: 1, effect: { leoContactMultiplier: 0.5 } },
+  { id: "mass_growth", icon: "⚖️", weight: 1, effect: { dryMassMultiplier: 1.15 } },
+  { id: "budget_cut", icon: "💰", weight: 1, effect: { budgetDeltaM: -20 } },
   { id: "nominal", icon: "🌤️", weight: 3, effect: {} },
 ];
-
-function failureRateFromMargin(margin) {
-  if (margin < 0) return 1.0;
-  if (margin < 10) return 0.25;
-  if (margin < 30) return 0.10;
-  if (margin < 60) return 0.05;
-  return 0.02;
-}
 
 function pickRandomEvent(forcedId) {
   if (forcedId) return EVENTS.find((e) => e.id === forcedId) || EVENTS[EVENTS.length - 1];

@@ -146,14 +146,8 @@ h1, h2, .btn, .stage-name {
 
 /* ---------- Selection screen ---------- */
 
-.meters {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.meter {
-  flex: 1;
+#app:has(#screen-selection.active) {
+  max-width: 1160px;
 }
 
 .meter-label {
@@ -164,23 +158,161 @@ h1, h2, .btn, .stage-name {
   color: var(--text-dim);
 }
 
-.bar {
-  height: 14px;
+.detail-explainer {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 0 0 12px;
+}
+
+.objective-req {
+  font-size: 13px;
+  color: var(--accent);
+  margin: 8px 0 0;
+}
+
+/* ---------- 任務預算表 ---------- */
+
+.budget-sheet {
+  flex: 0 1 340px;
+  min-width: 280px;
+  margin-left: auto;
   background: var(--panel);
   border: 1px solid var(--panel-light);
-  border-radius: 4px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+}
+
+.sheet-title {
+  font-size: 13px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+}
+
+.sheet-subtitle {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 14px 0 6px;
+}
+
+.sheet-headline {
+  background: var(--bg);
+  border: 1px solid var(--panel-light);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.sheet-headline.pending {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sheet-ev {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sheet-ev-label {
+  color: var(--text-dim);
+}
+
+.sheet-ev-number {
+  font-family: "Press Start 2P", monospace;
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.sheet-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.sheet-line,
+.factor-row {
+  border-bottom: 1px dashed var(--panel-light);
+  padding: 6px 0;
+}
+
+.sheet-line summary,
+.factor-row summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.sheet-line summary::-webkit-details-marker,
+.factor-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.sheet-line summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+}
+
+.factor-row summary {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sheet-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.bar-fill {
+.sheet-bar-fill {
+  display: block;
   height: 100%;
-  width: 0%;
   background: var(--success);
-  transition: width 0.2s ease, background 0.2s ease;
+  transition: width 0.2s ease;
 }
 
-.bar-fill.over {
+.sheet-line.warn .sheet-bar-fill {
+  background: var(--c-power);
+}
+
+.sheet-line.bad .sheet-bar-fill {
   background: var(--warn);
+}
+
+.sheet-line.bad .sheet-value,
+.factor-row.bad summary span:last-child {
+  color: var(--warn);
+}
+
+.factor-row.warn summary span:last-child {
+  color: var(--c-power);
+}
+
+.factor-row.ok summary span:last-child {
+  color: var(--success);
+}
+
+.sheet-explain {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin: 6px 0 2px;
+}
+
+.fuel-summary.short {
+  color: var(--warn);
 }
 
 .warning {
@@ -694,7 +826,9 @@ h1, h2, .btn, .stage-name {
 .simulation-log {
   text-align: center;
   color: var(--text-dim);
-  min-height: 20px;
+  min-height: 40px;
+  white-space: pre-line;
+  line-height: 1.6;
 }
 
 /* ---------- Results screen ---------- */
@@ -713,8 +847,51 @@ h1, h2, .btn, .stage-name {
   display: none;
 }
 
-.orbit-warning {
-  color: var(--warn) !important;
+.result-report {
+  background: var(--panel);
+  border: 1px solid var(--panel-light);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.report-numbers {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.report-number {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-number-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.report-number-value {
+  font-family: "Press Start 2P", monospace;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.report-number-value.dim {
+  color: var(--text-dim);
+}
+
+.report-luck,
+.report-hindsight {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+
+.report-hindsight {
+  color: var(--accent);
 }
 
 .campaign-note {

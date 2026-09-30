@@ -82,16 +82,12 @@ function startNewGame() {
 }
 
 function renderEventScreen() {
-  const objectiveCard = document.getElementById("objective-card");
-  if (gameState.features.orbit) {
-    const objective = gameState.missionObjective;
-    document.getElementById("objective-icon").textContent = t("objective." + objective.id + ".icon");
-    document.getElementById("objective-name").textContent = t("objective." + objective.id + ".name");
-    document.getElementById("objective-desc").textContent = t("objective." + objective.id + ".desc");
-    objectiveCard.classList.remove("hidden");
-  } else {
-    objectiveCard.classList.add("hidden");
-  }
+  const objective = gameState.missionObjective;
+  document.getElementById("objective-icon").textContent = t("objective." + objective.id + ".icon");
+  document.getElementById("objective-name").textContent = t("objective." + objective.id + ".name");
+  document.getElementById("objective-desc").textContent = t("objective." + objective.id + ".desc");
+  document.getElementById("objective-req").textContent = t("objective." + objective.id + ".req");
+  document.getElementById("objective-card").classList.remove("hidden");
 
   const eventCard = document.getElementById("event-reveal-card");
   if (gameState.features.events) {
@@ -106,19 +102,19 @@ function renderEventScreen() {
 
   const orbitGroup = document.getElementById("event-orbit-group");
   orbitGroup.innerHTML = "";
-  if (gameState.features.orbit) {
-    orbitGroup.appendChild(renderOrbitGroup(renderEventScreen));
-    orbitGroup.classList.remove("hidden");
+  orbitGroup.appendChild(renderOrbitGroup(renderEventScreen));
+
+  const budgetNote = document.getElementById("event-budget-note");
+  if (!gameState.orbit) {
+    budgetNote.textContent = t("event.pickOrbitNote");
   } else {
-    orbitGroup.classList.add("hidden");
+    const delta = (gameState.event && gameState.event.effect.budgetDeltaM) || 0;
+    budgetNote.textContent = delta
+      ? t("event.budgetNoteAdjusted", { budget: fmtMoney(gameState.budget), delta: fmtMoney(Math.abs(delta)) })
+      : t("event.budgetNoteNormal", { budget: fmtMoney(gameState.budget) });
   }
 
-  const hasBudgetAdjustment = gameState.event && gameState.event.effect.budgetDelta;
-  document.getElementById("event-budget-note").textContent = hasBudgetAdjustment
-    ? t("event.budgetNoteAdjusted", { budget: gameState.budget })
-    : t("event.budgetNoteNormal", { budget: gameState.budget });
-
-  document.getElementById("start-btn").disabled = gameState.features.orbit && !gameState.orbit;
+  document.getElementById("start-btn").disabled = !gameState.orbit;
 }
 
 function showScreen(name) {
@@ -142,8 +138,6 @@ async function startSimulation() {
 }
 
 function finishMission(simResult) {
-  const scores = computeRadarScores(simResult);
-  const cost = currentCostUsed();
   const failCountBeforeThis = gameState.failCount;
 
   if (!simResult.overallSuccess) {
@@ -152,9 +146,7 @@ function finishMission(simResult) {
 
   const achievements = evaluateAchievements({
     simResult,
-    scores,
-    cost,
-    budget: gameState.budget,
+    analysis: simResult.analysis,
     event: gameState.event,
     failCountBeforeThis,
     rocket: gameState.rocket,
@@ -165,25 +157,17 @@ function finishMission(simResult) {
   if (achievements.length > 0) setTimeout(sfxAchievement, 400);
 
   let campaignAward = null;
-  if (gameState.campaignLevel && simResult.overallSuccess) {
-    const earned = awardSkillPointsForScores(scores);
+  if (gameState.campaignLevel && simResult.deliveredValue >= CAMPAIGN_PASS_VALUE) {
+    const earned = Math.max(1, Math.round(simResult.deliveredValue * 5));
+    storageAddSkillPoints(earned);
     storageCompleteCampaignLevel(gameState.campaignLevel);
     campaignAward = { level: gameState.campaignLevel, points: earned };
   }
 
-  lastResultsContext = { simResult, scores, achievements, campaignAward };
-  renderResultsScreen(simResult, scores, achievements, campaignAward);
+  lastResultsContext = { simResult, achievements, campaignAward };
+  renderResultsScreen(simResult, achievements, campaignAward);
   showScreen("results");
   showTutorialIfNeeded("results");
-}
-
-function awardSkillPointsForScores(scores) {
-  const values = Object.values(scores).filter((v) => v > 0);
-  if (values.length === 0) return 0;
-  const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
-  const points = Math.max(1, Math.round(avg / 20));
-  storageAddSkillPoints(points);
-  return points;
 }
 
 function refreshDynamicScreenText() {
@@ -195,12 +179,7 @@ function refreshDynamicScreenText() {
   if (active.id === "screen-selection") renderSelectionScreen();
   if (active.id === "screen-achievements") renderAchievementsGallery();
   if (active.id === "screen-results" && lastResultsContext) {
-    renderResultsScreen(
-      lastResultsContext.simResult,
-      lastResultsContext.scores,
-      lastResultsContext.achievements,
-      lastResultsContext.campaignAward
-    );
+    renderResultsScreen(lastResultsContext.simResult, lastResultsContext.achievements, lastResultsContext.campaignAward);
   }
 
   if (!document.getElementById("tutorial-overlay").classList.contains("hidden")) {

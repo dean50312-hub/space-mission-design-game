@@ -35,10 +35,11 @@ image/
 | ~~中型火箭~~ ✅ | `rocket/rocket-medium.png` | — | 已完成：致敬 SpaceX Falcon 9（白色機身+柵格翼） |
 | ~~重型火箭~~ ✅ | `rocket/rocket-heavy.png` | — | 已完成：致敬 SpaceX Falcon Heavy（中央核心+雙側助推器） |
 | ~~火箭圖紙×3~~ ✅ | `rocket/blueprint-light.png`<br>`rocket/blueprint-medium.png`<br>`rocket/blueprint-heavy.png` | 240×480 | 已完成：程式碼生成的純線條技術圖紙版火箭，供選件畫面的「圖紙+熱點」互動使用 |
-| ~~電力系統×3~~ ✅ | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | — | 已完成：程式碼生成（小型面板/大型陣列/帶散熱片+熱光暈的 RTG） |
-| ~~通訊系統×3~~ ✅ | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | — | 已完成：程式碼生成（簡易天線/拋物面天線/雙碟+太陽翼） |
-| ~~科學酬載×3~~ ✅ | `parts/science-economy.png`<br>`parts/science-standard.png`<br>`parts/science-premium.png` | — | 已完成：程式碼生成（感測管/相機鏡頭/JWST 金色六角鏡） |
-| ~~燃料類型×5~~ ✅ | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-hydrogen_peroxide.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 已完成：程式碼生成（聯胺=橘色危害帶球型貯箱／AF-M315E=綠色安全帶球型貯箱／雙氧水=白色圓柱+分解氣泡／離子=柵極面盤+藍紫電漿束／霍爾=環形通道+青色電漿光暈） |
+| ~~電力系統×3~~ ✅ | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | — | 已完成：程式碼生成（機身貼附式電池/展開式太陽能板/ROSA 捲展式太陽能板）。v2 把高階從 RTG 換成 ROSA：地球軌道衛星實際上用太陽能，RTG 功率只有約 100 W |
+| ~~通訊系統×3~~ ✅ | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | — | 已完成：程式碼生成（S 頻段小天線/X 頻段碟形天線/Ka 頻段高增益雙碟） |
+| ~~光學酬載×3~~ ✅ | `parts/payload-optical-economy.png`<br>`parts/payload-optical-standard.png`<br>`parts/payload-optical-premium.png` | — | 已完成（v2 由 science-*.png 更名）：立方衛星相機/多光譜成像儀/大口徑望遠鏡。高階目前仍是 JWST 金色六角鏡造型，與 WorldView-3 的實際外觀不符，之後可重畫成長鏡筒望遠鏡 |
+| ~~通訊酬載（轉發器）×3~~ ✅ | `parts/payload-transponder-economy.png`<br>`parts/payload-transponder-standard.png`<br>`parts/payload-transponder-premium.png` | 64×64 | 已完成：程式碼生成（金色隔熱毯酬載艙＋饋源喇叭，高階加兩面大型反射器），供通訊任務使用 |
+| ~~推進系統×5~~ ✅ | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-biprop.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 已完成：程式碼生成（聯胺=橘色危害帶球型貯箱／AF-M315E=綠色球型貯箱／雙組元=燃料＋氧化劑雙球槽＋鐘形噴嘴／離子=柵極面盤+藍紫電漿束／霍爾=環形通道+青色電漿光暈）。v2 以雙組元取代雙氧水 |
 | ~~結構與屏蔽×3~~ ✅ | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | — | 已完成：程式碼生成（桁架/Whipple 防護罩+撞擊爆裂星效果/JWST 五層遮陽罩） |
 | ~~地球~~ | ~~`Stars/earth.png`~~ | — | **不需要**——火箭本來就是從地表發射，太空背景裡再放一顆地球邏輯不通，已從清單移除 |
 
@@ -54,7 +55,7 @@ image/
 | ORBIT 吉祥物 | `mascot/orbit.png` | 96×96 以上 | 教學對話框用，取代目前的 🤖 emoji |
 | 噴射尾焰 | `effects/exhaust-1.png`<br>`effects/exhaust-2.png` | 32×48 | 兩格輪播做火焰閃爍，取代目前 CSS 漸層 |
 | 爆炸效果 | `rocket/explosion-1.png`<br>`rocket/explosion-2.png`<br>`rocket/explosion-3.png` | 96×96 | 任務失敗時播放，建議 2~3 格 |
-| 事件圖示×10 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`wind_shear.png`<br>`micrometeorite.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`cold_snap.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️☁️💨🌠🛰️📡❄️💰🌤️） |
+| 事件圖示×9 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`micrometeorite.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🌤️）。v2 移除風切、低溫，新增質量增長 |
 | 成就圖示×7 | `icons/achievements/first_orbit.png`<br>`under_budget.png`<br>`storm_survivor.png`<br>`all_rounder.png`<br>`glorious_failure.png`<br>`never_give_up.png`<br>`locked.png` | 48×48 | 最後一個是「尚未解鎖」的問號/鎖頭圖示 |
 
 ---
@@ -69,7 +70,6 @@ image/
 | 星星 | `effects/star.png` | 8×8 或更小 | 目前 CSS 光點已經夠用，除非想要更有造型的星星 |
 | 按鈕 hover 樣式 | `ui/button-frame-hover.png` | 同按鈕外框 | 滑鼠移過去的變化樣式 |
 | 計量條外框 | `ui/progress-bar-frame.png` | 依版面 | 預算/質量條的裝飾外框 |
-| 毒氣防護圖示 | `icons/hazmat-suit.png` | 32×32 | 加購毒氣危害處理旁的小圖示，取代目前純文字 checkbox |
 
 ---
 
@@ -82,5 +82,7 @@ image/
 - [x] 4 個子系統×3 檔＝12 張部件圖示（程式碼生成，已接進選件畫面）
 - [x] 3 張火箭圖紙（程式碼生成純線條技術圖），選件畫面改為「先選火箭→下方出現圖紙→點部件熱點展開選單」的互動方式
 - [x] 5 個燃料圖示（程式碼生成，已接進選件畫面）
-- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×10、成就圖示×7
+- [x] v2 真實模型新增：ROSA 太陽能板、雙組元推進、通訊轉發器×3（程式碼生成）
+- [ ] 光學酬載高階重畫成長鏡筒望遠鏡（目前 JWST 六角鏡造型與 WorldView-3 不符）
+- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、爆炸效果、事件圖示×9、成就圖示×7
 - [ ] P2 項目（雲朵、地面裝飾等）
