@@ -259,8 +259,21 @@ const EVENTS = [
   { id: "limited_ground_station", icon: "📡", weight: 1, effect: { leoContactMultiplier: 0.5 } },
   { id: "mass_growth", icon: "⚖️", weight: 1, effect: { dryMassMultiplier: 1.15 } },
   { id: "budget_cut", icon: "💰", weight: 1, effect: { budgetDeltaM: -20 } },
+  // 限制型事件：改變能選的零件或火箭，逼你換一套設計
+  { id: "export_control", icon: "🚫", weight: 1, effect: { bannedTiers: ["premium"] } },
+  { id: "launch_manifest", icon: "📅", weight: 1, effect: { bannedRockets: ["medium"] } },
+  { id: "flagship", icon: "🏛️", weight: 1, effect: { requiredPayloadTier: "premium", budgetDeltaM: 20 } },
   { id: "nominal", icon: "🌤️", weight: 3, effect: {} },
 ];
+
+// 限制型事件下，某個選項能不能選。key 為 "rocket" 或零件類別（power、comm、payload、structure）
+function isOptionAvailable(event, key, option) {
+  const effect = (event && event.effect) || {};
+  if (key === "rocket") return !(effect.bannedRockets || []).includes(option.id);
+  if ((effect.bannedTiers || []).includes(option.id)) return false;
+  if (key === "payload" && effect.requiredPayloadTier && option.id !== effect.requiredPayloadTier) return false;
+  return true;
+}
 
 function pickRandomEvent(forcedId) {
   if (forcedId) return EVENTS.find((e) => e.id === forcedId) || EVENTS[EVENTS.length - 1];

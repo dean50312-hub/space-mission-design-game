@@ -55,7 +55,7 @@ image/
 | ORBIT 吉祥物 | `mascot/orbit.png` | 96×96 以上 | 教學對話框用，取代目前的 🤖 emoji |
 | 噴射尾焰 | `effects/exhaust-1.png`<br>`effects/exhaust-2.png` | 32×48 | 兩格輪播做火焰閃爍，取代目前 CSS 漸層 |
 | ~~爆炸效果~~ ✅ | `rocket/explosion-1.png`<br>`rocket/explosion-2.png`<br>`rocket/explosion-3.png` | 64×64 | 已完成：程式碼生成 3 格（亮核心→火球→煙塵與碎片），發射／爬升失敗時播放 |
-| 事件圖示×9 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`small_debris.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🌤️）。v2 移除風切、低溫，新增質量增長 |
+| 事件圖示×12 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`small_debris.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`export_control.png`<br>`launch_manifest.png`<br>`flagship.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🚫📅🏛️🌤️）。v2 移除風切、低溫，新增質量增長；2026-10-11 新增三個限制型事件 |
 | 成就圖示×7 | `icons/achievements/first_orbit.png`<br>`under_budget.png`<br>`storm_survivor.png`<br>`all_rounder.png`<br>`glorious_failure.png`<br>`never_give_up.png`<br>`locked.png` | 48×48 | 最後一個是「尚未解鎖」的問號/鎖頭圖示 |
 
 ---
@@ -85,6 +85,6 @@ image/
 - [x] v2 真實模型新增：ROSA 太陽能板、雙組元推進、通訊轉發器×3（程式碼生成）
 - [ ] 光學酬載高階重畫成長鏡筒望遠鏡（目前 JWST 六角鏡造型與 WorldView-3 不符）
 - [x] 爆炸效果 3 格（程式碼生成）；運作期的地球改用 canvas 即時繪製（北極俯視、比例正確），不需要圖檔
-- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、事件圖示×9、成就圖示×8
+- [ ] 標題 Logo、面板外框、ORBIT 吉祥物、尾焰、事件圖示×12、成就圖示×8
 - [x] 背景音樂 3 首（胡宥彥原創）：`audio/bgm/space.mp3`（宇宙氛圍：首頁、結果、運作期）、`lab.mp3`（實驗室：簡報、設計）、`launch.mp3`（發射）。原始 WAV 轉成 160 kbps MP3（26 MB → 3 MB），每首 16 小節＋殘響尾音，在第 16 小節結束時接下一輪形成無縫循環
 - [ ] P2 項目（雲朵、地面裝飾等）

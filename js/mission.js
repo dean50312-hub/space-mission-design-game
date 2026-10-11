@@ -118,6 +118,7 @@ function analyzeDesign(design) {
     overBudget: costM > design.budgetM,
     overMass: Boolean(design.rocket) && wetKg > capacityKg,
     noCapacity: Boolean(design.rocket) && capacityKg <= 0,
+    unavailable: usesUnavailableOption(design),
   };
 
   if (!design.orbit) return analysis;
@@ -228,8 +229,13 @@ function analyzeDesign(design) {
   return analysis;
 }
 
+function usesUnavailableOption(design) {
+  if (design.rocket && !isOptionAvailable(design.event, "rocket", design.rocket)) return true;
+  return SUBSYSTEM_KEYS.some((key) => design.parts[key] && !isOptionAvailable(design.event, key, design.parts[key]));
+}
+
 function isLaunchBlocked(analysis) {
-  return !analysis.complete || analysis.overBudget || analysis.overMass || analysis.noCapacity;
+  return !analysis.complete || analysis.overBudget || analysis.overMass || analysis.noCapacity || analysis.unavailable;
 }
 
 // 事後分析：只改一個選項（換火箭／換某個零件等級／換推進系統），找出期望價值提升最多的那個

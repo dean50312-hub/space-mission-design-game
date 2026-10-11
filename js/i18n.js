@@ -19,6 +19,7 @@ const STRINGS = {
       pickOrbitNote: "選好軌道後，才能確定本次任務的預算。",
       budgetNoteNormal: "本次任務預算 {budget}",
       budgetNoteAdjusted: "本次任務預算 {budget}（受事件影響減少 {delta}）",
+      budgetNoteIncreased: "本次任務預算 {budget}（受事件影響增加 {delta}）",
       solar_flare: {
         name: "太陽粒子事件",
         desc: "太陽正處於活躍期，高能粒子讓整個任務期間的輻射劑量提高 50%，屏蔽差、零件等級低的衛星更容易故障。太陽活動約 11 年一個週期，一個週期中 X1 級以上的強烈閃焰約 175 次、X10 級約 8 次（NOAA 太空天氣分級）。2003 年萬聖節太陽風暴期間，日本的 ADEOS-II 衛星失效。",
@@ -48,6 +49,18 @@ const STRINGS = {
         desc: "設計審查發現許多零件比估計的重，衛星乾質量增加 15%。這在真實任務中非常常見，所以工程師會在概念設計階段預留 20–30% 的質量餘裕。",
       },
       budget_cut: { name: "預算刪減", desc: "計畫預算在最後一刻被刪減 $20M。" },
+      export_control: {
+        name: "出口管制",
+        desc: "高階零件的出口許可證來不及核發（例如美國的 ITAR 與 EAR 管制），這次所有部件都只能選經濟或標準等級。抗輻射電子元件和高解析度光學儀器，正是最常被管制的項目。",
+      },
+      launch_manifest: {
+        name: "發射排程壅擠",
+        desc: "Falcon 9 的排程被大型星系部署塞滿了，最近的空檔要等一年以上。這次只能選 Electron 或 Falcon Heavy——要嘛縮小衛星，要嘛多花錢買大火箭。",
+      },
+      flagship: {
+        name: "國家旗艦計畫",
+        desc: "這次是國家級的旗艦任務：計畫書已經寫明酬載必須是最高階的規格，不能更改。好消息是多撥了 $20M 預算——但其他地方要怎麼配，就看你了。",
+      },
       nominal: { name: "一切正常", desc: "太空環境平靜，沒有特殊狀況。" },
     },
     rocket: {
@@ -195,6 +208,7 @@ const STRINGS = {
       blueprintHint: "請先選擇火箭，設計圖才會出現",
       blueprintCloseBtn: "收合",
       changeRocketBtn: "更換火箭",
+      unavailable: "🚫 {event}：這次無法選用",
     },
     sheet: {
       title: "任務預算表",
@@ -589,6 +603,7 @@ const STRINGS = {
       pickOrbitNote: "Pick an orbit to lock in this mission's budget.",
       budgetNoteNormal: "Mission budget: {budget}",
       budgetNoteAdjusted: "Mission budget: {budget} (cut by {delta} due to the event)",
+      budgetNoteIncreased: "Mission budget: {budget} (raised by {delta} due to the event)",
       solar_flare: {
         name: "Solar Particle Event",
         desc: "The Sun is highly active: energetic particles raise the radiation dose by 50% for the whole mission, so poorly shielded or low-grade satellites fail more often. Solar activity runs in roughly 11-year cycles, and each cycle brings about 175 flares of class X1 or stronger and about 8 of class X10 (NOAA space weather scales). Japan's ADEOS-II was lost during the 2003 Halloween solar storms.",
@@ -618,6 +633,18 @@ const STRINGS = {
         desc: "A design review finds many parts are heavier than estimated: dry mass grows 15%. This happens on almost every real mission, which is why engineers keep 20–30% mass margin during concept design.",
       },
       budget_cut: { name: "Budget Cut", desc: "The program budget is cut by $20M at the last minute." },
+      export_control: {
+        name: "Export Controls",
+        desc: "Export licenses for premium parts won't arrive in time (think US ITAR and EAR rules), so every part must be Economy or Standard this time. Radiation-hardened electronics and high-resolution optics are exactly what these rules restrict most.",
+      },
+      launch_manifest: {
+        name: "Crowded Launch Manifest",
+        desc: "Falcon 9's manifest is packed with megaconstellation launches and the next open slot is over a year away. Only Electron or Falcon Heavy are available — shrink the satellite or pay for the big rocket.",
+      },
+      flagship: {
+        name: "National Flagship Program",
+        desc: "This is a national flagship mission: the program plan fixes the payload at the top-tier spec, no changes allowed. The good news is an extra $20M of budget — how you balance the rest is up to you.",
+      },
       nominal: { name: "Nominal Conditions", desc: "The space environment is calm — nothing unusual today." },
     },
     rocket: {
@@ -765,6 +792,7 @@ const STRINGS = {
       blueprintHint: "Pick a rocket to reveal the blueprint",
       blueprintCloseBtn: "Close",
       changeRocketBtn: "Change Rocket",
+      unavailable: "🚫 {event}: not available this time",
     },
     sheet: {
       title: "Mission Budget Sheet",

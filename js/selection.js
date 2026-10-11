@@ -149,13 +149,19 @@ function renderRocketGroup() {
     card.type = "button";
     card.className = "part-card";
     if (gameState.rocket && gameState.rocket.id === rocket.id) card.classList.add("selected");
+    const available = isOptionAvailable(gameState.event, "rocket", rocket);
 
     card.innerHTML = `
       <img class="swatch swatch-rocket" src="image/rocket/rocket-${rocket.id}.png" alt="${t("rocket." + rocket.id + ".name")}" />
       <div class="part-name">${t("rocket." + rocket.id + ".name")}</div>
+      ${unavailableTag(available)}
       <div class="part-stats">${rocketStatsText(rocket)}</div>
       <div class="part-proto">${t("rocket." + rocket.id + ".proto")}</div>
     `;
+    if (!available) {
+      card.disabled = true;
+      card.classList.add("unavailable");
+    }
 
     card.addEventListener("click", () => {
       gameState.rocket = rocket;
@@ -184,6 +190,11 @@ function renderRocketSummary() {
   `;
 
   return bar;
+}
+
+function unavailableTag(available) {
+  if (available) return "";
+  return `<div class="unavailable-tag">${t("selection.unavailable", { event: t("event." + gameState.event.id + ".name") })}</div>`;
 }
 
 function hotspotLabel(key) {
@@ -360,13 +371,19 @@ function renderSubsystemCards(key) {
     card.type = "button";
     card.className = "part-card";
     if (gameState.parts[key] === tier) card.classList.add("selected");
+    const available = isOptionAvailable(gameState.event, key, tier);
 
     card.innerHTML = `
       <img class="swatch swatch-part" src="${partImageSrc(key, tier.id)}" alt="${t("tier." + tier.id)}" />
       <div class="part-name">${t("tier." + tier.id)}</div>
+      ${unavailableTag(available)}
       <div class="part-stats">${partStatsText(key, tier)}</div>
       <div class="part-proto">${partProtoText(key, tier)}</div>
     `;
+    if (!available) {
+      card.disabled = true;
+      card.classList.add("unavailable");
+    }
 
     card.addEventListener("click", () => {
       gameState.parts[key] = tier;

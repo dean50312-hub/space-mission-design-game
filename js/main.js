@@ -110,9 +110,10 @@ function renderEventScreen() {
     budgetNote.textContent = t("event.pickOrbitNote");
   } else {
     const delta = (gameState.event && gameState.event.effect.budgetDeltaM) || 0;
-    budgetNote.textContent = delta
-      ? t("event.budgetNoteAdjusted", { budget: fmtMoney(gameState.budget), delta: fmtMoney(Math.abs(delta)) })
-      : t("event.budgetNoteNormal", { budget: fmtMoney(gameState.budget) });
+    let key = "event.budgetNoteNormal";
+    if (delta < 0) key = "event.budgetNoteAdjusted";
+    if (delta > 0) key = "event.budgetNoteIncreased";
+    budgetNote.textContent = t(key, { budget: fmtMoney(gameState.budget), delta: fmtMoney(Math.abs(delta)) });
   }
 
   document.getElementById("start-btn").disabled = !gameState.orbit;
