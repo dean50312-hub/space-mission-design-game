@@ -123,6 +123,12 @@
 - 太陽同步軌道：550 km 高度傾角約 97.6°；地球觀測衛星常用上午 10:30 降交點
 - 地面站：國家太空中心（新竹，北緯 24.8°、東經 121.0°）。550 km 衛星的地面可視範圍約為 acos(R⊕/r) ≈ 22.6°，所以赤道軌道的低軌衛星永遠不會出現在台灣的地平線上，必須用傾斜軌道
 
+### 字型與美術素材授權
+
+- 俐方體11號（Cubic 11）：[ACh-K/Cubic-11 — GitHub](https://github.com/ACh-K/Cubic-11)，SIL Open Font License 1.1，網頁從 jsDelivr 載入 v1.500
+- Noto Sans TC：Google Fonts，SIL Open Font License 1.1
+- 遊戲內所有像素圖示、面板外框、星空背景、發射場、零件與火箭圖皆由本專案的 Python 腳本程式生成（`tools/` 資料夾）；`image/Stars/Saturn.png` 為組員提供
+
 ## 成就對應的太空史料
 
 ### 🏆 首次入軌成功 — 阿波羅 11 號

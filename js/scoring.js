@@ -178,20 +178,17 @@ const ELECTRIC_MIN_SCORE = { weather: 90, comms: 75 };
 const MEDALS = [
   {
     id: "s_rank",
-    icon: "🥇",
     params: () => ({ minScore: 95 }),
     meets: () => true,
   },
   {
     id: "frugal",
-    icon: "💡",
     params: (objective) => ({ minScore: FRUGAL_MIN_SCORE[objective.id], share: FRUGAL_BUDGET_SHARE }),
     meets: (design, analysis, p) => analysis.costM <= analysis.budgetM * p.share,
   },
   {
     // 可靠度不是免費的：要把完全成功機率拉到很高，通常得犧牲任務價值
     id: "robust",
-    icon: "🛡️",
     objectives: ["imaging", "climate"],
     params: () => ({ minScore: ROBUST_MIN_SCORE, fullSuccess: ROBUST_FULL_SUCCESS }),
     meets: (design, analysis, p) => analysis.fullSuccess >= p.fullSuccess,
@@ -199,7 +196,6 @@ const MEDALS = [
   {
     // 全電推進衛星（如 Boeing 702SP）：省下大量推進劑，代價是花半年爬升到 GEO
     id: "all_electric",
-    icon: "⚡",
     objectives: ["weather", "comms"],
     params: (objective) => ({ minScore: ELECTRIC_MIN_SCORE[objective.id] }),
     meets: (design) => design.fuel.electric,

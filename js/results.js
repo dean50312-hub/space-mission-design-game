@@ -42,7 +42,7 @@ const waterfallLabelPlugin = {
     const { ctx } = chart;
     const meta = chart.getDatasetMeta(0);
     ctx.save();
-    ctx.font = "11px 'Segoe UI', 'Noto Sans TC', sans-serif";
+    ctx.font = "11px 'Cubic 11', monospace";
     ctx.textBaseline = "middle";
     meta.data.forEach((bar, i) => {
       const row = rows[i];
@@ -88,11 +88,11 @@ function renderWaterfallChart(simResult, best) {
         x: {
           min: 0,
           max: 100,
-          ticks: { color: "#9aa3d1", callback: (v) => `${v}%` },
+          ticks: { color: "#9aa3d1", font: { family: "'Cubic 11', monospace", size: 11 }, callback: (v) => `${v}%` },
           grid: { color: "#2a2f66" },
         },
         y: {
-          ticks: { color: "#e8ecff", font: { size: 11 } },
+          ticks: { color: "#e8ecff", font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
           grid: { display: false },
         },
       },
@@ -169,7 +169,7 @@ function decisionSummary(simResult) {
   if (!simResult.decisions || simResult.decisions.length === 0) return "";
   const items = simResult.decisions
     .map((d) => {
-      const outcome = d.succeeded === null ? "" : d.succeeded ? ` ✅` : ` ❌`;
+      const outcome = d.succeeded === null ? "" : ` ${glyph(d.succeeded ? "check" : "cross")}`;
       return `<li>${t("anomaly." + d.source + ".name")} → ${t("anomalyOption." + d.option + ".label")}${outcome}</li>`;
     })
     .join("");
@@ -183,7 +183,7 @@ function scoreCardHtml(scoreInfo, simResult) {
   const { score, grade, best, previousBest } = scoreInfo;
   let record;
   if (previousBest === undefined) record = t("results.firstRecord");
-  else if (score > previousBest) record = t("results.newRecord", { previous: previousBest });
+  else if (score > previousBest) record = glyph("star") + t("results.newRecord", { previous: previousBest });
   else record = t("results.personalBest", { best: previousBest });
 
   return `
@@ -211,7 +211,7 @@ function medalsHtml(scoreInfo) {
       });
       return `
         <li class="medal ${state}">
-          <span class="medal-icon">${owned ? medal.icon : "🔒"}</span>
+          <img class="medal-icon" src="image/icons/${owned ? "medal-" + medal.id : "locked"}.png" alt="" />
           <div class="medal-text">
             <div class="medal-name">${t(`medal.${medal.id}.name`)}<span class="medal-state">${t("results.medal_" + state)}</span></div>
             <div class="medal-desc">${desc}</div>
@@ -268,7 +268,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
     </div>
     <p class="report-luck">${luckComment(simResult)}</p>
     ${decisionSummary(simResult)}
-    <p class="report-hindsight">💡 ${hindsightText(simResult)}</p>
+    <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult)}</p>
     ${bestDesignHtml(scoreInfo.best)}
   `;
 
@@ -299,7 +299,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
   } else {
     achievements.forEach((a) => {
       const li = document.createElement("li");
-      li.textContent = `${a.icon} ${t("achievement." + a.id + ".name")}`;
+      li.innerHTML = `<img src="image/icons/achievement-${a.id}.png" alt="" />${t("achievement." + a.id + ".name")}`;
       achList.appendChild(li);
     });
   }

@@ -297,19 +297,19 @@ const OPS_EVENTS = [
 ];
 
 const EVENTS = [
-  { id: "solar_flare", icon: "☀️", weight: 1, effect: { radiationMultiplier: 1.5 } },
-  { id: "geomagnetic_storm", icon: "🌩️", weight: 1, effect: { leoExtraDvKmS: 0.05, geoPowerHazardMultiplier: 2 } },
-  { id: "bad_weather", icon: "⛈️", weight: 1, effect: { budgetDeltaM: -5 } },
-  { id: "small_debris", icon: "🌠", weight: 1, effect: { impactCheck: true } },
-  { id: "orbital_congestion", icon: "🛰️", weight: 1, effect: { leoExtraDvKmS: 0.03 } },
-  { id: "limited_ground_station", icon: "📡", weight: 1, effect: { leoContactMultiplier: 0.5 } },
-  { id: "mass_growth", icon: "⚖️", weight: 1, effect: { dryMassMultiplier: 1.15 } },
-  { id: "budget_cut", icon: "💰", weight: 1, effect: { budgetDeltaM: -20 } },
+  { id: "solar_flare", weight: 1, effect: { radiationMultiplier: 1.5 } },
+  { id: "geomagnetic_storm", weight: 1, effect: { leoExtraDvKmS: 0.05, geoPowerHazardMultiplier: 2 } },
+  { id: "bad_weather", weight: 1, effect: { budgetDeltaM: -5 } },
+  { id: "small_debris", weight: 1, effect: { impactCheck: true } },
+  { id: "orbital_congestion", weight: 1, effect: { leoExtraDvKmS: 0.03 } },
+  { id: "limited_ground_station", weight: 1, effect: { leoContactMultiplier: 0.5 } },
+  { id: "mass_growth", weight: 1, effect: { dryMassMultiplier: 1.15 } },
+  { id: "budget_cut", weight: 1, effect: { budgetDeltaM: -20 } },
   // 限制型事件：改變能選的零件或火箭，逼你換一套設計
-  { id: "export_control", icon: "🚫", weight: 1, effect: { bannedTiers: ["premium"] } },
-  { id: "launch_manifest", icon: "📅", weight: 1, effect: { bannedRockets: ["medium"] } },
-  { id: "flagship", icon: "🏛️", weight: 1, effect: { requiredPayloadTier: "premium", budgetDeltaM: 20 } },
-  { id: "nominal", icon: "🌤️", weight: 3, effect: {} },
+  { id: "export_control", weight: 1, effect: { bannedTiers: ["premium"] } },
+  { id: "launch_manifest", weight: 1, effect: { bannedRockets: ["medium"] } },
+  { id: "flagship", weight: 1, effect: { requiredPayloadTier: "premium", budgetDeltaM: 20 } },
+  { id: "nominal", weight: 3, effect: {} },
 ];
 
 // 限制型事件下，某個選項能不能選。key 為 "rocket" 或零件類別（power、comm、payload、structure）

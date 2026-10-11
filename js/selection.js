@@ -1,12 +1,12 @@
 // 選件畫面：火箭卡片、火箭圖紙上的部件熱點、即時任務預算表
 
 const HOTSPOT_DEFS = [
-  { key: "payload", icon: "🔭", top: 15, left: 50 },
-  { key: "comm", icon: "📡", top: 30, left: 34 },
-  { key: "power", icon: "🔋", top: 47, left: 66 },
-  { key: "structure", icon: "🛡️", top: 63, left: 34 },
-  { key: "attitude", icon: "🧭", top: 72, left: 66 },
-  { key: "fuel", icon: "⛽", top: 84, left: 50 },
+  { key: "payload", top: 15, left: 50 },
+  { key: "comm", top: 30, left: 34 },
+  { key: "power", top: 47, left: 66 },
+  { key: "structure", top: 63, left: 34 },
+  { key: "attitude", top: 70, left: 66 },
+  { key: "fuel", top: 87, left: 50 },
 ];
 
 let activeHotspot = null;
@@ -80,7 +80,7 @@ function renderOrbitGroup(onSelect) {
     if (gameState.orbit && gameState.orbit.id === orbit.id) card.classList.add("selected");
 
     card.innerHTML = `
-      <div class="swatch swatch-orbit"></div>
+      <img class="swatch swatch-orbit" src="image/icons/orbit-${orbit.id}.png" alt="" />
       <div class="part-name">${t("orbit." + orbit.id)}</div>
       <div class="part-stats">${t("selection.orbitStats", {
         altitude: fmtNum(orbit.altitudeKm),
@@ -200,7 +200,7 @@ function renderRocketSummary() {
 
 function unavailableTag(available) {
   if (available) return "";
-  return `<div class="unavailable-tag">${t("selection.unavailable", { event: t("event." + gameState.event.id + ".name") })}</div>`;
+  return `<div class="unavailable-tag">${glyph("ban")}${t("selection.unavailable", { event: t("event." + gameState.event.id + ".name") })}</div>`;
 }
 
 function hotspotLabel(key) {
@@ -214,14 +214,21 @@ function partImageSrc(key, tierId) {
   return `image/parts/${key}-${tierId}.png`;
 }
 
+const EMPTY_HOTSPOT_ICON = `<img class="hotspot-icon-img empty" src="image/icons/glyph-add.png" alt="" />`;
+
+// 句子裡的小圖示（image/icons/glyph-*.png）
+function glyph(name) {
+  return `<img class="glyph" src="image/icons/glyph-${name}.png" alt="" />`;
+}
+
 function hotspotIconMarkup(h) {
   if (h.key === "fuel") {
     if (gameState.fuel) return `<img class="hotspot-icon-img" src="image/parts/fuel-${gameState.fuel.id}.png" alt="" />`;
-    return `<span class="hotspot-icon">${h.icon}</span>`;
+    return EMPTY_HOTSPOT_ICON;
   }
   const tier = gameState.parts[h.key];
   if (tier) return `<img class="hotspot-icon-img" src="${partImageSrc(h.key, tier.id)}" alt="" />`;
-  return `<span class="hotspot-icon">${h.icon}</span>`;
+  return EMPTY_HOTSPOT_ICON;
 }
 
 function isHotspotFilled(key) {
@@ -251,7 +258,7 @@ function renderBlueprintPanel() {
 
   const sheet = document.createElement("aside");
   sheet.id = "budget-sheet";
-  sheet.className = "budget-sheet";
+  sheet.className = "budget-sheet panel";
   body.appendChild(sheet);
 
   wrap.appendChild(body);
@@ -295,7 +302,7 @@ function renderBlueprintFrame() {
 
 function renderHotspotDetail(key) {
   const detail = document.createElement("div");
-  detail.className = "blueprint-detail";
+  detail.className = "blueprint-detail panel";
 
   const header = document.createElement("div");
   header.className = "blueprint-detail-header";
@@ -352,7 +359,7 @@ function partStatsText(key, tier) {
   if (key === "attitude") {
     const achieved = achievedPointingDeg(tier, orbit);
     return t("selection.attitudeStats", { ...common, pointing: fmtPointing(achieved), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) }) +
-      (tier.magnetic && orbit.id === "geo" ? ` · ${t("selection.geoTorquerTag")}` : "");
+      (tier.magnetic && orbit.id === "geo" ? `<br>${glyph("warn")}${t("selection.geoTorquerTag")}` : "");
   }
   if (gameState.missionObjective.payloadKind === "transponder") {
     return t("selection.transponderStats", { ...common, gbps: fmtNum(tier.throughputGbps), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) });
@@ -495,7 +502,7 @@ function sheetLine({ icon, labelKey, valueText, ratio, status, explainKey, expla
   return `
     <details class="sheet-line ${status}" data-key="${labelKey}">
       <summary>
-        <span class="sheet-label">${icon} ${t(labelKey)}</span>
+        <span class="sheet-label">${glyph(icon)}${t(labelKey)}</span>
         <span class="sheet-value">${valueText}</span>
         <span class="sheet-bar"><span class="sheet-bar-fill" style="width:${pct}%"></span></span>
       </summary>
@@ -521,7 +528,7 @@ function renderBudgetLines(analysis) {
   const lines = [];
 
   lines.push(sheetLine({
-    icon: "💰",
+    icon: "cost",
     labelKey: "sheet.cost",
     valueText: `${fmtMoney(analysis.costM)} / ${fmtMoney(analysis.budgetM)}`,
     ratio: analysis.costM / analysis.budgetM,
@@ -531,7 +538,7 @@ function renderBudgetLines(analysis) {
 
   if (gameState.rocket) {
     lines.push(sheetLine({
-      icon: "⚖️",
+      icon: "mass",
       labelKey: "sheet.mass",
       valueText: analysis.capacityKg > 0
         ? `${fmtNum(analysis.wetKg)} / ${fmtNum(analysis.capacityKg)} kg`
@@ -545,7 +552,7 @@ function renderBudgetLines(analysis) {
 
   if (gameState.parts.power) {
     lines.push(sheetLine({
-      icon: "⚡",
+      icon: "power",
       labelKey: "sheet.power",
       valueText: `${fmtNum(analysis.powerAvailW)} / ${fmtNum(analysis.powerLoadW)} W`,
       ratio: analysis.powerAvailW / Math.max(analysis.powerLoadW, 1),
@@ -558,7 +565,7 @@ function renderBudgetLines(analysis) {
   if (analysis.thermal) {
     const th = analysis.thermal;
     lines.push(sheetLine({
-      icon: "🌡️",
+      icon: "thermal",
       labelKey: "sheet.thermal",
       valueText: t("sheet.thermalValue", { area: fmtNum(th.radiatorM2, 1), method: t("thermalMethod." + th.method) }),
       ratio: th.heatW / 12000,
@@ -570,7 +577,7 @@ function renderBudgetLines(analysis) {
 
   if (analysis.dataGenGbit !== undefined && analysis.dataDownGbit !== undefined) {
     lines.push(sheetLine({
-      icon: "📶",
+      icon: "data",
       labelKey: "sheet.data",
       valueText: `${fmtNum(analysis.dataDownGbit, analysis.dataDownGbit < 10 ? 1 : 0)} / ${fmtNum(analysis.dataGenGbit)} Gbit`,
       ratio: analysis.dataDownGbit / analysis.dataGenGbit,
@@ -583,7 +590,7 @@ function renderBudgetLines(analysis) {
     const reserve = Math.max(0, analysis.budgetM - analysis.costM);
     const extensionYears = Math.min(reserve / EXTENDED_MISSION_COST_PER_YEAR_M, orbit.designLifeYears * EXTENSION_MAX_FRACTION);
     lines.push(sheetLine({
-      icon: "🧰",
+      icon: "reserve",
       labelKey: "sheet.reserve",
       valueText: fmtMoney(Math.round(reserve * 10) / 10),
       ratio: reserve / analysis.budgetM,
@@ -595,7 +602,7 @@ function renderBudgetLines(analysis) {
 
   if (gameState.fuel && analysis.dvRequired) {
     lines.push(sheetLine({
-      icon: "🚀",
+      icon: "dv",
       labelKey: "sheet.dv",
       valueText: `${fmtNum(analysis.dv, 2)} / ${fmtNum(analysis.dvRequired.total, 2)} km/s`,
       ratio: analysis.dv / analysis.dvRequired.total,

@@ -57,6 +57,32 @@ function renderHomeScreen() {
   campaignBtn.textContent = campaignComplete
     ? t("home.campaignReplay")
     : t("home.campaignProgress", { level: currentLevel, total: 4 });
+
+  document.getElementById("home-campaign-progress").innerHTML = tt("home.levelNames")
+    .map((name, i) => {
+      const level = i + 1;
+      const state = campaignComplete || level < currentLevel ? "done" : level === currentLevel ? "current" : "";
+      return `<li class="campaign-pip ${state}"><span class="campaign-pip-box">${level}</span>${name}</li>`;
+    })
+    .join("");
+
+  document.getElementById("home-records").innerHTML = MISSION_OBJECTIVES.map((objective) => {
+    const best = storageGetBestScore(objective.id);
+    const grade = best === undefined ? null : scoreGrade(best);
+    const score = grade
+      ? `<span class="record-score has-grade"><span class="grade-letter grade-${grade}">${grade}</span> ${best}</span>`
+      : `<span class="record-score">${t("home.notPlayed")}</span>`;
+    const medals = medalsFor(objective)
+      .map((m) => `<img src="image/icons/medal-${m.id}.png" class="${storageHasMedal(objective.id, m.id) ? "" : "locked"}" alt="" />`)
+      .join("");
+    return `
+      <div class="record-tile">
+        <img class="record-icon" src="image/icons/objective-${objective.id}.png" alt="" />
+        <span class="record-name">${t("objective." + objective.id + ".short")}</span>
+        ${score}
+        <span class="record-medals">${medals}</span>
+      </div>`;
+  }).join("");
 }
 
 function startFreePlay() {
@@ -84,8 +110,8 @@ async function startNewGame() {
 
 function renderEventScreen() {
   const objective = gameState.missionObjective;
-  document.getElementById("objective-icon").textContent = t("objective." + objective.id + ".icon");
-  document.getElementById("objective-name").textContent = t("objective." + objective.id + ".name");
+  document.getElementById("objective-icon").src = `image/icons/objective-${objective.id}.png`;
+  document.getElementById("objective-name").textContent = t("objective." + objective.id + ".short");
   document.getElementById("objective-desc").textContent = t("objective." + objective.id + ".desc");
   document.getElementById("objective-req").textContent = t("objective." + objective.id + ".req");
   document.getElementById("objective-card").classList.remove("hidden");
@@ -93,7 +119,7 @@ function renderEventScreen() {
   const eventCard = document.getElementById("event-reveal-card");
   if (gameState.features.events) {
     const event = gameState.event;
-    document.getElementById("event-icon").textContent = event.icon;
+    document.getElementById("event-icon").src = `image/icons/event-${event.id}.png`;
     document.getElementById("event-name").textContent = t("event." + event.id + ".name");
     document.getElementById("event-desc").textContent = t("event." + event.id + ".desc");
     eventCard.classList.remove("hidden");

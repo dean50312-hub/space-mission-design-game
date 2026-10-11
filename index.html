@@ -6,35 +6,67 @@
 <title>太空精算師 · Space Actuary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=36" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css?v=42" />
 </head>
 <body>
 <main id="app">
 
   <section id="screen-home" class="screen active">
-    <h1 id="app-title" class="game-title" data-i18n="app.title"></h1>
-    <p class="home-subtitle" data-i18n="home.subtitle"></p>
-    <button id="home-campaign-btn" class="btn btn-primary"></button>
-    <button id="home-start-btn" class="btn btn-secondary"></button>
-    <button id="home-achievements-btn" class="btn btn-secondary" data-i18n="home.achievements"></button>
-    <button id="home-settings-btn" class="btn btn-secondary" data-i18n="home.settings"></button>
+    <div class="home-hero">
+      <div class="home-art" aria-hidden="true">
+        <img class="home-planet" src="image/Stars/Saturn.png" alt="" />
+        <img class="home-moon" src="image/Stars/mars.png" alt="" />
+        <img class="home-rocket" src="image/rocket/rocket-medium.png" alt="" />
+      </div>
+      <p class="home-eyebrow">NASA Space Apps Challenge 2026</p>
+      <h1 id="app-title" class="game-title" data-i18n="app.title"></h1>
+      <p class="game-title-alt" data-i18n="app.titleAlt"></p>
+      <p class="home-subtitle" data-i18n="home.subtitle"></p>
+    </div>
+
+    <nav class="home-menu panel">
+      <button id="home-campaign-btn" class="btn btn-primary"></button>
+      <ol id="home-campaign-progress" class="campaign-pips"></ol>
+      <button id="home-start-btn" class="btn btn-secondary"></button>
+      <div class="home-menu-row">
+        <button id="home-achievements-btn" class="btn btn-secondary" data-i18n="home.achievements"></button>
+        <button id="home-settings-btn" class="btn btn-secondary" data-i18n="home.settings"></button>
+      </div>
+    </nav>
+
+    <section class="home-records">
+      <h3 class="section-title" data-i18n="home.recordsTitle"></h3>
+      <div id="home-records" class="record-grid"></div>
+    </section>
+
+    <footer class="home-footer" data-i18n="home.credits"></footer>
   </section>
 
   <section id="screen-event" class="screen">
+    <ol class="mission-steps" data-current="1">
+      <li data-i18n="steps.briefing"></li><li data-i18n="steps.design"></li><li data-i18n="steps.launch"></li><li data-i18n="steps.report"></li>
+    </ol>
     <h2 data-i18n="event.title"></h2>
 
-    <div id="objective-card" class="event-card hidden">
-      <div id="objective-icon" class="event-icon"></div>
-      <h2 id="objective-name"></h2>
-      <p id="objective-desc"></p>
-      <p id="objective-req" class="objective-req"></p>
+    <div id="objective-card" class="event-card panel hidden">
+      <img id="objective-icon" class="event-icon" alt="" />
+      <div class="event-card-body">
+        <span class="chip" data-i18n="event.objectiveTag"></span>
+        <h3 id="objective-name"></h3>
+        <p id="objective-desc"></p>
+        <p id="objective-req" class="objective-req"></p>
+      </div>
     </div>
 
-    <div id="event-reveal-card" class="event-card hidden">
-      <div id="event-icon" class="event-icon"></div>
-      <h2 id="event-name"></h2>
-      <p id="event-desc"></p>
+    <div id="event-reveal-card" class="event-card panel hidden">
+      <img id="event-icon" class="event-icon" alt="" />
+      <div class="event-card-body">
+        <span class="chip chip-warm" data-i18n="event.environmentTag"></span>
+        <h3 id="event-name"></h3>
+        <p id="event-desc"></p>
+      </div>
     </div>
 
     <div id="event-orbit-group"></div>
@@ -45,6 +77,9 @@
   </section>
 
   <section id="screen-selection" class="screen">
+    <ol class="mission-steps" data-current="2">
+      <li data-i18n="steps.briefing"></li><li data-i18n="steps.design"></li><li data-i18n="steps.launch"></li><li data-i18n="steps.report"></li>
+    </ol>
     <h2 data-i18n="selection.title"></h2>
 
     <p id="selection-warning" class="warning hidden"></p>
@@ -55,6 +90,9 @@
   </section>
 
   <section id="screen-simulation" class="screen">
+    <ol class="mission-steps" data-current="3">
+      <li data-i18n="steps.briefing"></li><li data-i18n="steps.design"></li><li data-i18n="steps.launch"></li><li data-i18n="steps.report"></li>
+    </ol>
     <h2 data-i18n="simulation.title"></h2>
 
     <div id="flight-track">
@@ -107,25 +145,34 @@
   </section>
 
   <section id="screen-results" class="screen">
+    <ol class="mission-steps" data-current="4">
+      <li data-i18n="steps.briefing"></li><li data-i18n="steps.design"></li><li data-i18n="steps.launch"></li><li data-i18n="steps.report"></li>
+    </ol>
     <h2 id="result-title"></h2>
-    <p id="result-subtitle"></p>
+    <p id="result-subtitle" class="result-subtitle"></p>
     <p id="result-reason" class="result-reason hidden"></p>
     <p id="result-campaign-note" class="campaign-note hidden"></p>
     <div id="result-score" class="result-score"></div>
-    <div id="result-report" class="result-report"></div>
-    <h3 data-i18n="waterfall.title"></h3>
+    <div id="result-report" class="result-report panel"></div>
+    <h3 class="section-title" data-i18n="waterfall.title"></h3>
     <p class="waterfall-hint" data-i18n="waterfall.hint"></p>
-    <div class="chart-wrap waterfall-wrap">
+    <div class="chart-wrap waterfall-wrap panel">
       <canvas id="waterfall-chart"></canvas>
     </div>
-    <h3 data-i18n="results.achievementsHeader"></h3>
-    <ul id="achievements-list"></ul>
-    <button id="play-again-btn" class="btn btn-primary" data-i18n="results.playAgain"></button>
-    <button id="results-home-btn" class="btn btn-secondary" data-i18n="results.backHome"></button>
+    <h3 class="section-title" data-i18n="results.achievementsHeader"></h3>
+    <ul id="achievements-list" class="badge-list"></ul>
+    <div class="button-row">
+      <button id="play-again-btn" class="btn btn-primary" data-i18n="results.playAgain"></button>
+      <button id="results-home-btn" class="btn btn-secondary" data-i18n="results.backHome"></button>
+    </div>
   </section>
 
   <section id="screen-achievements" class="screen">
     <h2 data-i18n="achievementsGallery.title"></h2>
+    <h3 class="section-title"><span data-i18n="achievementsGallery.medalsTitle"></span><span id="medal-count" class="section-count"></span></h3>
+    <p class="section-hint" data-i18n="achievementsGallery.medalsHint"></p>
+    <div id="medal-gallery" class="medal-gallery"></div>
+    <h3 class="section-title"><span data-i18n="achievementsGallery.achievementsTitle"></span><span id="achievement-count" class="section-count"></span></h3>
     <ul id="achievements-gallery-list" class="gallery-list"></ul>
     <button id="achievements-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
   </section>
@@ -133,34 +180,36 @@
   <section id="screen-settings" class="screen">
     <h2 data-i18n="settings.title"></h2>
 
-    <div class="settings-row">
-      <span data-i18n="settings.language"></span>
-      <div class="lang-buttons">
-        <button type="button" class="btn btn-secondary lang-btn" data-lang="zh">中文</button>
-        <button type="button" class="btn btn-secondary lang-btn" data-lang="en">English</button>
+    <div class="settings-panel panel">
+      <div class="settings-row">
+        <span data-i18n="settings.language"></span>
+        <div class="lang-buttons">
+          <button type="button" class="seg-btn lang-btn" data-lang="zh">中文</button>
+          <button type="button" class="seg-btn lang-btn" data-lang="en">English</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <span data-i18n="settings.sound"></span>
+        <label class="switch">
+          <input type="checkbox" id="settings-sound-toggle" />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <span data-i18n="settings.volume"></span>
+        <input type="range" id="settings-volume-slider" class="pixel-range" min="0" max="1" step="0.05" />
       </div>
     </div>
 
-    <div class="settings-row">
-      <span data-i18n="settings.sound"></span>
-      <label class="switch">
-        <input type="checkbox" id="settings-sound-toggle" />
-        <span class="switch-slider"></span>
-      </label>
-    </div>
-
-    <div class="settings-row">
-      <span data-i18n="settings.volume"></span>
-      <input type="range" id="settings-volume-slider" min="0" max="1" step="0.05" />
-    </div>
-
-    <button id="settings-reset-btn" class="btn btn-secondary" data-i18n="settings.resetProgress"></button>
+    <button id="settings-reset-btn" class="btn btn-danger" data-i18n="settings.resetProgress"></button>
     <button id="settings-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
   </section>
 
   <div id="anomaly-overlay" class="tutorial-overlay hidden">
-    <div class="anomaly-card">
-      <div class="anomaly-header"><span class="anomaly-badge">🚨</span><h3 id="anomaly-title"></h3></div>
+    <div class="anomaly-card panel panel-alert">
+      <div class="anomaly-header"><img class="anomaly-badge" src="image/icons/alert.png" alt="" /><h3 id="anomaly-title"></h3></div>
       <p id="anomaly-desc" class="anomaly-desc"></p>
       <p id="anomaly-meta" class="anomaly-meta"></p>
       <div id="anomaly-options" class="anomaly-options"></div>
@@ -169,14 +218,14 @@
   </div>
 
   <div id="tutorial-overlay" class="tutorial-overlay hidden">
-    <div class="tutorial-card">
-      <div class="tutorial-avatar">🤖</div>
+    <div class="tutorial-card panel">
+      <img class="tutorial-avatar" src="image/icons/mascot-orbit.png" alt="" />
       <div class="tutorial-body">
         <div id="tutorial-name" class="tutorial-name"></div>
         <p id="tutorial-text" class="tutorial-text"></p>
         <div class="tutorial-actions">
           <button id="tutorial-skip-btn" type="button" class="btn-link"></button>
-          <button id="tutorial-next-btn" type="button" class="btn btn-primary"></button>
+          <button id="tutorial-next-btn" type="button" class="btn btn-primary btn-small"></button>
         </div>
       </div>
     </div>
@@ -185,23 +234,23 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=36"></script>
-<script src="js/i18n.js?v=36"></script>
-<script src="js/sound.js?v=36"></script>
-<script src="js/data.js?v=36"></script>
-<script src="js/state.js?v=36"></script>
-<script src="js/mission.js?v=36"></script>
-<script src="js/operations.js?v=36"></script>
-<script src="js/scoring.js?v=36"></script>
-<script src="js/bestdesigns.js?v=36"></script>
-<script src="js/earthmap.js?v=36"></script>
-<script src="js/orbitview.js?v=36"></script>
-<script src="js/selection.js?v=36"></script>
-<script src="js/simulation.js?v=36"></script>
-<script src="js/results.js?v=36"></script>
-<script src="js/achievements.js?v=36"></script>
-<script src="js/settings.js?v=36"></script>
-<script src="js/tutorial.js?v=36"></script>
-<script src="js/main.js?v=36"></script>
+<script src="js/storage.js?v=42"></script>
+<script src="js/i18n.js?v=42"></script>
+<script src="js/sound.js?v=42"></script>
+<script src="js/data.js?v=42"></script>
+<script src="js/state.js?v=42"></script>
+<script src="js/mission.js?v=42"></script>
+<script src="js/operations.js?v=42"></script>
+<script src="js/scoring.js?v=42"></script>
+<script src="js/bestdesigns.js?v=42"></script>
+<script src="js/earthmap.js?v=42"></script>
+<script src="js/orbitview.js?v=42"></script>
+<script src="js/selection.js?v=42"></script>
+<script src="js/simulation.js?v=42"></script>
+<script src="js/results.js?v=42"></script>
+<script src="js/achievements.js?v=42"></script>
+<script src="js/settings.js?v=42"></script>
+<script src="js/tutorial.js?v=42"></script>
+<script src="js/main.js?v=42"></script>
 </body>
 </html>

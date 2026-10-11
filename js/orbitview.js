@@ -246,7 +246,7 @@ const OrbitView = (() => {
     ctx.fillStyle = visible ? "#57e389" : "#ffd166";
     ctx.fillRect(Math.round(sx) - 3, Math.round(sy) - 3, 6, 6);
     if (config.stationLabel) {
-      ctx.font = "11px 'Segoe UI', 'Noto Sans TC', sans-serif";
+      ctx.font = "11px 'Cubic 11', monospace";
       ctx.fillStyle = "rgba(255, 209, 102, 0.9)";
       // 標籤往地球外側放，才不會蓋住地圖
       const dx = sx - config.cx;

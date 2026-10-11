@@ -306,6 +306,7 @@ function resetFlightView() {
     dot.className = "stage-dot";
     dot.id = `stage-dot-${i}`;
     dot.title = t("stage." + stage.id);
+    dot.textContent = t("stageShort." + stage.id);
     dotsWrap.appendChild(dot);
   });
 }
