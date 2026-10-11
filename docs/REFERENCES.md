@@ -77,7 +77,28 @@
 
 - 2022 年 2 月地磁暴導致 38 顆 Starlink 墜入大氣層：[Starlink to lose about 40 satellites — Light Reading](https://www.lightreading.com/satellite/starlink-to-lose-about-40-satellites-in-wake-of-geomagnetic-storm/d/d-id/775200)
 - 1993 年英仙座流星雨期間 Olympus-1 疑似遭撞擊失控：[Shooting Stars Can Shoot Down Satellites — IEEE Spectrum](https://spectrum.ieee.org/shooting-stars-can-shoot-down-satellites)
+- 2016 年哨兵 1A（700 km）太陽能板被小於 5 mm 的碎片擊中，損傷區直徑約 40 cm，功率小幅下降但運作正常：[Copernicus Sentinel-1A satellite hit by space particle — ESA](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-1/Copernicus_Sentinel-1A_satellite_hit_by_space_particle)
+- 太空碎片分級：10 cm 以上可由地面雷達追蹤並閃避、1 cm 以下無法追蹤只能靠屏蔽（遊戲據此區分「軌道碎片密集」與「微小碎片密集」兩個事件）：ESA Space Debris Office 的公開說明
+- 1 cm 鋁珠（約 1.4 g）以 10 km/s 撞擊的動能 ½mv² ≈ 70 kJ，等於 250 kg 物體以 85 km/h 運動：直接計算
 - 其他事件與失敗原因引用的史實（Apollo 12 閃電、ADEOS-II、CRS-7、AsiaSat 3、伽利略號天線）均為廣為記載的太空史事件
+
+### 太空天氣（李彥宜整理，2026-10-11 查證）
+
+- NOAA 太空天氣分級：R3（X1 級閃焰）每個太陽週期約 175 次、R4（X10）約 8 次、R5（X20）少於 1 次；G5 極端地磁暴每週期約 4 次：[NOAA Space Weather Scales — SWPC](https://www.swpc.noaa.gov/noaa-scales-explanation)
+- 2024 年 5 月 G5 地磁暴：[“Extreme” G5 geomagnetic storm reaches Earth — CBS News](https://www.cbsnews.com/amp/texas/news/severe-geomagnetic-storm-watch-issued-unusual-solar-event)
+
+> 遊戲中「太陽風暴警報」的發生頻率（LEO 約每年 0.09 次、GEO 約 0.07 次）低於真實的 G5 頻率（約每年 0.36 次）。這是為了遊戲節奏所做的簡化：只抽出「需要營運商做決定」的那部分警報。
+
+### 台灣太空任務（李彥宜整理）
+
+- 福衛五號光學遙測酬載（RSI）：口徑 450 mm、720 km 太陽同步軌道、2 m 全色／4 m 多光譜、刈幅 24 km、2017 年由 Falcon 9 發射：[FORMOSAT-5 — CATALYST](https://catalyst.earth/catalyst-system-files/professional-help/references/gdb_r/Formosat-5.html)；[RSI (FORMOSAT-5) — WMO OSCAR](https://space.oscar.wmo.int/instruments/view/rsi_formosat_5)
+- 繞射極限驗算：1.22 × 550 nm × 720 km ÷ 0.45 m ≈ 1.1 m，實際 2 m 受限於偵測器像素，兩者一致（繞射極限是理論下限）
+- 福衛七號（COSMIC-2）GNSS 掩星：接收穿過大氣層而折射的導航衛星訊號，反推溫度、氣壓、濕度垂直剖面，不受雲層影響，資料用於全球數值天氣預報：TASA／NOAA 公開資料
+
+### 結構材料（李彥宜整理）
+
+- 6061-T6 降伏強度約 276 MPa、7075-T6 約 503 MPa（約 1.8 倍）：鋁合金標準材料性質
+- 立方衛星開放式框架、鋁蜂巢夾層板、一體式承力結構的取捨：依李彥宜整理的結構方案比較表
 
 ## 成就對應的太空史料
 

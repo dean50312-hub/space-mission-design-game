@@ -40,7 +40,7 @@ image/
 | ~~光學酬載×3~~ ✅ | `parts/payload-optical-economy.png`<br>`parts/payload-optical-standard.png`<br>`parts/payload-optical-premium.png` | — | 已完成（v2 由 science-*.png 更名）：立方衛星相機/多光譜成像儀/大口徑望遠鏡。高階目前仍是 JWST 金色六角鏡造型，與 WorldView-3 的實際外觀不符，之後可重畫成長鏡筒望遠鏡 |
 | ~~通訊酬載（轉發器）×3~~ ✅ | `parts/payload-transponder-economy.png`<br>`parts/payload-transponder-standard.png`<br>`parts/payload-transponder-premium.png` | 64×64 | 已完成：程式碼生成（金色隔熱毯酬載艙＋饋源喇叭，高階加兩面大型反射器），供通訊任務使用 |
 | ~~推進系統×5~~ ✅ | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-biprop.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 已完成：程式碼生成（聯胺=橘色危害帶球型貯箱／AF-M315E=綠色球型貯箱／雙組元=燃料＋氧化劑雙球槽＋鐘形噴嘴／離子=柵極面盤+藍紫電漿束／霍爾=環形通道+青色電漿光暈）。v2 以雙組元取代雙氧水 |
-| ~~結構與屏蔽×3~~ ✅ | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | — | 已完成：程式碼生成（桁架/Whipple 防護罩+撞擊爆裂星效果/JWST 五層遮陽罩） |
+| ~~結構與屏蔽×3~~ ✅ | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 已完成（2026-10-11 重畫）：程式碼生成，改成真實衛星結構——6061 開放式框架（看得到裡面的電路板）/鋁蜂巢夾層板剖面/7075 一體式外殼＋惠普爾犧牲板與碎片撞擊火花 |
 | ~~地球~~ | ~~`Stars/earth.png`~~ | — | **不需要**——火箭本來就是從地表發射，太空背景裡再放一顆地球邏輯不通，已從清單移除 |
 
 太陽系其餘 8 顆行星（水星、金星、火星、木星、土星、天王星、海王星、冥王星）皆已完成 ✅，用 Python/Pillow 程式碼直接產生像素風圖片（圓形遮罩＋明暗分帶＋雜訊/條紋），不是手繪也不是 AI 生成，色盤跟畫風可隨時調整重繪，成本很低。
@@ -55,7 +55,7 @@ image/
 | ORBIT 吉祥物 | `mascot/orbit.png` | 96×96 以上 | 教學對話框用，取代目前的 🤖 emoji |
 | 噴射尾焰 | `effects/exhaust-1.png`<br>`effects/exhaust-2.png` | 32×48 | 兩格輪播做火焰閃爍，取代目前 CSS 漸層 |
 | ~~爆炸效果~~ ✅ | `rocket/explosion-1.png`<br>`rocket/explosion-2.png`<br>`rocket/explosion-3.png` | 64×64 | 已完成：程式碼生成 3 格（亮核心→火球→煙塵與碎片），發射／爬升失敗時播放 |
-| 事件圖示×9 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`micrometeorite.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🌤️）。v2 移除風切、低溫，新增質量增長 |
+| 事件圖示×9 | `icons/events/solar_flare.png`<br>`geomagnetic_storm.png`<br>`bad_weather.png`<br>`small_debris.png`<br>`orbital_congestion.png`<br>`limited_ground_station.png`<br>`mass_growth.png`<br>`budget_cut.png`<br>`nominal.png` | 48×48 | 取代目前的 emoji（☀️🌩️⛈️🌠🛰️📡⚖️💰🌤️）。v2 移除風切、低溫，新增質量增長 |
 | 成就圖示×7 | `icons/achievements/first_orbit.png`<br>`under_budget.png`<br>`storm_survivor.png`<br>`all_rounder.png`<br>`glorious_failure.png`<br>`never_give_up.png`<br>`locked.png` | 48×48 | 最後一個是「尚未解鎖」的問號/鎖頭圖示 |
 
 ---

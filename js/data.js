@@ -254,7 +254,7 @@ const EVENTS = [
   { id: "solar_flare", icon: "☀️", weight: 1, effect: { radiationMultiplier: 1.5 } },
   { id: "geomagnetic_storm", icon: "🌩️", weight: 1, effect: { leoExtraDvKmS: 0.05, geoPowerHazardMultiplier: 2 } },
   { id: "bad_weather", icon: "⛈️", weight: 1, effect: { budgetDeltaM: -5 } },
-  { id: "micrometeorite", icon: "🌠", weight: 1, effect: { impactCheck: true } },
+  { id: "small_debris", icon: "🌠", weight: 1, effect: { impactCheck: true } },
   { id: "orbital_congestion", icon: "🛰️", weight: 1, effect: { leoExtraDvKmS: 0.03 } },
   { id: "limited_ground_station", icon: "📡", weight: 1, effect: { leoContactMultiplier: 0.5 } },
   { id: "mass_growth", icon: "⚖️", weight: 1, effect: { dryMassMultiplier: 1.15 } },

@@ -74,10 +74,11 @@ function startCampaignLevel(level) {
   startNewGame();
 }
 
-function startNewGame() {
+async function startNewGame() {
   resetForNewGame();
   renderEventScreen();
   showScreen("event");
+  if (gameState.campaignLevel >= 2) await showTutorialIfNeeded("level" + gameState.campaignLevel);
   showTutorialIfNeeded("event");
 }
 

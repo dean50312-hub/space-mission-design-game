@@ -21,7 +21,7 @@ const STRINGS = {
       budgetNoteAdjusted: "本次任務預算 {budget}（受事件影響減少 {delta}）",
       solar_flare: {
         name: "太陽粒子事件",
-        desc: "太陽正處於活躍期，高能粒子讓整個任務期間的輻射劑量提高 50%，屏蔽差、零件等級低的衛星更容易故障。（2003 年萬聖節太陽風暴期間，日本的 ADEOS-II 衛星失效。）",
+        desc: "太陽正處於活躍期，高能粒子讓整個任務期間的輻射劑量提高 50%，屏蔽差、零件等級低的衛星更容易故障。太陽活動約 11 年一個週期，一個週期中 X1 級以上的強烈閃焰約 175 次、X10 級約 8 次（NOAA 太空天氣分級）。2003 年萬聖節太陽風暴期間，日本的 ADEOS-II 衛星失效。",
       },
       geomagnetic_storm: {
         name: "地磁暴",
@@ -31,13 +31,13 @@ const STRINGS = {
         name: "雷雨延誤發射",
         desc: "發射場上空有雷雨，依照發射準則必須延期（1969 年阿波羅 12 號升空後曾遭閃電擊中）。延誤期間的人力與設施成本讓預算減少 $5M。",
       },
-      micrometeorite: {
-        name: "流星雨高峰",
-        desc: "任務期間正逢流星雨高峰，衛星可能被流星體撞擊。結構屏蔽越好，被擊毀的機率越低。",
+      small_debris: {
+        name: "微小碎片密集",
+        desc: "目標軌道上有大量 1 公分以下的太空碎片和微流星體。它們小到地面雷達追蹤不到，所以無法閃避，只能靠結構屏蔽擋下；結構越好，被擊毀的機率越低。（2016 年，歐洲的哨兵 1A 衛星太陽能板被一顆毫米級碎片擊中，功率下降但撐了下來。）",
       },
       orbital_congestion: {
         name: "軌道碎片密集",
-        desc: "目標低軌高度的太空碎片很多，衛星需要多次閃避機動，LEO 的 Δv 需求增加 0.03 km/s。",
+        desc: "目標低軌高度有很多 10 公分以上的太空碎片。它們夠大、地面雷達追蹤得到，所以可以閃避，但衛星要多次機動，LEO 的 Δv 需求增加 0.03 km/s。",
       },
       limited_ground_station: {
         name: "地面站維修",
@@ -128,13 +128,13 @@ const STRINGS = {
         premium: "Ka 頻段高增益天線＋專屬地面站：太陽動力學天文台（SDO）靠它從地球同步軌道每秒傳 130 Mb、每天 1.4 TB。附冗餘發射機。",
       },
       structure: {
-        economy: "輕量鋁合金結構：最省重量與成本，但幾乎沒有額外的輻射屏蔽，也沒做完整的發射振動測試。",
-        standard: "鋁蜂巢結構＋輻射屏蔽：大多數商用衛星的做法，通過完整的發射振動與熱真空測試。",
-        premium: "加厚屏蔽＋惠普爾防護罩（Whipple Shield）：用犧牲層把微隕石的撞擊能量打散，國際太空站的關鍵艙段就是這個設計；同時大幅降低電子元件受到的輻射劑量。",
+        economy: "6061 鋁合金開放式框架：四根角柱加上下框架，電路板一層層鎖在裡面，立方衛星最常見。最省重量與成本，但側面不是完整的金屬板，幾乎沒有輻射屏蔽，振動測試也只用分析代替。",
+        standard: "鋁蜂巢夾層板＋中央承力筒：兩片鋁板中間夾蜂巢芯，又輕又硬，是大多數商用衛星的做法。通過完整的發射振動與熱真空測試。",
+        premium: "7075 鋁合金一體式承力外殼＋惠普爾防護層：外殼本身承受發射負載（7075 強度約是 6061 的 1.8 倍），厚外殼同時擋住輻射；外面再加一層犧牲用的薄板，把碎片撞擊的能量打散（國際太空站的關鍵艙段就是這個設計）。",
       },
       payload_optical: {
         economy: "9 cm 口徑立方衛星相機（Planet Labs 的 Dove 級）：4 個波段（紅、綠、藍、近紅外），在約 500 km 高度解析度約 3.7 m。上百顆組成星座，每天拍遍全球。",
-        standard: "50 cm 口徑多光譜成像儀：16 個光譜波段，和 GOES 氣象衛星 ABI 成像儀的波段數相同。",
+        standard: "50 cm 口徑多光譜成像儀：16 個光譜波段，和 GOES 氣象衛星 ABI 成像儀的波段數相同。口徑和台灣自主研發的福衛五號光學遙測酬載（45 cm，2017 年發射，在 720 km 高度拍出 2 m 解析度）差不多。",
         premium: "1.1 m 口徑望遠鏡（WorldView-3 級）：29 個光譜波段，在 617 km 高度能拍出 31 cm 解析度——看得出車子的形狀。",
       },
       payload_transponder: {
@@ -153,7 +153,7 @@ const STRINGS = {
     explainer: {
       power: "電力系統負責發電和儲電，衛星上所有儀器都要用電。LEO 每圈約有 35 分鐘在地球陰影裡要靠電池撐過去，所以太陽能板要比平均用電做得更大。",
       comm: "通訊系統負責把資料傳回地面。訊號強度和距離平方成反比：GEO 比 LEO 遠 65 倍，同樣的天線訊號會弱約 4,200 倍。",
-      structure: "結構要承受發射時的劇烈振動，也負責擋住輻射和微隕石。結構越堅固就越重——而衛星每多 1 kg，火箭就得多載 1 kg。",
+      structure: "結構要承受發射時的劇烈振動，也負責擋住輻射和太空碎片。常見材料是鋁合金：6061 便宜好加工，7075 強度高、用在受力最大的地方。結構越堅固就越重——而衛星每多 1 kg，火箭就得多載 1 kg。",
       payload_optical: "光學酬載是衛星的眼睛。望遠鏡口徑越大，能分辨的細節越小（繞射極限：解析度 ≈ 1.22 × 波長 × 高度 ÷ 口徑）；波段越多，越能分辨雲、水氣、植物和冰。",
       payload_transponder: "通訊衛星的酬載是轉發器：接收地面訊號、放大後再轉發回地面。容量越大越耗電——通訊衛星的電力大部分都給了它。",
       fuel: "推進系統讓衛星在太空中改變速度（Δv）：修正軌道、對抗大氣阻力、任務結束後離軌。比衝（Isp）越高，同樣的推進劑能產生越多 Δv。",
@@ -241,7 +241,7 @@ const STRINGS = {
         geo: "GEO 衛星只看得到約 42% 的地球，而且看不到南北緯 81° 以上的極區——偏偏冰層監測最需要那裡。",
       },
       weather: {
-        leo: "LEO 衛星每天只經過同一片海域約 2 次，但颱風追蹤需要每 10 分鐘一張（每天 144 張）。",
+        leo: "LEO 衛星每天只經過同一片海域約 2 次，但颱風追蹤需要每 10 分鐘一張（每天 144 張）。不過 LEO 也能幫氣象預報：台灣的福衛七號用 GNSS 掩星技術量測大氣的溫度與濕度剖面，不受雲層影響，資料每天送進全球的天氣預報模式——只是要「看著」颱風移動，還是得靠 GEO。",
         geo: "GEO 衛星永遠盯著同一個半球，GOES 與向日葵衛星每 10 分鐘就能拍一張全圓盤影像。",
       },
       comms: {
@@ -306,7 +306,7 @@ const STRINGS = {
       },
       storm_warning: {
         name: "太陽風暴警報",
-        desc: "美國海洋暨大氣總署（NOAA）的太空天氣預報中心發布強烈地磁暴警報。很多衛星營運商會讓衛星暫時進入安全模式。",
+        desc: "美國海洋暨大氣總署（NOAA）的太空天氣預報中心發布極端（G5）地磁暴警報——一個 11 年太陽週期平均只有約 4 次，例如 2024 年 5 月的風暴。很多衛星營運商會讓衛星暫時進入安全模式。",
       },
       ground_outage: {
         name: "地面站故障",
@@ -403,7 +403,7 @@ const STRINGS = {
       component_payload: "任務酬載故障，衛星還活著，卻無法工作了。",
       component_propulsion: "推進系統故障，衛星無法再維持軌道。",
       component_bus: "衛星本體（電腦或姿態控制）故障。",
-      impact: "被微隕石擊中！1993 年英仙座流星雨期間，歐洲太空總署的 Olympus-1 通訊衛星疑似被流星體撞擊而失控。",
+      impact: "被追蹤不到的微小碎片擊中！相對速度約每秒 10 公里，一顆 1 公分的鋁珠動能約 70 千焦耳，和一輛 250 公斤的機車以時速 85 公里撞上來差不多。1993 年英仙座流星雨期間，歐洲的 Olympus-1 通訊衛星疑似被流星體撞擊而失控。",
     },
     hindsight: {
       optimal: "事後精算：在預算和質量限制內，只改一項選擇已經無法再提升期望價值——這是很紮實的設計！",
@@ -526,6 +526,20 @@ const STRINGS = {
         "任務報告會比較「實際交付的價值」和「發射前的期望值」。",
         "下面的「事後精算」會告訴你：如果只改一個選擇，怎麼改最能提升期望值。",
       ],
+      level2: [
+        "第 2 關：推進系統交給你了！之前是系統自動幫你配好推進器和推進劑，現在要自己選。",
+        "化學推進推力大、一下就能變軌；電推進的比衝高好幾倍、超省推進劑，但很耗電，去 GEO 還要花約 6 個月慢慢螺旋爬升、反覆穿越輻射帶。",
+        "推進劑可以用滑桿調整，也可以先按「自動計算」，再試試看加多或減少會怎樣。記住火箭方程式有對數：推進劑加倍，Δv 不會加倍。",
+      ],
+      level3: [
+        "第 3 關：真實的太空環境。從這關開始，每次任務都會遇到一個隨機事件——太陽風暴、預算刪減、發射延誤……",
+        "這一關固定是「太陽粒子事件」：輻射變強，零件等級和結構屏蔽會比平常重要很多。看看預算表裡的可靠度怎麼變。",
+      ],
+      level4: [
+        "最後一關：任務運作。衛星入軌後零件可能故障，你要決定花預備金搶修，還是降級繼續運作。",
+        "沒花完的預算就是預備金。把錢全部花在零件上不一定最好——NASA 的大型計畫也一定會保留預備金。",
+        "通過這一關，就會解鎖自由遊玩！",
+      ],
       operations: [
         "任務控制中心回報異常！衛星運作期間，零件故障或太空環境變化時，要由你來做決定。",
         "花預備金可以挽救衛星；但省下來的預備金，在設計壽命結束後可以用來延長任務。每個選項都有「精算估計」——想想哪個期望值最高。",
@@ -553,7 +567,7 @@ const STRINGS = {
       budgetNoteAdjusted: "Mission budget: {budget} (cut by {delta} due to the event)",
       solar_flare: {
         name: "Solar Particle Event",
-        desc: "The Sun is highly active: energetic particles raise the radiation dose by 50% for the whole mission, so poorly shielded or low-grade satellites fail more often. (Japan's ADEOS-II was lost during the 2003 Halloween solar storms.)",
+        desc: "The Sun is highly active: energetic particles raise the radiation dose by 50% for the whole mission, so poorly shielded or low-grade satellites fail more often. Solar activity runs in roughly 11-year cycles, and each cycle brings about 175 flares of class X1 or stronger and about 8 of class X10 (NOAA space weather scales). Japan's ADEOS-II was lost during the 2003 Halloween solar storms.",
       },
       geomagnetic_storm: {
         name: "Geomagnetic Storm",
@@ -563,13 +577,13 @@ const STRINGS = {
         name: "Thunderstorm Scrub",
         desc: "Thunderstorms over the launch site force a delay under launch commit criteria (Apollo 12 was struck by lightning after liftoff in 1969). Standing-army costs during the delay eat $5M of your budget.",
       },
-      micrometeorite: {
-        name: "Meteor Shower Peak",
-        desc: "The mission coincides with a meteor shower peak, so the satellite may be struck by a meteoroid. Better structural shielding lowers the chance of a fatal hit.",
+      small_debris: {
+        name: "Dense Small Debris",
+        desc: "The target orbit is thick with debris and meteoroids under 1 cm — too small for ground radar to track, so they can't be dodged, only shielded against. Better structure lowers the chance of a fatal hit. (In 2016 a millimeter-sized particle struck the solar array of Europe's Sentinel-1A; it lost some power but survived.)",
       },
       orbital_congestion: {
         name: "Crowded Orbit",
-        desc: "The target LEO altitude is full of debris, so the satellite must perform extra collision-avoidance maneuvers: LEO Δv needs rise by 0.03 km/s.",
+        desc: "The target LEO altitude has lots of debris larger than 10 cm. Ground radar can track pieces that big, so they can be dodged — but the extra avoidance maneuvers raise LEO Δv needs by 0.03 km/s.",
       },
       limited_ground_station: {
         name: "Ground Station Maintenance",
@@ -660,13 +674,13 @@ const STRINGS = {
         premium: "Ka-band high-gain antenna + dedicated ground station: NASA's Solar Dynamics Observatory uses this to send 130 Mbps (1.4 TB per day) from geosynchronous orbit. Redundant transmitters.",
       },
       structure: {
-        economy: "Lightweight aluminum frame: lowest mass and cost, but almost no extra radiation shielding and no full launch-vibration testing.",
-        standard: "Aluminum honeycomb + radiation shielding: how most commercial satellites are built, fully tested for launch vibration and thermal vacuum.",
-        premium: "Heavy shielding + Whipple shield: a sacrificial layer disperses meteoroid impacts, as on key ISS modules; it also greatly cuts the radiation dose reaching the electronics.",
+        economy: "6061 aluminum open frame: four corner rails plus top and bottom frames, with circuit boards stacked inside — the most common CubeSat structure. Lowest mass and cost, but the sides aren't solid metal, so there's almost no radiation shielding, and vibration testing is replaced by analysis.",
+        standard: "Aluminum honeycomb panels + central thrust tube: a honeycomb core sandwiched between two aluminum skins, light and stiff — how most commercial satellites are built. Fully tested for launch vibration and thermal vacuum.",
+        premium: "7075 aluminum monocoque shell + Whipple shield: the shell itself carries launch loads (7075 is about 1.8× as strong as 6061) and its thickness blocks radiation; a sacrificial outer sheet breaks up debris impacts, as on key ISS modules.",
       },
       payload_optical: {
         economy: "9 cm CubeSat camera (Planet Labs Dove class): 4 bands (red, green, blue, near-infrared), about 3.7 m resolution from ~500 km. Hundreds of them image the whole planet daily.",
-        standard: "50 cm multispectral imager: 16 spectral bands — the same band count as the ABI imager on GOES weather satellites.",
+        standard: "50 cm multispectral imager: 16 spectral bands — the same band count as the ABI imager on GOES weather satellites. The aperture is close to Taiwan's homegrown FORMOSAT-5 Remote Sensing Instrument (45 cm, launched 2017, 2 m resolution from 720 km).",
         premium: "1.1 m telescope (WorldView-3 class): 29 spectral bands and 31 cm resolution from 617 km — enough to make out the shape of a car.",
       },
       payload_transponder: {
@@ -685,7 +699,7 @@ const STRINGS = {
     explainer: {
       power: "The power system generates and stores electricity for every instrument. In LEO the satellite spends about 35 minutes of each orbit in Earth's shadow on batteries, so the arrays must be sized well above the average load.",
       comm: "The comms system sends data home. Signal strength falls with the square of distance: GEO is 65× farther than LEO, so the same antenna's signal is about 4,200× weaker.",
-      structure: "The structure survives violent launch vibrations and shields against radiation and meteoroids. Stronger means heavier — and every extra kilogram must be carried by the rocket.",
+      structure: "The structure survives violent launch vibrations and shields against radiation and space debris. Aluminum alloys are the usual choice: 6061 is cheap and easy to machine, while stronger 7075 goes where loads are highest. Stronger means heavier — and every extra kilogram must be carried by the rocket.",
       payload_optical: "The optical payload is the satellite's eye. A bigger aperture resolves finer detail (diffraction limit: resolution ≈ 1.22 × wavelength × altitude ÷ aperture); more spectral bands tell clouds, water vapor, plants, and ice apart.",
       payload_transponder: "A comsat's payload is its transponders: receive signals from the ground, amplify them, and send them back down. More capacity means more power — most of a comsat's power goes here.",
       fuel: "Propulsion lets the satellite change velocity (Δv) in space: correcting its orbit, fighting drag, and deorbiting at end of life. Higher specific impulse (Isp) squeezes more Δv out of the same propellant.",
@@ -773,7 +787,7 @@ const STRINGS = {
         geo: "A GEO satellite sees only about 42% of Earth and nothing beyond 81° latitude — exactly where ice monitoring matters most.",
       },
       weather: {
-        leo: "A LEO satellite passes the same ocean region only about twice a day, but typhoon tracking needs an image every 10 minutes (144 a day).",
+        leo: "A LEO satellite passes the same ocean region only about twice a day, but typhoon tracking needs an image every 10 minutes (144 a day). LEO still helps forecasting, though: Taiwan's FORMOSAT-7 uses GNSS radio occultation to measure temperature and humidity profiles through clouds, feeding global weather models every day — but to watch a typhoon move, you need GEO.",
         geo: "A GEO satellite stares at the same hemisphere forever: GOES and Himawari take a full-disk image every 10 minutes.",
       },
       comms: {
@@ -838,7 +852,7 @@ const STRINGS = {
       },
       storm_warning: {
         name: "Solar Storm Warning",
-        desc: "NOAA's Space Weather Prediction Center has issued a severe geomagnetic storm warning. Many operators put their satellites into safe mode until it passes.",
+        desc: "NOAA's Space Weather Prediction Center has issued an extreme (G5) geomagnetic storm warning — only about 4 per 11-year solar cycle on average, like the storm of May 2024. Many operators put their satellites into safe mode until it passes.",
       },
       ground_outage: {
         name: "Ground Station Failure",
@@ -935,7 +949,7 @@ const STRINGS = {
       component_payload: "The payload failed: the satellite is alive but can no longer do its job.",
       component_propulsion: "The propulsion system failed and the satellite can no longer hold its orbit.",
       component_bus: "The satellite bus (computer or attitude control) failed.",
-      impact: "Meteoroid strike! During the 1993 Perseids, ESA's Olympus-1 comsat lost control after a suspected meteoroid impact.",
+      impact: "Hit by untrackable debris! At a relative speed of about 10 km/s, a 1 cm aluminum bead carries about 70 kJ — like a 250 kg motorcycle hitting at 85 km/h. During the 1993 Perseids, ESA's Olympus-1 comsat lost control after a suspected meteoroid impact.",
     },
     hindsight: {
       optimal: "Hindsight: within your budget and mass limits, no single change would raise the expected value any further — a solid design!",
@@ -1057,6 +1071,20 @@ const STRINGS = {
       results: [
         "The mission report compares the value you actually delivered with the expected value at launch.",
         "The Hindsight line below shows the single change that would have raised your expected value the most.",
+      ],
+      level2: [
+        "Level 2: propulsion is yours now! Until now the system picked the thruster and propellant for you.",
+        "Chemical thrusters push hard and change orbit fast. Electric thrusters have several times the specific impulse and sip propellant, but they draw lots of power — and reaching GEO means a slow 6-month spiral through the radiation belts.",
+        "Set propellant with the slider, or press Auto-calculate first and then see what happens with more or less. Remember the rocket equation's logarithm: doubling propellant doesn't double Δv.",
+      ],
+      level3: [
+        "Level 3: the real space environment. From now on every mission draws a random event — solar storms, budget cuts, launch delays...",
+        "This level always brings a Solar Particle Event: radiation runs high, so part grades and structural shielding matter far more than usual. Watch how the reliability rows on the budget sheet change.",
+      ],
+      level4: [
+        "Final level: operations. Once in orbit, parts can fail — you decide whether to spend reserve on a fix or carry on degraded.",
+        "Unspent budget is your reserve. Pouring every dollar into parts isn't always best — NASA's big projects always hold reserve back too.",
+        "Clear this level to unlock Free Play!",
       ],
       operations: [
         "Mission control reports an anomaly! During operations, you make the call when parts fail or space weather changes.",

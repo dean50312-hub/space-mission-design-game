@@ -1,6 +1,8 @@
 // ORBIT 劇情引導：每個畫面第一次出現時，用對話框帶新手認識該畫面
 
 const TUTORIAL_SCREENS = ["home", "event", "selection", "simulation", "results", "operations"];
+// 劇情關卡開放新機制時的說明；「跳過教學」不會略過它們，因為每關都有新東西要知道
+const LEVEL_INTRO_KEYS = ["level2", "level3", "level4"];
 
 let tutorialActiveScreen = null;
 let tutorialLineIndex = 0;
@@ -8,7 +10,8 @@ let tutorialResolve = null;
 
 function showTutorialIfNeeded(screenKey) {
   return new Promise((resolve) => {
-    if (!TUTORIAL_SCREENS.includes(screenKey) || storageHasSeenTutorial(screenKey)) {
+    const known = TUTORIAL_SCREENS.includes(screenKey) || LEVEL_INTRO_KEYS.includes(screenKey);
+    if (!known || storageHasSeenTutorial(screenKey)) {
       resolve();
       return;
     }
@@ -55,6 +58,7 @@ function closeTutorialBeat() {
 function skipAllTutorials() {
   sfxClick();
   TUTORIAL_SCREENS.forEach(storageMarkTutorialSeen);
+  if (tutorialActiveScreen) storageMarkTutorialSeen(tutorialActiveScreen);
   document.getElementById("tutorial-overlay").classList.add("hidden");
   tutorialActiveScreen = null;
   if (tutorialResolve) {
