@@ -866,8 +866,84 @@ ICONS = {
 }
 
 
+# ---------- 火箭尾焰（3 格輪播的精靈圖，存到 image/rocket/exhaust.png）----------
+# 每格 8×14，顯示時放大 3 倍，接近火箭圖本身的像素大小。顏色由噴嘴往下：白熱 → 黃 → 橙 → 紅
+
+EXHAUST_FRAMES = [
+    [
+        ".LwwwwL.",
+        ".wZZZZw.",
+        ".yZZZZy.",
+        ".yyZZyy.",
+        ".oyyyyo.",
+        "..oyyo..",
+        "..oyyo..",
+        "..ooyo..",
+        "..rooo..",
+        "...oo...",
+        "...ro...",
+        "...rr...",
+        "....r...",
+        "........",
+    ],
+    [
+        ".LwwwwL.",
+        "LwZZZZwL",
+        "yyZZZZyy",
+        ".yyZZyy.",
+        ".oyyyyo.",
+        ".ooyyoo.",
+        "..oyyo..",
+        "..roor..",
+        "...oo...",
+        "...rr...",
+        "...r....",
+        "........",
+        "........",
+        "........",
+    ],
+    [
+        ".LwwwwL.",
+        ".wZZZZw.",
+        ".yZZZZy.",
+        ".yZZZyy.",
+        ".yyZyyo.",
+        ".oyyyo..",
+        "..oyyo..",
+        "..oyoo..",
+        "..ooor..",
+        "..roo...",
+        "...or...",
+        "...rr...",
+        "...r....",
+        "....r...",
+    ],
+]
+
+EXHAUST_COLORS = {
+    "L": (255, 255, 255, 255),
+    "w": (255, 251, 232, 255),
+    "Z": (255, 241, 184, 255),
+    "y": (255, 209, 102, 255),
+    "o": (255, 159, 67, 255),
+    "r": (255, 85, 102, 255),
+}
+
+
+def exhaust_sheet():
+    w, h = 8, 14
+    sheet = Image.new("RGBA", (w * len(EXHAUST_FRAMES), h), (0, 0, 0, 0))
+    for i, frame in enumerate(EXHAUST_FRAMES):
+        for y, row in enumerate(frame):
+            for x, ch in enumerate(row):
+                if ch != ".":
+                    sheet.putpixel((i * w + x, y), EXHAUST_COLORS[ch])
+    return sheet
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    exhaust_sheet().save(os.path.join(os.path.dirname(__file__), "..", "image", "rocket", "exhaust.png"))
     images = {}
     for name, fn in ICONS.items():
         im = fn().im

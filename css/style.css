@@ -1299,24 +1299,32 @@ details[open] > summary {
   80% { transform: translate(3px, 2px); }
 }
 
+/* 尾焰：image/rocket/exhaust.png 是 3 格輪播的像素火焰（每格 8×14，放大 3 倍）；
+   重型火箭有三支核心，所以 js/simulation.js 會放三道火焰，間距對準三個噴嘴 */
 #exhaust {
-  width: 12px;
-  height: 26px;
-  margin-top: -4px;
-  background: linear-gradient(to bottom, #fff59d 0 30%, #ff9800 30% 60%, #ff5722 60% 85%, transparent 85%);
-  clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+  display: flex;
+  gap: 8px;
+  margin-top: -2px;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
 #exhaust.active {
   opacity: 1;
-  animation: flicker 0.12s steps(2) infinite alternate;
 }
 
-@keyframes flicker {
-  from { transform: scaleY(1); }
-  to { transform: scaleY(0.75); }
+.flame {
+  width: 24px;
+  height: 42px;
+  background: url("../image/rocket/exhaust.png") 0 0 / 72px 42px no-repeat;
+  animation: flame-frames 0.3s steps(3) infinite;
+}
+
+.flame:nth-child(2) { animation-delay: -0.1s; }
+.flame:nth-child(3) { animation-delay: -0.2s; }
+
+@keyframes flame-frames {
+  to { background-position: -72px 0; }
 }
 
 /* ---------- 運作期軌道畫面 ---------- */

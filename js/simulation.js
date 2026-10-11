@@ -182,6 +182,10 @@ function setRocketState(state) {
   } else if (gameState.rocket) {
     img.src = `image/rocket/rocket-${gameState.rocket.id}.png`;
   }
+
+  // 重型火箭（Falcon Heavy）三支核心並聯，三道火焰；爆炸後就沒有火焰
+  const flames = state === "exploded" ? 0 : gameState.rocket && gameState.rocket.id === "heavy" ? 3 : 1;
+  document.getElementById("exhaust").innerHTML = '<span class="flame"></span>'.repeat(flames);
 }
 
 function shakeTrack() {
