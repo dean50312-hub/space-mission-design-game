@@ -124,6 +124,7 @@ const STRINGS = {
     subsystem: {
       power: "電力系統",
       comm: "通訊系統",
+      attitude: "姿態控制",
       structure: "結構與屏蔽",
     },
     payloadKind: { optical: "光學酬載", transponder: "通訊酬載（轉發器）" },
@@ -139,6 +140,11 @@ const STRINGS = {
         economy: "S 頻段立方衛星無線電：只有幾公斤、耗電十幾瓦，速率約每秒數百萬位元。傳遙測夠用，傳大量影像就會塞車。",
         standard: "X 頻段可轉向天線：地球觀測衛星的標準配備，WorldView 系列就是用 800 Mbps 的 X 頻段下傳影像。",
         premium: "Ka 頻段高增益天線＋專屬地面站：太陽動力學天文台（SDO）靠它從地球同步軌道每秒傳 130 Mb、每天 1.4 TB。附冗餘發射機。",
+      },
+      attitude: {
+        economy: "磁力棒（磁力矩器）：三根互相垂直的電磁線圈，通電後和地球磁場作用來轉動衛星。沒有活動零件，便宜又耐用，NASA 約 180 kg 的 FASTSAT 小衛星就只用磁力棒控制姿態。但指向精度只有約 2°，而且地磁強度和距離的立方成反比，到了 GEO 幾乎沒有作用。",
+        standard: "3 顆反應輪＋星象儀：馬達讓飛輪加速或減速，衛星就往反方向轉（角動量守恆），指向精度可達約 0.02°。韋伯太空望遠鏡就是靠 6 顆反應輪精確指向。飛輪轉速累積到上限時，要用磁力棒或推進器「卸載」。",
+        premium: "4 顆反應輪（金字塔構型）＋星象儀：三軸控制只需要 3 顆，多裝的 1 顆是備份，任何一顆壞了都還能精確指向。克卜勒太空望遠鏡就是這樣的配置，直到 4 顆中壞了第 2 顆，才失去精確指向的能力。",
       },
       structure: {
         economy: "6061 鋁合金開放式框架：四根角柱加上下框架，電路板一層層鎖在裡面，立方衛星最常見。最省重量與成本，但側面不是完整的金屬板，幾乎沒有輻射屏蔽，振動測試也只用分析代替。",
@@ -166,6 +172,7 @@ const STRINGS = {
     explainer: {
       power: "電力系統負責發電和儲電，衛星上所有儀器都要用電。LEO 每圈約有 35 分鐘在地球陰影裡要靠電池撐過去，所以太陽能板要比平均用電做得更大。",
       comm: "通訊系統負責把資料傳回地面。訊號強度和距離平方成反比：GEO 比 LEO 遠 65 倍，同樣的天線訊號會弱約 4,200 倍。",
+      attitude: "姿態控制讓衛星指向正確的方向：相機對準目標、天線對準地面、太陽能板對準太陽。反應輪靠改變轉速、利用角動量守恆讓衛星往反方向轉；磁力棒則是通電產生磁場，和地球磁場作用產生力矩——但地磁強度和距離的立方成反比，GEO 的地磁只有低軌道的約 1/226。",
       structure: "結構要承受發射時的劇烈振動，也負責擋住輻射和太空碎片。常見材料是鋁合金：6061 便宜好加工，7075 強度高、用在受力最大的地方。結構越堅固就越重——而衛星每多 1 kg，火箭就得多載 1 kg。",
       payload_optical: "光學酬載是衛星的眼睛。望遠鏡口徑越大，能分辨的細節越小（繞射極限：解析度 ≈ 1.22 × 波長 × 高度 ÷ 口徑）；波段越多，越能分辨雲、水氣、植物和冰。",
       payload_transponder: "通訊衛星的酬載是轉發器：接收地面訊號、放大後再轉發回地面。容量越大越耗電——通訊衛星的電力大部分都給了它。",
@@ -193,6 +200,9 @@ const STRINGS = {
       powerStats: "{watts} W · {mass} kg · {cost} · {grade}",
       commStats: "{orbit} 下傳 {rate} · {watts} W · {mass} kg · {cost} · {grade}",
       structureStats: "結構重量 = 其他乾重的 {fraction}% · {cost}",
+      attitudeStats: "指向精度 {pointing} · {watts} W · {mass} kg · {cost} · {grade}",
+      geoTorquerTag: "⚠️ GEO 地磁太弱，幾乎無效",
+      uncontrolled: "無法穩定指向",
       transponderStats: "容量 {gbps} Gbps · {watts} W · {mass} kg · {cost} · {grade}",
       opticalStats: "口徑 {aperture} cm · {bands} 波段 · 解析度 {gsd} · {watts} W · {mass} kg · {cost} · {grade}",
       deployTag: "需展開",
@@ -221,13 +231,15 @@ const STRINGS = {
       power: "電力",
       data: "每日資料",
       dv: "Δv",
-      valueBreakdown: "設計壽命內的任務價值 = 以下五項相乘",
+      valueBreakdown: "設計壽命內的任務價值 = 以下六項相乘",
       reliability: "可靠度",
       reserve: "預備金",
+      thermal: "散熱",
+      thermalValue: "{area} m² · {method}",
       monteCarloNote: "含故障應變與延長任務（蒙地卡羅模擬 {runs} 次）",
     },
     sheetExplain: {
-      cost: "所有花費加總：火箭發射費、衛星本體（電腦、姿態控制、熱控，固定 $8M）、各部件，以及毒性推進劑的防護加注作業。超出預算就無法發射。",
+      cost: "所有花費加總：火箭發射費、衛星本體（電腦、熱控、線路，固定 $4M）、各部件，以及毒性推進劑的防護加注作業。超出預算就無法發射。",
       mass: "衛星乾質量 {dry} kg（含結構）加上推進劑，不能超過火箭能送到{dest}的運力。真實工程在概念設計階段還會預留 20–30% 的質量餘裕，因為衛星在研發過程中幾乎一定會變重。",
       power_leo: "左邊是軌道平均可用功率：太陽能板額定功率 × {factor}，因為 LEO 每圈約 35 分鐘在地球陰影中，還要分電替電池充電。右邊是衛星本體、酬載與通訊的用電。電力不夠時，酬載只能輪流開機。",
       power_geo: "GEO 幾乎全年日照（只有春分、秋分前後每天最多約 72 分鐘的蝕），但太陽能板 15 年下來會被輻射損耗，所以用額定功率 × {factor} 計算。右邊是衛星本體、酬載與通訊的用電。",
@@ -236,13 +248,20 @@ const STRINGS = {
       dv_leo: "LEO 的 Δv 需求：軌道維持，加上任務結束後 5 年內離軌（美國 FCC 在 2022 年訂的新規定），共 {ops} km/s。",
       dv_geo: "火箭只把衛星送到 GTO，衛星要自己用遠地點引擎圓化成 GEO（{insert} km/s），之後 15 年還要做南北位置保持（{ops} km/s）。Δv 連圓化都不夠的話，衛星會卡在 GTO。",
       dv_geo_electric: "電推進推力太小，只能繞數百圈螺旋慢慢爬升，比一次點火多耗 Δv（{insert} km/s），還要花約 6 個月反覆穿越范艾倫輻射帶。之後的位置保持需要 {ops} km/s。",
+      thermal: "衛星用掉的 {watts} W 電力，最後幾乎全部變成熱。太空中沒有空氣可以對流，只能靠散熱面把熱「輻射」出去（史蒂芬－波茲曼定律：散熱量和溫度的四次方成正比），在這個軌道每平方公尺約能散掉 {flux} W，所以需要約 {area} m² 的散熱面。這個熱量需要：{method}。通訊衛星的轉發器動輒上萬瓦，所以大型通訊衛星都用迴路熱管加上可展開的散熱板；福衛五號則把散熱面做在太陽能板背面，讓電池板降溫、發電效率更好。",
       reserve: "沒花完的預算會變成預備金：運作期發生故障時可以用來挽救衛星；撐完設計壽命後，剩下的錢還能延長任務（每年 {perYear}，目前最多約 {years} 年，前提是推進劑還有剩），補回故障期間損失的服務時間。NASA 規定大型計畫的預算要有 70% 的機率不超支（聯合信心水準 JCL），所以一定會保留預備金。",
+    },
+    thermalMethod: {
+      passive: "多層隔熱毯＋被動散熱面",
+      heat_pipes: "熱管把熱帶到散熱面",
+      loop_heat_pipes: "迴路熱管＋可展開散熱板",
     },
     factor: {
       coverage: "覆蓋",
       performance: "性能",
       delivery: "資料下傳",
       power: "電力",
+      pointing: "指向",
       lifetime: "壽命",
     },
     coverageExplain: {
@@ -270,6 +289,8 @@ const STRINGS = {
       delivery: "每天能傳回地面的資料比例。拍了傳不回來，就等於沒拍。",
       deliveryTransponder: "通訊衛星的服務就是轉發本身，不需要另外下傳資料。",
       power: "電力供應 ÷ 用電需求。電力不足時酬載要輪流關機。",
+      pointing: "指向精度 {have}，任務需要 {need} 以內。指向不準，相機拍不到目標、天線對不準地面。",
+      pointingGeoTorquer: "GEO 的地磁只有低軌道的約 1/{ratio}，磁力棒產生的力矩太小，衛星根本無法穩定指向——GEO 衛星都用反應輪。",
       stranded: "Δv 不足以從 GTO 圓化成 GEO，衛星會卡在轉移軌道上，任務無法開始。",
       lifetime: "推進劑足夠撐完設計壽命的 {pct}。GEO 衛星通常就是因為燃料用完而退役。",
       transferDelay: "電推進爬升到 GEO 約需 {months} 個月，這段期間無法提供服務。",
@@ -310,9 +331,17 @@ const STRINGS = {
         name: "推進系統閥門異常",
         desc: "推進系統的閥門開得非常慢。2016 年朱諾號木星探測器也遇到同樣的問題，NASA 最後決定不冒險點火，讓它留在原本的軌道上繼續完成任務。",
       },
+      computer_upset: {
+        name: "衛星電腦當機",
+        desc: "高能粒子打中衛星電腦的記憶體，造成「單事件翻轉」，電腦反覆重開機。2021 年哈伯太空望遠鏡的酬載電腦也出過問題，在安全模式中停擺了約一個月，最後切換到備援硬體才恢復。",
+      },
+      torquer_fault: {
+        name: "磁力棒線圈斷路",
+        desc: "三根磁力棒中有一根的線圈斷了，只剩兩個方向能產生力矩。",
+      },
       reaction_wheel: {
-        name: "反作用輪故障",
-        desc: "控制衛星指向的反作用輪壞了一個。2013 年克卜勒太空望遠鏡壞了第二個反作用輪，工程師想出用太陽光壓平衡姿態的方法，讓它以 K2 任務又觀測了 4 年。",
+        name: "反應輪故障",
+        desc: "控制衛星指向的反應輪壞了一個。2013 年克卜勒太空望遠鏡壞了第二個反應輪，工程師想出用太陽光壓平衡姿態的方法，讓它以 K2 任務又觀測了 4 年。",
       },
       conjunction: {
         name: "碰撞預警",
@@ -338,6 +367,10 @@ const STRINGS = {
       backup_thrusters: { label: "改用小型備用推進器", effect: "效率較差，剩餘推進劑能撐的年限少 30%。" },
       new_software: { label: "開發新的姿態控制軟體", effect: "用剩下的零件重寫姿態控制（類似哈伯太空望遠鏡 2024 年改用單陀螺儀模式），恢復 90% 的產出。" },
       solar_pressure: { label: "改用太陽光壓平衡", effect: "像克卜勒 K2 任務一樣用太陽光壓穩住姿態，之後只剩 60% 的產出。" },
+      patch_firmware: { label: "上傳修正韌體", effect: "地面團隊找出問題、上傳修正，衛星馬上恢復正常。" },
+      safe_mode_debug: { label: "在安全模式下慢慢除錯", effect: "不花錢，但酬載要停擺約一個月（0.1 年）。" },
+      two_axis_control: { label: "改寫姿態控制律", effect: "工程師重寫控制軟體，利用衛星繞地球時磁場方向的變化，用剩下兩根磁力棒控制三軸，恢復 90% 的產出。" },
+      spin_stabilize: { label: "改成自旋穩定", effect: "讓衛星像陀螺一樣自轉保持穩定，酬載只有轉到對準地面時才能工作，之後只剩 50% 的產出。" },
       maneuver: { label: "執行閃避機動", effect: "消耗 0.01 km/s 的 Δv，剩餘壽命會稍微縮短。" },
       accept_risk: { label: "不閃避", effect: "保留推進劑，但有 0.2% 的機率被撞毀。" },
       safe_mode: { label: "進入安全模式 3 天", effect: "暫停酬載 3 天，損失一點點任務價值，但不必冒險。" },
@@ -448,7 +481,8 @@ const STRINGS = {
       component_comm: "通訊系統故障，地面再也收不到衛星的訊號。",
       component_payload: "任務酬載故障，衛星還活著，卻無法工作了。",
       component_propulsion: "推進系統故障，衛星無法再維持軌道。",
-      component_bus: "衛星本體（電腦或姿態控制）故障。",
+      component_attitude: "姿態控制系統故障，衛星開始翻滾，再也無法對準目標。",
+      component_bus: "衛星電腦故障，再也無法執行地面送上來的指令。",
       impact: "被追蹤不到的微小碎片擊中！相對速度約每秒 10 公里，一顆 1 公分的鋁珠動能約 70 千焦耳，和一輛 250 公斤的機車以時速 85 公里撞上來差不多。1993 年英仙座流星雨期間，歐洲的 Olympus-1 通訊衛星疑似被流星體撞擊而失控。",
     },
     hindsight: {
@@ -478,7 +512,7 @@ const STRINGS = {
       },
       all_rounder: {
         name: "全能設計",
-        hint: "任務價值的五項指標都達到 80% 以上且任務成功",
+        hint: "任務價值的六項指標都達到 80% 以上且任務成功",
         story: "1977 年發射的航海家一號與二號，原本只是設計來探索木星和土星的任務，工程餘裕卻好到讓航海家二號一路飛越天王星、海王星，兩艘探測器至今仍在星際空間持續傳回資料，是工程「面面俱到」的最佳典範。",
       },
       glorious_failure: {
@@ -493,12 +527,12 @@ const STRINGS = {
       },
       bare_bones: {
         name: "克難精神",
-        hint: "用 Electron 火箭、4 個部件都選經濟檔，且任務成功",
+        hint: "用 Electron 火箭、所有部件都選經濟檔，且任務成功",
         story: "1957 年 10 月 4 日，蘇聯發射的史普尼克一號只是一顆直徑 58 公分、裝了四根天線的簡單金屬球，沒有任何科學儀器，卻靠著這樣的陽春設計成為人類第一顆人造衛星，正式揭開太空時代的序幕。",
       },
       top_of_the_line: {
         name: "不計成本",
-        hint: "4 個部件都選高階檔，且任務成功",
+        hint: "所有部件都選高階檔，且任務成功",
         story: "詹姆斯・韋伯太空望遠鏡耗資超過 100 億美元，是有史以來最昂貴的太空科學任務，但也換來了能看穿宇宙塵埃、直窺早期宇宙誕生的頂級觀測能力，證明有些時候貴是真的有貴的道理。",
       },
       so_close: {
@@ -565,9 +599,10 @@ const STRINGS = {
         "每種任務還有 3 枚挑戰勳章可以收集。下面的瀑布圖會告訴你價值被什麼扣掉了，「事後精算」則告訴你只改一個選擇的話怎麼改最好。",
       ],
       level2: [
-        "第 2 關：推進系統交給你了！之前是系統自動幫你配好推進器和推進劑，現在要自己選。",
+        "第 2 關：推進和姿態控制交給你了！之前是系統自動幫你配好，現在要自己選。",
         "化學推進推力大、一下就能變軌；電推進的比衝高好幾倍、超省推進劑，但很耗電，去 GEO 還要花約 6 個月慢慢螺旋爬升、反覆穿越輻射帶。",
         "推進劑可以用滑桿調整，也可以先按「自動計算」，再試試看加多或減少會怎樣。記住火箭方程式有對數：推進劑加倍，Δv 不會加倍。",
+        "姿態控制決定衛星能指得多準。磁力棒便宜耐用，但靠的是地球磁場——想想看，離地球越遠會怎樣？",
       ],
       level3: [
         "第 3 關：真實的太空環境。從這關開始，每次任務都會遇到一個隨機事件——太陽風暴、預算刪減、發射延誤……",
@@ -708,6 +743,7 @@ const STRINGS = {
     subsystem: {
       power: "Power System",
       comm: "Communications",
+      attitude: "Attitude Control",
       structure: "Structure & Shielding",
     },
     payloadKind: { optical: "Optical Payload", transponder: "Comms Payload (Transponders)" },
@@ -723,6 +759,11 @@ const STRINGS = {
         economy: "S-band CubeSat radio: a few kilograms and a dozen watts, a few megabits per second. Fine for telemetry, but large images will pile up.",
         standard: "Steerable X-band antenna: standard kit on Earth-observation satellites — the WorldView series downlinks imagery at 800 Mbps in X-band.",
         premium: "Ka-band high-gain antenna + dedicated ground station: NASA's Solar Dynamics Observatory uses this to send 130 Mbps (1.4 TB per day) from geosynchronous orbit. Redundant transmitters.",
+      },
+      attitude: {
+        economy: "Magnetorquers: three perpendicular electromagnet coils that push against Earth's magnetic field to turn the satellite. No moving parts, cheap and durable — NASA's 180 kg FASTSAT smallsat steered with magnetorquers alone. But pointing is only about 2°, and since Earth's field weakens with the cube of distance, they barely work at GEO.",
+        standard: "3 reaction wheels + star tracker: a motor spins a flywheel up or down and the satellite turns the other way (conservation of angular momentum), pointing to about 0.02°. The James Webb Space Telescope points with 6 reaction wheels. When the wheels reach top speed they must be \"desaturated\" using magnetorquers or thrusters.",
+        premium: "4 reaction wheels (pyramid layout) + star tracker: three-axis control needs only 3 wheels, so the fourth is a spare and any one can fail without losing precise pointing. Kepler flew exactly this setup and only lost fine pointing when its second of four wheels failed.",
       },
       structure: {
         economy: "6061 aluminum open frame: four corner rails plus top and bottom frames, with circuit boards stacked inside — the most common CubeSat structure. Lowest mass and cost, but the sides aren't solid metal, so there's almost no radiation shielding, and vibration testing is replaced by analysis.",
@@ -750,6 +791,7 @@ const STRINGS = {
     explainer: {
       power: "The power system generates and stores electricity for every instrument. In LEO the satellite spends about 35 minutes of each orbit in Earth's shadow on batteries, so the arrays must be sized well above the average load.",
       comm: "The comms system sends data home. Signal strength falls with the square of distance: GEO is 65× farther than LEO, so the same antenna's signal is about 4,200× weaker.",
+      attitude: "Attitude control points the satellite the right way: cameras at their targets, antennas at the ground, solar arrays at the Sun. Reaction wheels change speed and use conservation of angular momentum to turn the satellite the opposite way; magnetorquers make a magnetic field that pushes against Earth's — but Earth's field weakens with the cube of distance, and at GEO it's only about 1/226 as strong as in low orbit.",
       structure: "The structure survives violent launch vibrations and shields against radiation and space debris. Aluminum alloys are the usual choice: 6061 is cheap and easy to machine, while stronger 7075 goes where loads are highest. Stronger means heavier — and every extra kilogram must be carried by the rocket.",
       payload_optical: "The optical payload is the satellite's eye. A bigger aperture resolves finer detail (diffraction limit: resolution ≈ 1.22 × wavelength × altitude ÷ aperture); more spectral bands tell clouds, water vapor, plants, and ice apart.",
       payload_transponder: "A comsat's payload is its transponders: receive signals from the ground, amplify them, and send them back down. More capacity means more power — most of a comsat's power goes here.",
@@ -777,6 +819,9 @@ const STRINGS = {
       powerStats: "{watts} W · {mass} kg · {cost} · {grade}",
       commStats: "{orbit} downlink {rate} · {watts} W · {mass} kg · {cost} · {grade}",
       structureStats: "Structure mass = {fraction}% of other dry mass · {cost}",
+      attitudeStats: "Pointing {pointing} · {watts} W · {mass} kg · {cost} · {grade}",
+      geoTorquerTag: "⚠️ Earth's field is too weak at GEO — nearly useless",
+      uncontrolled: "can't hold pointing",
       transponderStats: "Capacity {gbps} Gbps · {watts} W · {mass} kg · {cost} · {grade}",
       opticalStats: "Aperture {aperture} cm · {bands} bands · resolution {gsd} · {watts} W · {mass} kg · {cost} · {grade}",
       deployTag: "deploys",
@@ -805,13 +850,15 @@ const STRINGS = {
       power: "Power",
       data: "Daily data",
       dv: "Δv",
-      valueBreakdown: "Design-life mission value = these five multiplied",
+      valueBreakdown: "Design-life mission value = these six multiplied",
       reliability: "Reliability",
       reserve: "Reserve",
+      thermal: "Heat rejection",
+      thermalValue: "{area} m² · {method}",
       monteCarloNote: "Includes anomaly response and mission extension ({runs} Monte Carlo runs)",
     },
     sheetExplain: {
-      cost: "Everything added up: launch price, the satellite bus (computer, attitude control, thermal — a fixed $8M), every part, and protected fueling for toxic propellants. Over budget means no launch.",
+      cost: "Everything added up: launch price, the satellite bus (computer, thermal control, wiring — a fixed $4M), every part, and protected fueling for toxic propellants. Over budget means no launch.",
       mass: "Dry mass {dry} kg (including structure) plus propellant must fit within what the rocket can carry to{dest}. Real engineers also keep 20–30% mass margin at the concept stage, because satellites almost always get heavier during development.",
       power_leo: "Left: orbit-average available power — array rating × {factor}, because in LEO about 35 minutes of every orbit are in Earth's shadow and batteries must be recharged. Right: power drawn by the bus, payload, and comms. Short on power, the payload has to take turns switching off.",
       power_geo: "GEO is sunlit almost all year (eclipses only around the equinoxes, at most about 72 minutes a day), but arrays degrade from radiation over 15 years, so we count rating × {factor}. Right: power drawn by the bus, payload, and comms.",
@@ -820,13 +867,20 @@ const STRINGS = {
       dv_leo: "LEO Δv needs: orbit maintenance plus deorbiting within 5 years of mission end (the US FCC rule adopted in 2022), {ops} km/s total.",
       dv_geo: "The rocket only delivers you to GTO; the satellite's own apogee engine must circularize into GEO ({insert} km/s), then do north–south station-keeping for 15 years ({ops} km/s). Without enough Δv to circularize, the satellite is stranded in GTO.",
       dv_geo_electric: "Electric thrusters are too weak for a single burn: they spiral up over hundreds of orbits, which costs more Δv ({insert} km/s) and takes about 6 months of repeated passes through the Van Allen belts. Station-keeping afterwards needs {ops} km/s.",
+      thermal: "Nearly all of the {watts} W the satellite uses ends up as heat. Space has no air to carry heat away, so radiators must radiate it (Stefan–Boltzmann law: emitted power rises with the fourth power of temperature). In this orbit each square meter sheds about {flux} W, so you need about {area} m² of radiator. This heat load calls for: {method}. Comsat transponders draw over ten kilowatts, which is why large comsats use loop heat pipes and deployable radiators; FORMOSAT-5 put radiators on the back of its solar panels to keep them cool and boost their efficiency.",
       reserve: "Unspent budget becomes a reserve: it can rescue the satellite when something breaks, and whatever is left at the end of the design life can fund an extended mission ({perYear} per year — up to about {years} years, as long as propellant remains) to make up service time lost to failures. NASA requires large projects to budget at a 70% probability of not overrunning (the Joint Confidence Level), so reserves are always held back.",
+    },
+    thermalMethod: {
+      passive: "MLI blankets + passive radiators",
+      heat_pipes: "heat pipes carrying heat to radiators",
+      loop_heat_pipes: "loop heat pipes + deployable radiators",
     },
     factor: {
       coverage: "Coverage",
       performance: "Performance",
       delivery: "Data delivery",
       power: "Power",
+      pointing: "Pointing",
       lifetime: "Lifetime",
     },
     coverageExplain: {
@@ -854,6 +908,8 @@ const STRINGS = {
       delivery: "The share of each day's data that reaches the ground. An image that never comes down might as well not exist.",
       deliveryTransponder: "For a comsat, relaying signals is the service itself — there's no separate data to downlink.",
       power: "Power supply ÷ power demand. When it's short, the payload takes turns switching off.",
+      pointing: "Pointing accuracy {have}; the mission needs {need} or better. Point badly and the camera misses its targets and the antenna misses the ground.",
+      pointingGeoTorquer: "Earth's magnetic field at GEO is only about 1/{ratio} of its low-orbit strength, so magnetorquers produce too little torque to hold any pointing at all — GEO satellites use reaction wheels.",
       stranded: "Not enough Δv to circularize from GTO into GEO: the satellite is stuck in transfer orbit and the mission never starts.",
       lifetime: "Propellant lasts {pct} of the design life. GEO satellites usually retire when they run out of fuel.",
       transferDelay: "Electric orbit-raising to GEO takes about {months} months, with no service in the meantime.",
@@ -894,6 +950,14 @@ const STRINGS = {
         name: "Propulsion Valve Anomaly",
         desc: "Propulsion valves are opening far too slowly. NASA's Juno hit the same problem at Jupiter in 2016 and decided not to risk the burn, staying in its orbit to finish the mission.",
       },
+      computer_upset: {
+        name: "Flight Computer Crash",
+        desc: "A high-energy particle flipped bits in the flight computer's memory (a single-event upset), and it keeps rebooting. Hubble's payload computer failed in 2021; the telescope sat in safe mode for about a month until engineers switched to backup hardware.",
+      },
+      torquer_fault: {
+        name: "Magnetorquer Coil Open",
+        desc: "One of the three magnetorquer coils has broken, so torque is now available along only two axes.",
+      },
       reaction_wheel: {
         name: "Reaction Wheel Failure",
         desc: "One of the reaction wheels that point the satellite has failed. When Kepler lost its second wheel in 2013, engineers balanced it against sunlight pressure and kept it observing for 4 more years as K2.",
@@ -922,6 +986,10 @@ const STRINGS = {
       backup_thrusters: { label: "Switch to backup thrusters", effect: "Less efficient: the remaining propellant lasts 30% fewer years." },
       new_software: { label: "Write new attitude-control software", effect: "Rebuild pointing around the remaining hardware (like Hubble's 2024 one-gyro mode), restoring 90% of output." },
       solar_pressure: { label: "Balance on sunlight pressure", effect: "Hold attitude with solar pressure like Kepler's K2: only 60% of output remains." },
+      patch_firmware: { label: "Upload a firmware fix", effect: "The ground team finds the bug and uploads a fix — the satellite is back to normal right away." },
+      safe_mode_debug: { label: "Debug slowly in safe mode", effect: "Free, but the payload is down for about a month (0.1 years)." },
+      two_axis_control: { label: "Rewrite the control law", effect: "Engineers rewrite the software to control all three axes with the two remaining coils, using how the field direction changes around the orbit — 90% of output restored." },
+      spin_stabilize: { label: "Switch to spin stabilization", effect: "Spin the satellite like a top to keep it stable; the payload only works when it rotates to face Earth, leaving 50% of output." },
       maneuver: { label: "Perform an avoidance maneuver", effect: "Spend 0.01 km/s of Δv, shortening the remaining life slightly." },
       accept_risk: { label: "Don't maneuver", effect: "Save propellant, but accept a 0.2% chance of destruction." },
       safe_mode: { label: "Enter safe mode for 3 days", effect: "Pause the payload for 3 days — a tiny loss of value, zero risk." },
@@ -1032,7 +1100,8 @@ const STRINGS = {
       component_comm: "The comms system failed, and the ground never heard from the satellite again.",
       component_payload: "The payload failed: the satellite is alive but can no longer do its job.",
       component_propulsion: "The propulsion system failed and the satellite can no longer hold its orbit.",
-      component_bus: "The satellite bus (computer or attitude control) failed.",
+      component_attitude: "The attitude control system failed: the satellite started tumbling and can no longer point at anything.",
+      component_bus: "The flight computer failed and can no longer carry out commands from the ground.",
       impact: "Hit by untrackable debris! At a relative speed of about 10 km/s, a 1 cm aluminum bead carries about 70 kJ — like a 250 kg motorcycle hitting at 85 km/h. During the 1993 Perseids, ESA's Olympus-1 comsat lost control after a suspected meteoroid impact.",
     },
     hindsight: {
@@ -1062,7 +1131,7 @@ const STRINGS = {
       },
       all_rounder: {
         name: "All-Rounder",
-        hint: "Succeed with all five mission-value factors at 80%+",
+        hint: "Succeed with all six mission-value factors at 80%+",
         story: "Launched in 1977, Voyager 1 and 2 were originally designed to explore Jupiter and Saturn, but thanks to remarkable engineering margins, Voyager 2 went on to fly past Uranus and Neptune as well — and both probes are still transmitting from interstellar space today.",
       },
       glorious_failure: {
@@ -1077,12 +1146,12 @@ const STRINGS = {
       },
       bare_bones: {
         name: "Bare Bones",
-        hint: "Succeed with Electron and all four parts at Economy",
+        hint: "Succeed with Electron and every part at Economy",
         story: "On October 4, 1957, the Soviet Union's Sputnik 1 — a simple 58 cm metal sphere with four antennas and no scientific instruments at all — became humanity's first artificial satellite, kicking off the Space Age with the bare minimum.",
       },
       top_of_the_line: {
         name: "Top of the Line",
-        hint: "Succeed with all four parts at Premium",
+        hint: "Succeed with every part at Premium",
         story: "The James Webb Space Telescope cost over $10 billion, making it the most expensive science mission ever flown — but it bought unmatched observing power that lets us peer through cosmic dust to see the universe's earliest galaxies. Sometimes you really do get what you pay for.",
       },
       so_close: {
@@ -1149,9 +1218,10 @@ const STRINGS = {
         "Each mission type also has 3 challenge medals to collect. The waterfall chart below shows what ate your value, and Hindsight shows the best single change you could make.",
       ],
       level2: [
-        "Level 2: propulsion is yours now! Until now the system picked the thruster and propellant for you.",
+        "Level 2: propulsion and attitude control are yours now! Until now the system picked them for you.",
         "Chemical thrusters push hard and change orbit fast. Electric thrusters have several times the specific impulse and sip propellant, but they draw lots of power — and reaching GEO means a slow 6-month spiral through the radiation belts.",
         "Set propellant with the slider, or press Auto-calculate first and then see what happens with more or less. Remember the rocket equation's logarithm: doubling propellant doesn't double Δv.",
+        "Attitude control decides how precisely the satellite can point. Magnetorquers are cheap and tough, but they rely on Earth's magnetic field — so what happens the farther you get from Earth?",
       ],
       level3: [
         "Level 3: the real space environment. From now on every mission draws a random event — solar storms, budget cuts, launch delays...",

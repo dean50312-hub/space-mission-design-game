@@ -17,6 +17,10 @@ function defaultFuelForOrbit(orbitId) {
   return FUELS.find((f) => f.id === (orbitId === "geo" ? "biprop" : "hydrazine"));
 }
 
+function defaultAttitude() {
+  return SUBSYSTEMS.attitude.find((a) => a.id === "standard");
+}
+
 function currentDesign() {
   return {
     objective: gameState.missionObjective,
@@ -49,7 +53,7 @@ function designCostM(design) {
 
 function designDryMassKg(design) {
   let mass = BUS_CORE.massKg;
-  ["power", "comm", "payload"].forEach((key) => {
+  ["power", "comm", "payload", "attitude"].forEach((key) => {
     if (design.parts[key]) mass += design.parts[key].massKg;
   });
   if (design.fuel) mass += design.fuel.dryMassKg;
@@ -85,6 +89,17 @@ function autoPropellantKg(design) {
   const ratio = Math.exp((target * 1000) / (design.fuel.isp * G0));
   const kg = dry * (ratio - 1);
   return Math.min(PROPELLANT_MAX_KG, Math.ceil(kg / PROPELLANT_STEP_KG) * PROPELLANT_STEP_KG);
+}
+
+// 磁力棒：地磁強度 ∝ 1/r³，磁場弱幾倍，同樣的線圈就只剩幾分之一的力矩
+function magneticFieldWeakening(altitudeKm) {
+  const r = EARTH_RADIUS_KM_FOR_FIELD + altitudeKm;
+  const r0 = EARTH_RADIUS_KM_FOR_FIELD + MAGNETORQUER_REFERENCE_ALTITUDE_KM;
+  return Math.pow(r / r0, 3);
+}
+
+function achievedPointingDeg(attitude, orbit) {
+  return attitude.magnetic ? attitude.pointingDeg * magneticFieldWeakening(orbit.altitudeKm) : attitude.pointingDeg;
 }
 
 function groundSampleDistanceM(apertureM, altitudeKm) {
@@ -123,9 +138,19 @@ function analyzeDesign(design) {
 
   if (!design.orbit) return analysis;
   const orbit = design.orbit;
-  const { power, comm, payload, structure } = design.parts;
+  const { power, comm, payload, attitude, structure } = design.parts;
 
-  analysis.powerLoadW = BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0);
+  analysis.powerLoadW =
+    BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0) + (attitude ? attitude.powerW : 0);
+  if (attitude) analysis.pointingDeg = achievedPointingDeg(attitude, orbit);
+  if (power) {
+    const heatW = Math.min(analysis.powerLoadW, power.powerW * orbit.sunlightFactor);
+    analysis.thermal = {
+      heatW,
+      radiatorM2: heatW / RADIATOR_NET_FLUX_W_M2[orbit.id],
+      method: THERMAL_METHODS.find((m) => heatW <= m.maxW).id,
+    };
+  }
   analysis.powerAvailW = power ? power.powerW * orbit.sunlightFactor : 0;
 
   if (design.fuel) {
@@ -159,6 +184,8 @@ function analyzeDesign(design) {
   const delivery =
     objective.payloadKind === "optical" ? Math.min(1, analysis.dataDownGbit / analysis.dataGenGbit) : 1;
   const powerFactor = Math.min(1, analysis.powerAvailW / analysis.powerLoadW);
+  // 指向不準：相機拍不到目標、天線對不準地面。和性能一樣取平方根，代表價值隨誤差逐漸下降
+  const pointing = analysis.pointingDeg >= UNCONTROLLED_POINTING_DEG ? 0 : Math.sqrt(Math.min(1, objective.pointingDeg / analysis.pointingDeg));
 
   const electricTransfer = orbit.id === "geo" && design.fuel.electric;
   const transferYears = electricTransfer
@@ -172,7 +199,8 @@ function analyzeDesign(design) {
   const lifetime = stranded ? 0 : dvLifeFactor * delayFactor;
 
   const coverage = objective.coverage[orbit.id];
-  const value = coverage * performance * delivery * powerFactor * lifetime;
+  const coreValue = coverage * performance * delivery * powerFactor * pointing;
+  const value = coreValue * lifetime;
 
   const rocketR = rocketReliability(design.rocket);
   const launch = rocketR * structure.launchSurvival;
@@ -184,6 +212,7 @@ function analyzeDesign(design) {
     power: gradeHazardPerYear(power.grade) * powerHazardMultiplier * environment,
     comm: gradeHazardPerYear(comm.grade) * environment,
     payload: gradeHazardPerYear(payload.grade) * environment,
+    attitude: gradeHazardPerYear(attitude.grade) * environment,
     propulsion: gradeHazardPerYear("qualified") * environment,
     bus: gradeHazardPerYear(BUS_CORE.grade) * environment,
   };
@@ -203,8 +232,8 @@ function analyzeDesign(design) {
   const fullSuccess = stranded ? 0 : launch * deploy * surviveBelts * surviveLife * (1 - impactRisk);
 
   Object.assign(analysis, {
-    factors: { coverage, performance, delivery, power: powerFactor, lifetime },
-    coreValue: coverage * performance * delivery * powerFactor,
+    factors: { coverage, performance, delivery, power: powerFactor, pointing, lifetime },
+    coreValue,
     value,
     stranded,
     transferYears,

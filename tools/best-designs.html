@@ -22,10 +22,25 @@
 <textarea id="output" readonly></textarea>
 <table id="report"></table>
 
-<script src="../js/data.js"></script>
-<script src="../js/mission.js"></script>
-<script src="../js/operations.js"></script>
-<script src="../js/scoring.js"></script>
+<script>
+  // 每次都載入最新的遊戲程式，避免瀏覽器快取到舊的平衡數值
+  const GAME_SCRIPTS = ["data.js", "mission.js", "operations.js", "scoring.js"];
+  const stamp = Date.now();
+  const scriptsReady = GAME_SCRIPTS.reduce(
+    (chain, name) =>
+      chain.then(
+        () =>
+          new Promise((resolve, reject) => {
+            const el = document.createElement("script");
+            el.src = `../js/${name}?t=${stamp}`;
+            el.onload = resolve;
+            el.onerror = reject;
+            document.head.appendChild(el);
+          })
+      ),
+    Promise.resolve()
+  );
+</script>
 <script>
   const statusEl = document.getElementById("status");
   const tick = () => new Promise((r) => setTimeout(r, 0));
@@ -80,7 +95,7 @@
     window.bestDesignsResult = { table, rows, seconds };
   }
 
-  document.getElementById("run-btn").addEventListener("click", run);
+  document.getElementById("run-btn").addEventListener("click", () => scriptsReady.then(run));
 </script>
 </body>
 </html>

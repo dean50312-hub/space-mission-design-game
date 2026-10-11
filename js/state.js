@@ -8,7 +8,7 @@ const gameState = {
   event: null,
   budget: 0,
   rocket: null,
-  parts: { power: null, comm: null, payload: null, structure: null },
+  parts: { power: null, comm: null, payload: null, attitude: null, structure: null },
   fuel: null,
   propellantKg: 0,
   failCount: 0,
@@ -21,7 +21,7 @@ function resetForNewGame() {
   gameState.event = gameState.features.events ? pickRandomEvent(gameState.features.forcedEventId) : null;
 
   gameState.rocket = null;
-  gameState.parts = { power: null, comm: null, payload: null, structure: null };
+  gameState.parts = { power: null, comm: null, payload: null, attitude: null, structure: null };
   gameState.fuel = null;
   gameState.propellantKg = 0;
 
@@ -35,8 +35,9 @@ function recomputeBudget() {
   gameState.budget = base + delta;
 }
 
-// 劇情關卡還沒教推進系統時，由系統依軌道配好推進器並自動計算推進劑
+// 劇情關卡還沒教推進與姿態控制時，由系統配好反應輪、依軌道選推進器並自動計算推進劑
 function syncAutoPropulsion() {
+  if (!gameState.features.attitude) gameState.parts.attitude = defaultAttitude();
   if (gameState.features.fuel || !gameState.orbit) return;
   gameState.fuel = defaultFuelForOrbit(gameState.orbit.id);
   gameState.propellantKg = autoPropellantKg(currentDesign());

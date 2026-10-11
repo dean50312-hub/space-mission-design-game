@@ -5,6 +5,7 @@ const HOTSPOT_DEFS = [
   { key: "comm", icon: "📡", top: 30, left: 34 },
   { key: "power", icon: "🔋", top: 47, left: 66 },
   { key: "structure", icon: "🛡️", top: 63, left: 34 },
+  { key: "attitude", icon: "🧭", top: 72, left: 66 },
   { key: "fuel", icon: "⛽", top: 84, left: 50 },
 ];
 
@@ -37,6 +38,11 @@ function fmtRate(mbps) {
   if (mbps >= 1000) return `${fmtNum(mbps / 1000, 1)} Gbps`;
   if (mbps >= 1) return `${fmtNum(mbps)} Mbps`;
   return `${fmtNum(mbps * 1000, 1)} kbps`;
+}
+
+function fmtPointing(deg) {
+  if (deg >= UNCONTROLLED_POINTING_DEG) return t("selection.uncontrolled");
+  return deg >= 1 ? `${fmtNum(deg)}°` : `${fmtNum(deg, 2)}°`;
 }
 
 function fmtDistance(m) {
@@ -262,7 +268,7 @@ function renderBlueprintFrame() {
   img.alt = t("rocket." + gameState.rocket.id + ".name");
   frame.appendChild(img);
 
-  HOTSPOT_DEFS.filter((h) => h.key !== "fuel" || gameState.features.fuel).forEach((h) => {
+  HOTSPOT_DEFS.filter((h) => gameState.features[h.key] !== false).forEach((h) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hotspot";
@@ -342,6 +348,11 @@ function partStatsText(key, tier) {
   }
   if (key === "structure") {
     return t("selection.structureStats", { ...common, fraction: fmtNum(tier.massFraction * 100) });
+  }
+  if (key === "attitude") {
+    const achieved = achievedPointingDeg(tier, orbit);
+    return t("selection.attitudeStats", { ...common, pointing: fmtPointing(achieved), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) }) +
+      (tier.magnetic && orbit.id === "geo" ? ` · ${t("selection.geoTorquerTag")}` : "");
   }
   if (gameState.missionObjective.payloadKind === "transponder") {
     return t("selection.transponderStats", { ...common, gbps: fmtNum(tier.throughputGbps), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) });
@@ -544,6 +555,19 @@ function renderBudgetLines(analysis) {
     }));
   }
 
+  if (analysis.thermal) {
+    const th = analysis.thermal;
+    lines.push(sheetLine({
+      icon: "🌡️",
+      labelKey: "sheet.thermal",
+      valueText: t("sheet.thermalValue", { area: fmtNum(th.radiatorM2, 1), method: t("thermalMethod." + th.method) }),
+      ratio: th.heatW / 12000,
+      status: th.method === "passive" ? "ok" : "warn",
+      explainKey: "sheetExplain.thermal",
+      explainParams: { watts: fmtNum(th.heatW), area: fmtNum(th.radiatorM2, 1), flux: RADIATOR_NET_FLUX_W_M2[orbit.id], method: t("thermalMethod." + th.method) },
+    }));
+  }
+
   if (analysis.dataGenGbit !== undefined && analysis.dataDownGbit !== undefined) {
     lines.push(sheetLine({
       icon: "📶",
@@ -587,7 +611,7 @@ function renderBudgetLines(analysis) {
 }
 
 function renderFactorRows(analysis) {
-  const keys = ["coverage", "performance", "delivery", "power", "lifetime"];
+  const keys = ["coverage", "performance", "delivery", "power", "pointing", "lifetime"];
   return keys
     .map((key) => {
       const v = analysis.factors[key];
@@ -624,6 +648,13 @@ function factorExplanation(key, analysis) {
     return objective.payloadKind === "transponder" ? t("factorExplain.deliveryTransponder") : t("factorExplain.delivery");
   }
   if (key === "power") return t("factorExplain.power");
+  if (key === "pointing") {
+    const attitude = gameState.parts.attitude;
+    if (attitude.magnetic && orbit.id === "geo") {
+      return t("factorExplain.pointingGeoTorquer", { ratio: fmtNum(magneticFieldWeakening(orbit.altitudeKm)) });
+    }
+    return t("factorExplain.pointing", { have: fmtPointing(analysis.pointingDeg), need: fmtPointing(objective.pointingDeg) });
+  }
   if (analysis.stranded) return t("factorExplain.stranded");
   const parts = [t("factorExplain.lifetime", { pct: fmtPct(analysis.dvLifeFactor) })];
   if (analysis.transferYears > 0) {

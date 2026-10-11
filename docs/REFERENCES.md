@@ -69,7 +69,7 @@
 - 碰撞機率 1/10,000 為業界閃避門檻（NASA CARA、ISS 紅線）：[NASA NTRS 20180007756](https://ntrs.nasa.gov/api/citations/20180007756/downloads/20180007756.pdf)
 - 朱諾號 2016 年氦氣止回閥異常，決定留在 53 天軌道：[NASA's Juno to Remain in Current Orbit — NASA JPL](https://www.jpl.nasa.gov/news/nasas-juno-to-remain-in-current-orbit-at-jupiter/)
 - Landsat 7 掃描線校正器 2003 年失效、修復未成功，每張影像缺約 22%：[Landsat 7 — USGS](https://www.usgs.gov/landsat-missions/landsat-7)
-- 克卜勒 2013 年第二個反作用輪失效後以太陽光壓平衡進行 K2 任務（2014–2018）、哈伯 2024 年改用單陀螺儀模式、機會號（設計 90 火星日，運作至 2018 年）、2009 年銥 33／Cosmos 2251 相撞：廣為記載的太空史事件
+- 克卜勒 2013 年第二個反應輪失效後以太陽光壓平衡進行 K2 任務（2014–2018）、哈伯 2024 年改用單陀螺儀模式、機會號（設計 90 火星日，運作至 2018 年）、2009 年銥 33／Cosmos 2251 相撞：廣為記載的太空史事件
 
 > 可挽救故障比例 60%、各應變選項的成本與效果、運作期事件頻率、延長任務每年 $4M，皆為**遊戲估算值**。
 
@@ -99,6 +99,22 @@
 
 - 6061-T6 降伏強度約 276 MPa、7075-T6 約 503 MPa（約 1.8 倍）：鋁合金標準材料性質
 - 立方衛星開放式框架、鋁蜂巢夾層板、一體式承力結構的取捨：依李彥宜整理的結構方案比較表
+
+### 姿態控制（梁詠為整理）
+
+- 地球磁場近似偶極場，強度 ∝ 1/r³：(42,157 km ÷ 6,921 km)³ ≈ 226，直接計算
+- NASA FASTSAT-HSV01（約 180 kg）僅用三根互相垂直的磁力棒控制姿態：Design and Integration of an All-Magnetic Attitude Control System for FASTSAT-HSV01's Multiple Pointing Objectives（梁詠為提供）
+- 韋伯太空望遠鏡 6 顆反應輪，單顆 6,000 rpm 時角動量 68 N·m·s：The Design, Verification, and Performance of the James Webb Space Telescope（梁詠為提供）
+- 克卜勒太空望遠鏡 4 顆反應輪、需要 3 顆才能精確指向，2013 年第二顆失效後改為 K2 任務：廣為記載
+- 哈伯 2021 年 6 月酬載電腦故障，安全模式約一個月後切換到備援硬體恢復：NASA 公開新聞
+- 遊戲中的指向精度（磁力棒 2°、反應輪 0.02°）與各任務的指向需求為**遊戲估算值**，量級符合小衛星磁力棒控制（數度）與星象儀＋反應輪（百分之一度級）的典型表現
+
+### 熱控（梁詠為整理）
+
+- 散熱面輻射：史蒂芬－波茲曼定律，ε = 0.85、20°C 時 εσT⁴ ≈ 355 W/m²；扣掉地球紅外線與反照後的淨散熱量（LEO 250、GEO 330 W/m²）為**遊戲估算值**
+- 福衛五號太陽能板背部散熱面：Solar Panel Temperature Reduction Study of FORMOSAT-5 Satellite（梁詠為提供）
+- 迴路熱管：Propylene Loop Heat Pipe Design and Thermal Performance（NASA PACE，梁詠為提供）；大型通訊衛星使用熱管與可展開散熱板為業界常識
+- 衛星熱控綜述：Advances in satellite thermal management systems: Challenges, innovations, and future directions（梁詠為提供）
 
 ## 成就對應的太空史料
 

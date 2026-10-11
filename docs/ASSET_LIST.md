@@ -40,6 +40,7 @@ image/
 | ~~光學酬載×3~~ ✅ | `parts/payload-optical-economy.png`<br>`parts/payload-optical-standard.png`<br>`parts/payload-optical-premium.png` | — | 已完成（v2 由 science-*.png 更名）：立方衛星相機/多光譜成像儀/大口徑望遠鏡。高階目前仍是 JWST 金色六角鏡造型，與 WorldView-3 的實際外觀不符，之後可重畫成長鏡筒望遠鏡 |
 | ~~通訊酬載（轉發器）×3~~ ✅ | `parts/payload-transponder-economy.png`<br>`parts/payload-transponder-standard.png`<br>`parts/payload-transponder-premium.png` | 64×64 | 已完成：程式碼生成（金色隔熱毯酬載艙＋饋源喇叭，高階加兩面大型反射器），供通訊任務使用 |
 | ~~推進系統×5~~ ✅ | `parts/fuel-hydrazine.png`<br>`parts/fuel-af_m315e.png`<br>`parts/fuel-biprop.png`<br>`parts/fuel-ion.png`<br>`parts/fuel-hall.png` | 64×64 | 已完成：程式碼生成（聯胺=橘色危害帶球型貯箱／AF-M315E=綠色球型貯箱／雙組元=燃料＋氧化劑雙球槽＋鐘形噴嘴／離子=柵極面盤+藍紫電漿束／霍爾=環形通道+青色電漿光暈）。v2 以雙組元取代雙氧水 |
+| ~~姿態控制×3~~ ✅ | `parts/attitude-economy.png`<br>`parts/attitude-standard.png`<br>`parts/attitude-premium.png` | 64×64 | 已完成（2026-10-11）：程式碼生成（三根銅線圈磁力棒＋磁力線／3 顆反應輪＋星象儀／4 顆反應輪＋星象儀） |
 | ~~結構與屏蔽×3~~ ✅ | `parts/structure-economy.png`<br>`parts/structure-standard.png`<br>`parts/structure-premium.png` | 64×64 | 已完成（2026-10-11 重畫）：程式碼生成，改成真實衛星結構——6061 開放式框架（看得到裡面的電路板）/鋁蜂巢夾層板剖面/7075 一體式外殼＋惠普爾犧牲板與碎片撞擊火花 |
 | ~~地球~~ | ~~`Stars/earth.png`~~ | — | **不需要**——火箭本來就是從地表發射，太空背景裡再放一顆地球邏輯不通，已從清單移除 |
 

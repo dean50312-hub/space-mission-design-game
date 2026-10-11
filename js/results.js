@@ -19,7 +19,7 @@ function waterfallRows(simResult, best) {
     v = next;
   };
 
-  ["coverage", "performance", "delivery", "power", "lifetime"].forEach((key) => {
+  ["coverage", "performance", "delivery", "power", "pointing", "lifetime"].forEach((key) => {
     step(t("factor." + key), v * a.factors[key], "factorLoss");
   });
   rows.push({ label: t("waterfall.designValue"), range: [0, v], kind: "total" });

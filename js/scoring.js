@@ -21,7 +21,7 @@ const SEARCH_QUICK_RUNS = 120;
 const SEARCH_FINALISTS = 15;
 
 function featureKey(features) {
-  return `f${features.fuel ? 1 : 0}o${features.operations ? 1 : 0}`;
+  return `f${features.fuel ? 1 : 0}a${features.attitude ? 1 : 0}o${features.operations ? 1 : 0}`;
 }
 
 function scenarioKey(objective, event, features) {
@@ -52,18 +52,22 @@ function* candidateDesigns(objective, event, features) {
   for (const orbit of ORBITS) {
     const budgetM = MISSION_BUDGET_BY_ORBIT[orbit.id] + budgetDelta;
     const fuels = features.fuel ? FUELS : [defaultFuelForOrbit(orbit.id)];
+    const attitudes = features.attitude ? SUBSYSTEMS.attitude : [defaultAttitude()];
     for (const rocket of ROCKETS) {
       for (const power of SUBSYSTEMS.power) {
         for (const comm of SUBSYSTEMS.comm) {
           for (const payload of payloadOptionsFor(objective)) {
-            for (const structure of SUBSYSTEMS.structure) {
-              for (const fuel of fuels) {
-                const base = { objective, orbit, event, budgetM, rocket, parts: { power, comm, payload, structure }, fuel, propellantKg: 0 };
-                const auto = autoPropellantKg(base);
-                const amounts = features.fuel
-                  ? [...new Set(SEARCH_PROPELLANT_FACTORS.map((f) => Math.min(PROPELLANT_MAX_KG, Math.round((auto * f) / PROPELLANT_STEP_KG) * PROPELLANT_STEP_KG)))]
-                  : [auto];
-                for (const propellantKg of amounts) yield { ...base, propellantKg };
+            for (const attitude of attitudes) {
+              for (const structure of SUBSYSTEMS.structure) {
+                for (const fuel of fuels) {
+                  const parts = { power, comm, payload, attitude, structure };
+                  const base = { objective, orbit, event, budgetM, rocket, parts, fuel, propellantKg: 0 };
+                  const auto = autoPropellantKg(base);
+                  const amounts = features.fuel
+                    ? [...new Set(SEARCH_PROPELLANT_FACTORS.map((f) => Math.min(PROPELLANT_MAX_KG, Math.round((auto * f) / PROPELLANT_STEP_KG) * PROPELLANT_STEP_KG)))]
+                    : [auto];
+                  for (const propellantKg of amounts) yield { ...base, propellantKg };
+                }
               }
             }
           }
@@ -123,7 +127,8 @@ function balanceFingerprint() {
     SUBSYSTEMS, PAYLOADS, FUELS, TOXIC_HANDLING_COST_M, PROPELLANT_MAX_KG, PROPELLANT_STEP_KG, AUTO_PROPELLANT_MARGIN,
     ELECTRIC_TRANSFER_DV_FACTOR, ELECTRIC_TRANSFER_YEARS, RADIATION_BELT_FACTOR, LIFTOFF_SHARE_OF_LAUNCH_FAILURE,
     MISSION_OBJECTIVES, EXTENDED_MISSION_COST_PER_YEAR_M, EXTENSION_MAX_FRACTION, RECOVERABLE_ANOMALY_SHARE,
-    OPS_EVENT_RATE_PER_YEAR, EV_SIMULATION_RUNS, EV_SIMULATION_SEED, COMPONENT_ANOMALIES, OPS_EVENTS, EVENTS,
+    OPS_EVENT_RATE_PER_YEAR, EV_SIMULATION_RUNS, EV_SIMULATION_SEED, COMPONENT_ANOMALIES, TORQUER_ANOMALY, OPS_EVENTS, EVENTS,
+    MAGNETORQUER_REFERENCE_ALTITUDE_KM, UNCONTROLLED_POINTING_DEG,
     SEARCH_PROPELLANT_FACTORS, SEARCH_ANALYTIC_POOL, SEARCH_QUICK_RUNS, SEARCH_FINALISTS,
   ]);
   let hash = 2166136261;

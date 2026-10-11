@@ -44,8 +44,13 @@ function rocketReliability(rocket) {
   return (rocket.successes + 1) / (rocket.flights + 2);
 }
 
-// 衛星本體（電腦、姿態控制、熱控）：每顆衛星都需要，不讓玩家選
-const BUS_CORE = { massKg: 40, powerW: 60, costM: 8, grade: "qualified" };
+// 衛星本體（電腦、熱控、線路）：每顆衛星都需要，不讓玩家選
+const BUS_CORE = { massKg: 20, powerW: 20, costM: 4, grade: "qualified" };
+
+// 地球磁場強度和距離的立方成反比；磁力棒的指向精度以 LEO 550 km 為基準換算
+const EARTH_RADIUS_KM_FOR_FIELD = 6371;
+const MAGNETORQUER_REFERENCE_ALTITUDE_KM = 550;
+const UNCONTROLLED_POINTING_DEG = 90; // 等效指向誤差超過這個值，就是根本控制不了
 
 // 零件等級：商規（COTS）／太空級（qualified）／太空級＋冗餘備份（redundant）
 // 數值為「在 LEO 運作 5 年仍正常」的機率，其他軌道與年限依故障率換算
@@ -64,6 +69,12 @@ const SUBSYSTEMS = {
     { id: "economy", rateMbps: { leo: 5, geo: 0.0012 }, powerW: 15, massKg: 2, costM: 0.5, grade: "cots", deployables: 0 },
     { id: "standard", rateMbps: { leo: 800, geo: 0.19 }, powerW: 120, massKg: 25, costM: 6, grade: "qualified", deployables: 1 },
     { id: "premium", rateMbps: { leo: 2000, geo: 130 }, powerW: 250, massKg: 60, costM: 18, grade: "redundant", deployables: 1 },
+  ],
+  attitude: [
+    // 指向精度（度）。磁力棒靠地球磁場產生力矩，磁場越弱越控制不住
+    { id: "economy", pointingDeg: 2, magnetic: true, powerW: 5, massKg: 3, costM: 0.5, grade: "qualified" },
+    { id: "standard", pointingDeg: 0.02, magnetic: false, powerW: 40, massKg: 20, costM: 4, grade: "qualified" },
+    { id: "premium", pointingDeg: 0.02, magnetic: false, powerW: 55, massKg: 28, costM: 6.5, grade: "redundant" },
   ],
   structure: [
     // 結構質量為其他乾質量的比例；輻射倍率越低代表屏蔽越好
@@ -87,7 +98,16 @@ const PAYLOADS = {
   ],
 };
 
-const SUBSYSTEM_KEYS = ["power", "comm", "payload", "structure"];
+const SUBSYSTEM_KEYS = ["power", "comm", "payload", "attitude", "structure"];
+
+// 熱預算（只顯示，不影響任務價值）：用掉的電最後幾乎都變成熱，要靠散熱面輻射到太空。
+// 每平方公尺散熱面的淨散熱量 ≈ εσT⁴ − 吸收的地球紅外線與反照（ε 0.85、20°C 時 εσT⁴ ≈ 355 W/m²）
+const RADIATOR_NET_FLUX_W_M2 = { leo: 250, geo: 330 };
+const THERMAL_METHODS = [
+  { id: "passive", maxW: 1000 }, // 多層隔熱毯＋散熱面
+  { id: "heat_pipes", maxW: 5000 }, // 熱管把熱帶到散熱面
+  { id: "loop_heat_pipes", maxW: Infinity }, // 迴路熱管＋可展開散熱板
+];
 const TIER_IDS = ["economy", "standard", "premium"];
 
 // 推進系統：比衝（Isp）決定同樣推進劑能產生多少 Δv
@@ -136,24 +156,28 @@ const MISSION_OBJECTIVES = [
     payloadKind: "optical",
     coverage: { leo: 1, geo: 1 },
     requirement: { type: "resolution", maxGsdM: 0.5 },
+    pointingDeg: 0.05, // 窄視野相機：指向偏 0.05° 在 550 km 高度就偏了約 0.5 km
   },
   {
     id: "climate",
     payloadKind: "optical",
     coverage: { leo: 1, geo: 0.42 }, // GEO 只看得到 42% 的地球，看不到南北緯 81° 以上
     requirement: { type: "bands", bands: 29, maxGsdM: 1000 },
+    pointingDeg: 0.5, // 寬刈幅（MODIS 約 2,330 km），容許的指向誤差較大
   },
   {
     id: "weather",
     payloadKind: "optical",
     coverage: { leo: 2 / 144, geo: 1 }, // 需要每 10 分鐘一張（每天 144 張），LEO 每天只經過約 2 次
     requirement: { type: "bands", bands: 16, maxGsdM: 2000 },
+    pointingDeg: 0.05, // 從 36,000 km 外拍 2 km 解析度，每個像素只有約 0.003°
   },
   {
     id: "comms",
     payloadKind: "transponder",
     coverage: { leo: 35 / 1440, geo: 1 }, // 單顆 LEO 衛星每天只在頭頂出現約 35 分鐘
     requirement: { type: "throughput", gbps: 30 },
+    pointingDeg: 0.1, // 點波束寬度約 0.5°，天線指向誤差要遠小於波束寬度
   },
 ];
 
@@ -162,10 +186,11 @@ const CAMPAIGN_PASS_VALUE = 0.5;
 
 // 戰役關卡的 feature flag。level 為 null 代表自由遊玩（全開）。
 function getCampaignFeatures(level) {
-  if (!level) return { orbit: true, fuel: true, events: true, operations: true, forcedEventId: null };
+  if (!level) return { orbit: true, fuel: true, attitude: true, events: true, operations: true, forcedEventId: null };
   return {
     orbit: true,
     fuel: level >= 2,
+    attitude: level >= 2,
     events: level >= 3,
     operations: level >= 4,
     forcedEventId: level === 3 ? "solar_flare" : null,
@@ -213,14 +238,35 @@ const COMPONENT_ANOMALIES = {
       { id: "backup_thrusters", costM: 0, effect: { lifeMultiply: 0.7 } },
     ],
   },
-  bus: {
+  attitude: {
     id: "reaction_wheel",
     options: [
       { id: "new_software", costM: 10, effect: { multiply: 0.9 } },
       { id: "solar_pressure", costM: 0, effect: { multiply: 0.6 } },
     ],
   },
+  bus: {
+    id: "computer_upset",
+    options: [
+      { id: "patch_firmware", costM: 3, effect: {} },
+      { id: "safe_mode_debug", costM: 0, effect: { lostYears: 0.1 } },
+    ],
+  },
 };
+
+// 只有磁力棒的衛星沒有反應輪，姿態控制故障時是磁力棒線圈斷路
+const TORQUER_ANOMALY = {
+  id: "torquer_fault",
+  options: [
+    { id: "two_axis_control", costM: 2, effect: { multiply: 0.9 } },
+    { id: "spin_stabilize", costM: 0, effect: { multiply: 0.5 } },
+  ],
+};
+
+function componentAnomaly(subsystem, design) {
+  if (subsystem === "attitude" && design.parts.attitude.magnetic) return TORQUER_ANOMALY;
+  return COMPONENT_ANOMALIES[subsystem];
+}
 
 // 非故障的運作期事件
 const OPS_EVENTS = [

@@ -289,7 +289,7 @@ function* missionTimeline(analysis, design, features, rng) {
     if (isComponent) {
       const subsystem = pickByWeight(hazards, rng);
       if (!features.operations || rng() > RECOVERABLE_ANOMALY_SHARE) return fail("operation", "component_" + subsystem);
-      const anomaly = COMPONENT_ANOMALIES[subsystem];
+      const anomaly = componentAnomaly(subsystem, design);
       const result = yield* decide({ type: "component", id: anomaly.id, subsystem }, anomaly.options);
       if (result === "collision") return fail("operation", "collision");
     } else {
