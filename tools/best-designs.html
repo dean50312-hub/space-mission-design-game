@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<title>理論最佳設計產生器</title>
+<style>
+  body { background: #0b0e2b; color: #e8ecff; font-family: "Segoe UI", "Noto Sans TC", sans-serif; padding: 24px; max-width: 960px; margin: 0 auto; }
+  button { font-size: 15px; padding: 8px 16px; margin-right: 8px; }
+  textarea { width: 100%; height: 260px; background: #161a40; color: #e8ecff; font-family: monospace; font-size: 12px; }
+  table { border-collapse: collapse; font-size: 12px; width: 100%; margin-top: 12px; }
+  td, th { border: 1px solid #2a2f66; padding: 3px 6px; text-align: left; }
+  .low { color: #ff5566; }
+  p { line-height: 1.6; }
+</style>
+</head>
+<body>
+<h1>理論最佳設計產生器</h1>
+<p>窮舉每個情境（任務目標 × 事件 × 開放的機制）所有可以發射的設計，找出期望價值最高的那一個，結果給「精算評分」當分母。
+調整 <code>js/data.js</code> 的任何數值後，都要重新執行一次，把下面的輸出整段貼進 <code>js/bestdesigns.js</code>。</p>
+<label><input type="checkbox" id="medal-check" /> 同時檢查勳章能不能拿到（時間約變成 3 倍）</label>
+<p><button id="run-btn">開始計算</button><span id="status"></span></p>
+<textarea id="output" readonly></textarea>
+<table id="report"></table>
+
+<script src="../js/data.js"></script>
+<script src="../js/mission.js"></script>
+<script src="../js/operations.js"></script>
+<script src="../js/scoring.js"></script>
+<script>
+  const statusEl = document.getElementById("status");
+  const tick = () => new Promise((r) => setTimeout(r, 0));
+
+  async function run() {
+    const checkMedals = document.getElementById("medal-check").checked;
+    const scenarios = allScenarios();
+    const table = {};
+    const rows = [];
+    const started = performance.now();
+
+    for (let i = 0; i < scenarios.length; i++) {
+      const { key, objective, event, features } = scenarios[i];
+      statusEl.textContent = ` ${i + 1} / ${scenarios.length}：${key}`;
+      await tick();
+      const best = searchBestDesign(objective, event, features);
+      table[key] = best;
+      const row = { key, best };
+      if (checkMedals && best) {
+        medalsFor(objective).filter((m) => m.id !== "s_rank").forEach((medal) => {
+          const params = medal.params(objective);
+          const b = searchBestDesign(objective, event, features, (d, a) => medal.meets(d, a, params));
+          row[medal.id] = { score: b ? Math.round((100 * b.ev) / best.ev) : 0, min: params.minScore };
+        });
+      }
+      rows.push(row);
+    }
+
+    const seconds = ((performance.now() - started) / 1000).toFixed(1);
+    statusEl.textContent = ` 完成：${scenarios.length} 個情境，${seconds} 秒`;
+
+    const lines = Object.entries(table).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`);
+    document.getElementById("output").value =
+      "// 由 tools/best-designs.html 產生，請勿手動修改。調整 js/data.js 的數值後要重新產生。\n" +
+      `// 產生時間：${new Date().toISOString()}，蒙地卡羅種子 ${EV_SIMULATION_SEED}\n` +
+      `const BEST_DESIGNS_FINGERPRINT = "${balanceFingerprint()}";\n` +
+      "const BEST_DESIGNS = {\n" + lines.join("\n") + "\n};\n";
+
+    const medalCols = checkMedals ? MEDALS.filter((m) => m.id !== "s_rank") : [];
+    document.getElementById("report").innerHTML =
+      `<tr><th>情境</th><th>最佳期望值</th><th>設計</th>${medalCols.map((m) => `<th>${m.id} 可達分數／門檻</th>`).join("")}</tr>` +
+      rows.map((r) => {
+        const b = r.best;
+        const design = b ? `${b.orbit} · ${b.rocket} · P${b.parts.power[0]} C${b.parts.comm[0]} L${b.parts.payload[0]} S${b.parts.structure[0]} · ${b.fuel} ${b.propellantKg} kg · $${b.costM}/${b.budgetM}M` : "無解";
+        const medals = medalCols.map((m) => {
+          const cell = r[m.id];
+          return cell ? `<td class="${cell.score < cell.min ? "low" : ""}">${cell.score} / ${cell.min}</td>` : "<td>—</td>";
+        }).join("");
+        return `<tr><td>${r.key}</td><td>${b ? (b.ev * 100).toFixed(1) + "%" : "-"}</td><td>${design}</td>${medals}</tr>`;
+      }).join("");
+
+    window.bestDesignsResult = { table, rows, seconds };
+  }
+
+  document.getElementById("run-btn").addEventListener("click", run);
+</script>
+</body>
+</html>

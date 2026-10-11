@@ -318,13 +318,13 @@ function runTimelineWithPolicy(analysis, design, features, rng) {
 }
 
 // 期望任務價值：沒有運作期決策時用解析公式；有的話用固定亂數種子的蒙地卡羅模擬
-function computeExpectedValue(design, features, analysis = analyzeDesign(design)) {
+function computeExpectedValue(design, features, analysis = analyzeDesign(design), runs = EV_SIMULATION_RUNS) {
   if (!analysis.complete) return 0;
   if (!features.operations) return analysis.expectedValue;
   const rng = makeRng(EV_SIMULATION_SEED);
   let sum = 0;
-  for (let i = 0; i < EV_SIMULATION_RUNS; i++) {
+  for (let i = 0; i < runs; i++) {
     sum += runTimelineWithPolicy(analysis, design, features, rng).deliveredValue;
   }
-  return sum / EV_SIMULATION_RUNS;
+  return sum / runs;
 }

@@ -168,18 +168,32 @@ function finishMission(simResult) {
   if (simResult.overallSuccess) sfxSuccess();
   if (achievements.length > 0) setTimeout(sfxAchievement, 400);
 
+  const scoreInfo = scoreMission(simResult);
+
+  // 過關：交付夠多價值，或設計本身夠好——運氣差但決策正確，審查委員會放行
   let campaignAward = null;
-  if (gameState.campaignLevel && simResult.deliveredValue >= CAMPAIGN_PASS_VALUE) {
+  const passedByValue = simResult.deliveredValue >= CAMPAIGN_PASS_VALUE;
+  const passedByScore = scoreInfo.score !== null && scoreInfo.score >= CAMPAIGN_PASS_SCORE;
+  if (gameState.campaignLevel && (passedByValue || passedByScore)) {
     const earned = Math.max(1, Math.round(simResult.deliveredValue * 5));
     storageAddSkillPoints(earned);
     storageCompleteCampaignLevel(gameState.campaignLevel);
-    campaignAward = { level: gameState.campaignLevel, points: earned };
+    campaignAward = { level: gameState.campaignLevel, points: earned, byScore: !passedByValue };
   }
 
-  lastResultsContext = { simResult, achievements, campaignAward };
-  renderResultsScreen(simResult, achievements, campaignAward);
+  lastResultsContext = { simResult, achievements, campaignAward, scoreInfo };
+  renderResultsScreen(simResult, achievements, campaignAward, scoreInfo);
   showScreen("results");
   showTutorialIfNeeded("results");
+}
+
+function scoreMission(simResult) {
+  const { design, analysis } = simResult;
+  const best = bestDesignFor(design.objective, design.event, gameState.features);
+  const score = actuarialScore(simResult.expectedValue, best);
+  const previousBest = score !== null ? storageRecordScore(design.objective.id, score) : undefined;
+  const medals = evaluateMedals(design.objective, { score, design, analysis });
+  return { score, grade: score !== null ? scoreGrade(score) : null, best, previousBest, medals };
 }
 
 function refreshDynamicScreenText() {
@@ -191,7 +205,8 @@ function refreshDynamicScreenText() {
   if (active.id === "screen-selection") renderSelectionScreen();
   if (active.id === "screen-achievements") renderAchievementsGallery();
   if (active.id === "screen-results" && lastResultsContext) {
-    renderResultsScreen(lastResultsContext.simResult, lastResultsContext.achievements, lastResultsContext.campaignAward);
+    const c = lastResultsContext;
+    renderResultsScreen(c.simResult, c.achievements, c.campaignAward, c.scoreInfo);
   }
 
   if (!document.getElementById("tutorial-overlay").classList.contains("hidden")) {

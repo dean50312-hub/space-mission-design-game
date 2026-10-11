@@ -11,6 +11,8 @@ function defaultSave() {
     campaign: { currentLevel: 1, completed: false },
     skillPoints: 0,
     unlockedSkills: [],
+    medals: {}, // 任務目標 id → 已取得的勳章 id 陣列
+    bestScores: {}, // 任務目標 id → 最高精算評分
   };
 }
 
@@ -28,6 +30,8 @@ function loadSave() {
       unlockedAchievements: Array.isArray(parsed.unlockedAchievements) ? parsed.unlockedAchievements : [],
       campaign: { ...base.campaign, ...(parsed.campaign || {}) },
       unlockedSkills: Array.isArray(parsed.unlockedSkills) ? parsed.unlockedSkills : [],
+      medals: { ...(parsed.medals || {}) },
+      bestScores: { ...(parsed.bestScores || {}) },
     };
   } catch (e) {
     return defaultSave();
@@ -110,6 +114,32 @@ function storageCompleteCampaignLevel(level) {
     saveData.campaign.completed = true;
   }
   writeSave(saveData);
+}
+
+// ---------- 挑戰勳章與個人最佳 ----------
+
+function storageHasMedal(objectiveId, medalId) {
+  return (saveData.medals[objectiveId] || []).includes(medalId);
+}
+
+function storageAwardMedal(objectiveId, medalId) {
+  if (storageHasMedal(objectiveId, medalId)) return;
+  saveData.medals[objectiveId] = [...(saveData.medals[objectiveId] || []), medalId];
+  writeSave(saveData);
+}
+
+function storageGetBestScore(objectiveId) {
+  return saveData.bestScores[objectiveId];
+}
+
+// 回傳這次之前的最高分（沒有紀錄則為 undefined）
+function storageRecordScore(objectiveId, score) {
+  const previous = saveData.bestScores[objectiveId];
+  if (previous === undefined || score > previous) {
+    saveData.bestScores[objectiveId] = score;
+    writeSave(saveData);
+  }
+  return previous;
 }
 
 // ---------- 技能點數／技能樹（節點內容之後再做，先保留存檔欄位） ----------
