@@ -679,9 +679,40 @@ h1, h2, .btn, .stage-name {
     #142250 28%,
     #2a5fa8 48%,
     #4fc3ff 68%,
-    #3d8b3d 78%,
-    #3d8b3d 100%
+    #9ad9ff 100%
   );
+}
+
+/* 開場的發射場：台面由 js/simulation.js 對齊火箭底部 */
+.launch-site {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.launch-site img {
+  display: block;
+  width: 720px;
+  height: 180px;
+  /* 圖比畫面寬時（手機）margin: auto 不會置中，所以用 transform 對齊中線 */
+  margin-left: 50%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+}
+
+/* 真實的發射場幾乎都在海邊（甘迺迪、種子島、文昌），火箭往海上飛，萬一失敗殘骸才不會掉在城鎮 */
+.launch-ground {
+  height: 600px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 255, 255, 0.18) 46px 58px) 0 58px / 100% 3px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 30px, rgba(255, 255, 255, 0.12) 30px 38px) 17px 84px / 100% 2px no-repeat,
+    linear-gradient(to bottom, #3e843e 0 30px, #d9c48a 30px 42px, #c9b47a 42px 46px, #2f78bf 46px 100px, #25639f 100px);
+}
+
+.launch-site-label {
+  top: 150px;
 }
 
 .star-field {

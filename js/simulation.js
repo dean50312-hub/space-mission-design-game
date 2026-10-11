@@ -271,6 +271,17 @@ function updateOpsHud(delivered, extension) {
   });
 }
 
+// image/ui/launchpad.png 顯示高度 180 px，台面在原圖第 62 / 90 列
+const LAUNCHPAD_SURFACE_PX = (180 * 62) / 90;
+
+// 把發射台的台面對齊火箭底部，火箭才會真的立在發射台上
+function alignLaunchSite() {
+  const scene = document.getElementById("flight-scene");
+  const site = document.getElementById("launch-site");
+  const rocketBottom = document.getElementById("rocket-img").getBoundingClientRect().bottom;
+  site.style.top = `${rocketBottom - scene.getBoundingClientRect().top - LAUNCHPAD_SURFACE_PX}px`;
+}
+
 function resetFlightView() {
   OrbitView.stop();
   document.getElementById("flight-track").classList.remove("orbit-mode", "shake", "maxq");
@@ -283,6 +294,7 @@ function resetFlightView() {
 
   setRocketFlying(false);
   setRocketState("normal");
+  alignLaunchSite();
   scene.style.transition = "";
 
   document.getElementById("simulation-log").textContent = "";
