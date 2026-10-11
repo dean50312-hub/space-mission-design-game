@@ -253,10 +253,10 @@ function enterOrbitMode(design, valueCap) {
       ? t(design.orbit.id === "geo" ? "simulation.hudLinkGeo" : "simulation.hudLinkLeo")
       : t("simulation.hudWaiting");
     status.classList.toggle("live", visible);
-  });
+  }, t("simulation.stationName"));
 
-  document.getElementById("orbit-caption").textContent = t("simulation.orbitCaption", {
-    period: design.orbit.id === "geo" ? t("simulation.periodDay") : t("simulation.periodMinutes", { min: Math.round(info.periodMin) }),
+  document.getElementById("orbit-caption").textContent = t("simulation.orbitCaption_" + design.orbit.id, {
+    min: Math.round(info.periodMin),
     ratio: fmtNum(info.ratio, 2),
   });
 }

@@ -116,6 +116,13 @@
 - 迴路熱管：Propylene Loop Heat Pipe Design and Thermal Performance（NASA PACE，梁詠為提供）；大型通訊衛星使用熱管與可展開散熱板為業界常識
 - 衛星熱控綜述：Advances in satellite thermal management systems: Challenges, innovations, and future directions（梁詠為提供）
 
+### 運作期軌道畫面的地球（2026-10-11）
+
+- 海岸線與冰原：[Natural Earth](https://www.naturalearthdata.com/) 1:110m `ne_110m_land`、`ne_110m_glaciated_areas`（公有領域），以 `tools/earth-texture.py` 轉成 192×48 的北半球像素地圖
+- 北極海冰：每年 3 月最大約 1,400–1,500 萬 km²、9 月最小約 400 萬 km²（[NSIDC Arctic Sea Ice News](https://nsidc.org/arcticseaicenews/)）。遊戲以北緯 77° 以北的海面當作年平均範圍，為**遊戲估算值**。Google Earth 的底圖是拼接的無雲影像加海底地形渲染，不顯示會漂移的海冰；當天真實影像可在 [NASA Worldview](https://worldview.earthdata.nasa.gov/) 查看
+- 太陽同步軌道：550 km 高度傾角約 97.6°；地球觀測衛星常用上午 10:30 降交點
+- 地面站：國家太空中心（新竹，北緯 24.8°、東經 121.0°）。550 km 衛星的地面可視範圍約為 acos(R⊕/r) ≈ 22.6°，所以赤道軌道的低軌衛星永遠不會出現在台灣的地平線上，必須用傾斜軌道
+
 ## 成就對應的太空史料
 
 ### 🏆 首次入軌成功 — 阿波羅 11 號
