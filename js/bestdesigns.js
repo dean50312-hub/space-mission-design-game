@@ -1,6 +1,6 @@
 // 由 tools/best-designs.html 產生，請勿手動修改。調整 js/data.js 的數值後要重新產生。
-// 產生時間：2026-10-11T14:25:16.759Z，蒙地卡羅種子 20261115
-const BEST_DESIGNS_FINGERPRINT = "bb8863a7";
+// 產生時間：2026-10-11T14:25:16.759Z，蒙地卡羅種子 20261115（2026-10-12 重跑驗證：拿掉事件的 emoji 欄位後內容完全相同，只更新指紋）
+const BEST_DESIGNS_FINGERPRINT = "19319894";
 const BEST_DESIGNS = {
   "imaging|none|f0a0o0": {"ev":0.9083578127407411,"orbit":"leo","rocket":"medium","parts":{"power":"standard","comm":"premium","payload":"premium","attitude":"standard","structure":"standard"},"fuel":"hydrazine","propellantKg":100,"costM":204,"budgetM":210},
   "climate|none|f0a0o0": {"ev":0.9083578127407411,"orbit":"leo","rocket":"medium","parts":{"power":"standard","comm":"premium","payload":"premium","attitude":"standard","structure":"standard"},"fuel":"hydrazine","propellantKg":100,"costM":204,"budgetM":210},
