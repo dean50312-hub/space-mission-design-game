@@ -506,6 +506,14 @@ details > summary::-webkit-details-marker {
   margin: 10px 0 14px;
 }
 
+.home-team {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin: -6px 0 14px;
+}
+
 .home-subtitle {
   color: var(--text-dim);
   margin: 0;

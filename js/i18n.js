@@ -6,6 +6,7 @@ const STRINGS = {
     home: {
       subtitle: "在預算、質量與風險之間，精算出最好的太空任務",
       recordsTitle: "任務紀錄",
+      team: "製作團隊：Mission Impaysible",
       notPlayed: "尚未挑戰",
       credits: "海岸線：Natural Earth · 字型：俐方體11號（Cubic 11）",
       levelNames: ["基礎設計", "推進與姿態", "太空環境", "任務運作"],
@@ -645,6 +646,7 @@ const STRINGS = {
     home: {
       subtitle: "Balance budget, mass, and risk to design the best possible space mission",
       recordsTitle: "Mission Records",
+      team: "Made by team Mission Impaysible",
       notPlayed: "Not yet flown",
       credits: "Coastlines: Natural Earth · Font: Cubic 11",
       levelNames: ["Basics", "Propulsion", "Space weather", "Operations"],
