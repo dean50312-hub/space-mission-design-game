@@ -1,5 +1,2 @@
-node_modules/
-dist/
-.DS_Store
-Thumbs.db
-*.log
+# 音樂母帶（已轉成 audio/bgm/*.mp3）
+*.wav
