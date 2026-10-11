@@ -22,11 +22,13 @@ function handleLangChange(lang) {
 
 function handleSoundToggleChange(e) {
   storageUpdateSettings({ soundOn: e.target.checked });
+  updateBgmVolume();
   if (e.target.checked) sfxClick();
 }
 
 function handleVolumeChange(e) {
   storageUpdateSettings({ volume: Number(e.target.value) });
+  updateBgmVolume();
 }
 
 function handleResetProgress() {

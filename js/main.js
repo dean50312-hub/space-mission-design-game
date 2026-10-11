@@ -117,7 +117,18 @@ function renderEventScreen() {
   document.getElementById("start-btn").disabled = !gameState.orbit;
 }
 
+const SCREEN_BGM = {
+  home: "space",
+  achievements: "space",
+  settings: "space",
+  event: "lab",
+  selection: "lab",
+  simulation: "launch",
+  results: "space",
+};
+
 function showScreen(name) {
+  playBgm(SCREEN_BGM[name]);
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   document.getElementById(`screen-${name}`).classList.add("active");
   if (name === "selection") renderSelectionScreen();

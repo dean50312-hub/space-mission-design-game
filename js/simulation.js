@@ -237,6 +237,7 @@ async function animateRoll(odds, passed) {
 let opsValueCap = 1;
 
 function enterOrbitMode(design, valueCap) {
+  playBgm("space");
   document.getElementById("flight-track").classList.add("orbit-mode");
   opsValueCap = valueCap;
   document.getElementById("ops-hud-label").textContent = t("simulation.hudLabel");
