@@ -106,9 +106,12 @@ function renderWaterfallChart(simResult, best) {
   });
 }
 
+// 標題同時看「衛星活多久」和「交付多少價值」：衛星撐完全程卻幾乎沒交付價值，不能叫圓滿成功
 function outcomeKind(simResult) {
-  if (simResult.overallSuccess) return "success";
-  return simResult.serviceYears > 0 ? "partial" : "fail";
+  const metGoal = simResult.deliveredValue >= CAMPAIGN_PASS_VALUE;
+  if (simResult.overallSuccess) return metGoal ? "success" : "underperform";
+  if (simResult.serviceYears > 0) return metGoal ? "partial" : "partialLow";
+  return "fail";
 }
 
 function resultSubtitle(simResult) {
@@ -119,7 +122,9 @@ function resultSubtitle(simResult) {
     text = simResult.propellantDepleted
       ? t("results.subtitleDepleted", { years })
       : t("results.subtitleSuccess", { years });
-  } else if (kind === "partial") {
+  } else if (kind === "underperform") {
+    text = t("results.subtitleUnderperform", { years, value: fmtPct(simResult.deliveredValue) });
+  } else if (kind === "partial" || kind === "partialLow") {
     text = t("results.subtitlePartial", { years: fmtNum(simResult.serviceYears + simResult.extensionYears, 1) });
   } else {
     return t("results.subtitleFail", { stage: t("stage." + simResult.failedStage.id) });
@@ -138,6 +143,7 @@ function causeExplanation(simResult) {
 }
 
 function changeDescription(change) {
+  if (change.kind === "orbit") return t("hindsight.changeOrbit", { to: t("orbit." + change.to.id) });
   if (change.kind === "rocket") return t("hindsight.changeRocket", { to: t("rocket." + change.to.id + ".name") });
   if (change.kind === "fuel") return t("hindsight.changeFuel", { to: t("fuel." + change.to.id) });
   if (change.kind === "propellant") return t("hindsight.changePropellant", { kg: fmtNum(change.propellantKg) });
@@ -145,9 +151,10 @@ function changeDescription(change) {
   return t("hindsight.changePart", { part: partName, from: t("tier." + change.from.id), to: t("tier." + change.to.id) });
 }
 
-function hindsightText(simResult) {
+function hindsightText(simResult, score) {
   const suggestion = bestSingleChange(simResult.design, gameState.features);
-  if (!suggestion) return t("hindsight.optimal");
+  // 找不到單一改善時，只有分數本來就高才算「很紮實的設計」，否則代表要同時改好幾個地方
+  if (!suggestion) return score !== null && score >= CAMPAIGN_PASS_SCORE ? t("hindsight.optimal") : t("hindsight.needsMore");
   let text = t("hindsight.suggest", {
     change: changeDescription(suggestion.change),
     from: fmtPct(suggestion.baseScore),
@@ -155,6 +162,9 @@ function hindsightText(simResult) {
   });
   if (suggestion.change.autoPropellant && suggestion.change.kind !== "propellant" && gameState.features.fuel) {
     text += t("hindsight.withPropellant", { kg: fmtNum(suggestion.change.propellantKg) });
+  }
+  if (suggestion.change.kind === "orbit") {
+    text += t("hindsight.orbitBudget", { budget: fmtMoney(suggestion.change.budgetM) });
   }
   return text;
 }
@@ -196,7 +206,41 @@ function scoreCardHtml(scoreInfo, simResult) {
         <div class="score-record">${record}</div>
       </div>
     </div>
+    ${biggestLossHtml(simResult, score)}
     <p class="score-explain">${t("results.scoreExplain")}</p>`;
+}
+
+// 瀑布圖裡扣最多的那一項，直接寫在評分下面，附上預算表裡同一段原理說明
+const RISK_EXPLAIN_KEYS = { launch: "launch", deploy: "deploy", ops: "ops", opsWithReserve: "ops" };
+
+function biggestLossHtml(simResult, score) {
+  if (score >= 95) return "";
+  const a = simResult.analysis;
+  let worst = null;
+  let v = 1;
+  ["coverage", "performance", "delivery", "power", "pointing", "lifetime"].forEach((key) => {
+    const next = v * a.factors[key];
+    if (!worst || v - next > worst.loss) worst = { kind: "factor", key, loss: v - next };
+    v = next;
+  });
+  const risks = [
+    ["launch", v * a.reliability.launch],
+    ["deploy", v * a.reliability.launch * a.reliability.deploy],
+    [gameState.features.operations ? "opsWithReserve" : "ops", simResult.expectedValue],
+  ];
+  let prev = v;
+  risks.forEach(([key, next]) => {
+    if (prev - next > worst.loss) worst = { kind: "risk", key, loss: prev - next };
+    prev = next;
+  });
+  if (worst.loss < 0.05) return "";
+
+  const gap = getLang() === "zh" ? "" : " ";
+  const text = worst.kind === "factor"
+    ? t("results.lossFactor", { factor: t("factor." + worst.key), value: fmtPct(a.factors[worst.key]) }) + gap + factorExplanation(worst.key, a)
+    : t("results.lossRisk", { risk: t("waterfall." + worst.key), value: fmtPct(worst.loss) }) + gap +
+      t("reliabilityExplain." + RISK_EXPLAIN_KEYS[worst.key], { share: fmtPct(RECOVERABLE_ANOMALY_SHARE) });
+  return `<p class="score-loss">${glyph("warn")}${text}</p>`;
 }
 
 function medalsHtml(scoreInfo) {
@@ -268,7 +312,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
     </div>
     <p class="report-luck">${luckComment(simResult)}</p>
     ${decisionSummary(simResult)}
-    <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult)}</p>
+    <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult, scoreInfo.score)}</p>
     ${bestDesignHtml(scoreInfo.best)}
   `;
 
@@ -284,6 +328,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
       if (campaignAward.byScore) text = t("results.campaignPassByScore", { score: scoreInfo.score }) + " " + text;
     }
     campaignNote.textContent = text;
+    campaignNote.classList.toggle("retry", !campaignAward);
     campaignNote.classList.remove("hidden");
   } else {
     campaignNote.classList.add("hidden");

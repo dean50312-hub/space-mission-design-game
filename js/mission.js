@@ -293,7 +293,16 @@ function bestSingleChange(design, features) {
   ROCKETS.forEach((rocket) => {
     if (rocket !== design.rocket) consider({ ...design, rocket }, { kind: "rocket", to: rocket });
   });
+  // 換軌道：預算跟著軌道變；還沒開放推進系統的關卡由系統依軌道換推進器，推進劑一律重新計算
+  ORBITS.forEach((orbit) => {
+    if (orbit === design.orbit) return;
+    const budgetDelta = (design.event && design.event.effect.budgetDeltaM) || 0;
+    const variant = { ...design, orbit, budgetM: MISSION_BUDGET_BY_ORBIT[orbit.id] + budgetDelta };
+    if (!features.fuel) variant.fuel = defaultFuelForOrbit(orbit.id);
+    consider(variant, { kind: "orbit", to: orbit, budgetM: variant.budgetM });
+  });
   SUBSYSTEM_KEYS.forEach((key) => {
+    if (key === "attitude" && !features.attitude) return;
     const options = key === "payload" ? payloadOptionsFor(design.objective) : SUBSYSTEMS[key];
     options.forEach((tier) => {
       if (tier === design.parts[key]) return;

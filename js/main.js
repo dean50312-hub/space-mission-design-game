@@ -192,7 +192,7 @@ function finishMission(simResult) {
     parts: gameState.parts,
   });
 
-  if (simResult.overallSuccess) sfxSuccess();
+  if (outcomeKind(simResult) === "success") sfxSuccess();
   if (achievements.length > 0) setTimeout(sfxAchievement, 400);
 
   const scoreInfo = scoreMission(simResult);

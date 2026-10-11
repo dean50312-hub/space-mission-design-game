@@ -1738,6 +1738,34 @@ details[open] > summary {
   background: url("../image/icons/glyph-star.png") 0 0 / 16px 16px;
 }
 
+/* 沒過關的提示用警示色，不能和過關一樣是綠色加星星 */
+.campaign-note.retry {
+  background: rgba(255, 209, 102, 0.08);
+  border-color: var(--gold-deep);
+  color: var(--gold);
+}
+
+.campaign-note.retry::before {
+  background-image: url("../image/icons/glyph-warn.png");
+}
+
+.score-loss {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 13px;
+  color: #ffd9a8;
+  background: rgba(255, 159, 67, 0.08);
+  border-left: 4px solid var(--orange);
+  padding: 8px 10px;
+  margin: 10px 0 0;
+}
+
+.score-loss .glyph {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
 .result-reason.hidden,
 .campaign-note.hidden {
   display: none;
