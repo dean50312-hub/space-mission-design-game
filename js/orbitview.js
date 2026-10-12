@@ -252,9 +252,11 @@ const OrbitView = (() => {
       const dx = sx - config.cx;
       const dy = sy - config.cy;
       const len = Math.hypot(dx, dy) || 1;
-      ctx.textAlign = dx >= 0 ? "left" : "right";
-      ctx.fillText(config.stationLabel, sx + (dx / len) * 10, sy + (dy / len) * 10 + 4);
-      ctx.textAlign = "left";
+      // 標籤不能超出畫面（手機很窄）
+      const w = ctx.measureText(config.stationLabel).width;
+      let x = sx + (dx / len) * 10 - (dx >= 0 ? 0 : w);
+      x = Math.max(4, Math.min(canvas.width - w - 4, x));
+      ctx.fillText(config.stationLabel, x, sy + (dy / len) * 10 + 4);
     }
 
     // 在地球背後的衛星已經先畫、被地球蓋住了；再疊一層半透明的，讓玩家知道它在哪
