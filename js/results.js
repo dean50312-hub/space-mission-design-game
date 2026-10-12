@@ -438,6 +438,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
       </div>
     </div>
     <p class="report-luck">${luckComment(simResult)}</p>
+    ${simResult.uplink && simResult.uplink.total > 0 ? `<p class="report-luck">${glyph("signal")}${t("results.uplinkSummary", simResult.uplink)}</p>` : ""}
     ${decisionSummary(simResult)}
     <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult, scoreInfo.designScore)}</p>
     ${bestDesignHtml(scoreInfo.best)}

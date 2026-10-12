@@ -58,10 +58,13 @@ const GRADE_REFERENCE_YEARS = 5;
 const DEPLOY_MECHANISM_RELIABILITY = 0.99; // 每個需要展開的機構（太陽能板、天線）
 
 const SUBSYSTEMS = {
+  // 電力系統選的是「技術」，太陽能板依用電需求自動決定大小（見 js/mission.js 的 powerSystemSpec）
+  // 質量 = 基本質量 + 額定功率 ÷ 比功率（含電池與電源控制）；成本 = 基本成本 + 每 kW 成本
+  // 機身貼附式只能用衛星外殼的面積，額定功率有上限
   power: [
-    { id: "economy", powerW: 150, massKg: 12, costM: 1.5, grade: "cots", deployables: 0 },
-    { id: "standard", powerW: 5000, massKg: 150, costM: 15, grade: "qualified", deployables: 1 },
-    { id: "premium", powerW: 20000, massKg: 400, costM: 40, grade: "redundant", deployables: 1 },
+    { id: "economy", wPerKg: 25, baseMassKg: 2, baseCostM: 0.5, costPerKwM: 4, maxRatedW: 300, grade: "cots", deployables: 0 },
+    { id: "standard", wPerKg: 35, baseMassKg: 5, baseCostM: 2, costPerKwM: 2.6, maxRatedW: Infinity, grade: "qualified", deployables: 1 },
+    { id: "premium", wPerKg: 70, baseMassKg: 8, baseCostM: 4, costPerKwM: 3.2, maxRatedW: Infinity, grade: "redundant", deployables: 1 },
   ],
   comm: [
     // 下傳速率（Mbps）：同樣硬體到 GEO 距離變成約 65 倍，訊號剩約 1/4,200（平方反比）
@@ -93,7 +96,8 @@ const PAYLOADS = {
   transponder: [
     { id: "economy", throughputGbps: 1, powerW: 1500, massKg: 250, costM: 20, grade: "cots" },
     { id: "standard", throughputGbps: 10, powerW: 4500, massKg: 600, costM: 50, grade: "qualified" },
-    { id: "premium", throughputGbps: 100, powerW: 12000, massKg: 1400, costM: 90, grade: "redundant" },
+    // 高通量酬載很重：ViaSat-1（140 Gbps）發射質量約 6.7 噸
+    { id: "premium", throughputGbps: 100, powerW: 12000, massKg: 2200, costM: 90, grade: "redundant" },
   ],
   // 電離層電漿儀器：quantities 為能量測的物理量數目（福衛五號 AIP 量 6 項；加上掩星接收機多了垂直剖面）
   plasma: [
@@ -156,7 +160,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 1, geo: 1 },
     requirement: { type: "resolution", maxGsdM: 0.5 },
     pointingDeg: 0.05, // 窄視野相機：指向偏 0.05° 在 550 km 高度就偏了約 0.5 km
-    budgetM: { leo: 175, geo: 195 },
+    budgetM: { leo: 145, geo: 165 },
   },
   {
     id: "climate",
@@ -164,7 +168,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 1, geo: 0.42 }, // GEO 只看得到 42% 的地球，看不到南北緯 81° 以上
     requirement: { type: "bands", bands: 29, maxGsdM: 1000 },
     pointingDeg: 0.5, // 寬刈幅（MODIS 約 2,330 km），容許的指向誤差較大
-    budgetM: { leo: 175, geo: 195 },
+    budgetM: { leo: 145, geo: 165 },
   },
   {
     id: "weather",
@@ -180,7 +184,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 35 / 1440, geo: 1 }, // 單顆 LEO 衛星每天只在頭頂出現約 35 分鐘
     requirement: { type: "throughput", gbps: 30 },
     pointingDeg: 0.1, // 點波束寬度約 0.5°，天線指向誤差要遠小於波束寬度
-    budgetM: { leo: 210, geo: 230 },
+    budgetM: { leo: 230, geo: 250 },
   },
   {
     // 電離層要「身在其中」才量得到：F 層電子密度峰值約在 250–400 km，頂部延伸到約 1,000 km；

@@ -1694,6 +1694,60 @@ details[open] > summary {
   background-image: url("../image/icons/glyph-signal.png");
 }
 
+/* 地面站上行指令的 QTE 按鈕：底部的進度條代表剩下的通訊窗口 */
+.uplink-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 7;
+  overflow: hidden;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--bg-deep);
+  background: var(--gold);
+  border: 2px solid var(--gold-deep);
+  border-radius: var(--radius);
+  padding: 10px 18px 14px;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.3);
+  animation: uplink-pulse 0.5s ease-in-out infinite alternate;
+}
+
+.uplink-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  background: var(--bg-deep);
+  transform-origin: left;
+  animation: uplink-window var(--window, 1600ms) linear forwards;
+}
+
+.uplink-btn.done,
+.uplink-btn.missed {
+  animation: none;
+  cursor: default;
+}
+
+.uplink-btn.done { background: var(--green); border-color: #23a35a; }
+.uplink-btn.missed { background: var(--line-strong); border-color: var(--line); color: var(--text); }
+.uplink-btn.done::after,
+.uplink-btn.missed::after { display: none; }
+.uplink-btn.hidden { display: none; }
+
+@keyframes uplink-pulse {
+  to { box-shadow: 0 0 0 8px rgba(255, 209, 102, 0.12); }
+}
+
+@keyframes uplink-window {
+  to { transform: scaleX(0); }
+}
+
+#flight-track:not(.orbit-mode) .uplink-btn { display: none; }
+
 .ops-hud-time {
   margin-top: 2px;
   font-family: var(--font-pixel);

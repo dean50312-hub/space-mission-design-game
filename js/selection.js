@@ -363,8 +363,17 @@ function partStatsText(key, tier) {
   const orbit = gameState.orbit;
   const common = { cost: fmtMoney(tier.costM), grade: gradeLabel(tier.grade) };
   if (key === "power") {
-    return t("selection.powerStats", { ...common, watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) }) +
-      (tier.deployables ? ` · ${t("selection.deployTag")}` : "");
+    // 太陽能板依目前的設計自動定大小，所以卡片上的規格會跟著其他零件改變
+    const spec = powerSystemSpec({ ...currentDesign(), parts: { ...gameState.parts, power: tier } });
+    return t("selection.powerStats", {
+      grade: gradeLabel(tier.grade),
+      cost: fmtMoney(spec.costM),
+      watts: fmtNum(spec.ratedW),
+      mass: fmtNum(spec.massKg),
+      wPerKg: tier.wPerKg,
+    }) +
+      (tier.deployables ? ` · ${t("selection.deployTag")}` : "") +
+      (spec.capped ? `<br>${glyph("warn")}${t("selection.powerCapped", { max: fmtNum(tier.maxRatedW), need: fmtNum(spec.requiredW) })}` : "");
   }
   if (key === "comm") {
     return t("selection.commStats", {
@@ -454,6 +463,13 @@ function fuelStatsText(fuel) {
     (fuel.toxic ? ` · ${t("selection.toxicTag", { cost: fmtMoney(TOXIC_HANDLING_COST_M) })}` : "");
 }
 
+// 換成這種推進系統，這次任務大約要帶多少推進劑：LEO 差別小、GEO 差別很大，一眼就看得出來
+function fuelNeedText(fuel) {
+  const kg = autoPropellantKg({ ...currentDesign(), fuel });
+  if (kg >= PROPELLANT_MAX_KG) return `${glyph("warn")}${t("selection.fuelNeedTooMuch", { kg: fmtNum(PROPELLANT_MAX_KG) })}`;
+  return `${glyph("dv")}${t("selection.fuelNeed", { kg: fmtNum(kg) })}`;
+}
+
 function renderFuelCards() {
   const wrap = document.createElement("div");
 
@@ -469,7 +485,7 @@ function renderFuelCards() {
     card.innerHTML = `
       <img class="swatch swatch-part" src="image/parts/fuel-${fuel.id}.png" alt="${t("fuel." + fuel.id)}" />
       <div class="part-name">${t("fuel." + fuel.id)}</div>
-      <div class="part-stats">${fuelStatsText(fuel)}</div>
+      <div class="part-stats">${fuelStatsText(fuel)}<br>${fuelNeedText(fuel)}</div>
       <div class="part-proto">${t("partProto.fuel." + fuel.id)}</div>
     `;
 

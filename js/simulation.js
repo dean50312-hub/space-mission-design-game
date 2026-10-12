@@ -63,6 +63,7 @@ async function runSimulation() {
   }
 
   const outcome = step.value;
+  stopUplink();
   const overallSuccess = outcome.failedStageId === null;
   const failedIndex = overallSuccess ? STAGES.length - 1 : STAGES.findIndex((s) => s.id === outcome.failedStageId);
   if (outcome.failedStageId === "operation" || overallSuccess) updateOpsHud(outcome.deliveredValue, outcome.extensionYears > 0);
@@ -82,6 +83,7 @@ async function runSimulation() {
     deliveredValue: Math.max(0, outcome.deliveredValue),
     propellantDepleted: overallSuccess && outcome.propellantDepleted,
     decisions: outcome.decisions,
+    uplink: { ...uplinkStats },
     reserveLeftM: outcome.reserveLeftM,
   };
 }
@@ -338,7 +340,9 @@ function enterOrbitMode(design, valueCap) {
       ? t(design.orbit.id === "geo" ? "simulation.hudLinkGeo" : "simulation.hudLinkLeo")
       : t("simulation.hudWaiting");
     status.classList.toggle("live", visible);
+    if (visible && design.orbit.id === "leo") promptUplink();
   }, t("simulation.stationName"));
+  startUplink(design.orbit.id);
 
   // 兩種時間尺度：地球自轉和衛星繞行照真實比例（1 天 = 20 秒），任務年份另外快轉
   const life = design.orbit.designLifeYears;
@@ -361,6 +365,55 @@ function enterOrbitMode(design, valueCap) {
     });
 }
 
+// ---------- 地面站上行指令（QTE）：衛星經過地面站時，玩家要及時送出請求，衛星收到才開始下傳 ----------
+// 只是操作體驗：錯過的資料會先存在船上等下一次，不影響任務價值與評分
+
+const UPLINK_WINDOW_MS = 1600;
+const UPLINK_GEO_INTERVAL_MS = 3000;
+let uplinkStats = { ok: 0, total: 0 };
+let uplinkTimer = null;
+let uplinkInterval = null;
+let uplinkOpen = false;
+
+function startUplink(orbitId) {
+  stopUplink();
+  uplinkStats = { ok: 0, total: 0 };
+  // GEO 和地面站永遠連線，改成定時送出例行指令
+  if (orbitId === "geo") uplinkInterval = setInterval(promptUplink, UPLINK_GEO_INTERVAL_MS);
+}
+
+function stopUplink() {
+  clearInterval(uplinkInterval);
+  clearTimeout(uplinkTimer);
+  uplinkInterval = null;
+  uplinkOpen = false;
+  const btn = document.getElementById("uplink-btn");
+  if (btn) btn.classList.add("hidden");
+}
+
+function promptUplink() {
+  if (uplinkOpen || !document.getElementById("anomaly-overlay").classList.contains("hidden")) return;
+  uplinkOpen = true;
+  uplinkStats.total += 1;
+  const btn = document.getElementById("uplink-btn");
+  btn.textContent = t(gameState.orbit.id === "geo" ? "simulation.uplinkGeo" : "simulation.uplinkLeo");
+  btn.className = "uplink-btn";
+  btn.style.setProperty("--window", `${UPLINK_WINDOW_MS}ms`);
+  uplinkTimer = setTimeout(() => finishUplink(false), UPLINK_WINDOW_MS);
+}
+
+function finishUplink(success) {
+  if (!uplinkOpen) return;
+  uplinkOpen = false;
+  clearTimeout(uplinkTimer);
+  if (success) uplinkStats.ok += 1;
+  const btn = document.getElementById("uplink-btn");
+  btn.textContent = t(success ? "simulation.uplinkOk" : "simulation.uplinkMissed");
+  btn.className = "uplink-btn " + (success ? "done" : "missed");
+  if (success) sfxPass();
+  uplinkTimer = setTimeout(() => btn.classList.add("hidden"), 900);
+}
+
 function updateOpsHud(delivered, extension) {
   const fill = document.getElementById("ops-hud-fill");
   fill.style.width = `${Math.min(100, delivered * 100)}%`;
@@ -372,6 +425,7 @@ function updateOpsHud(delivered, extension) {
 }
 
 function resetFlightView() {
+  stopUplink();
   OrbitView.stop();
   document.getElementById("flight-track").classList.remove("orbit-mode", "shake", "maxq");
   hideRollMeter();

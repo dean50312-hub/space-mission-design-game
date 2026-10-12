@@ -633,6 +633,17 @@ def medal_sure_launch():
     return ic.outline()
 
 
+def medal_fast_service():
+    ic = Icon(32)
+    medal_base(ic, "o", "O", "Z")
+    # 獎牌中央：碟形天線發出訊號
+    ic.ellipse(11, 16, 19, 22, "l")
+    ic.line([(15, 22), (15, 25)], "S", 2)
+    ic.arc([16, 12, 22, 18], 270, 360, "w")
+    ic.arc([17, 10, 25, 18], 270, 360, "w")
+    return ic.outline()
+
+
 def mascot_orbit():
     ic = Icon(32)
     ic.line([(16, 2), (16, 7)], "S", 1)
@@ -870,6 +881,7 @@ ICONS = {
     "medal-robust": medal_robust,
     "medal-all_electric": medal_all_electric,
     "medal-sure_launch": medal_sure_launch,
+    "medal-fast_service": medal_fast_service,
     "mascot-orbit": mascot_orbit,
     "alert": alert,
     "locked": locked,

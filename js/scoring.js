@@ -175,7 +175,8 @@ const FRUGAL_BUDGET_SHARE = 0.7;
 const FRUGAL_MIN_SCORE = { imaging: 75, climate: 70, weather: 70, comms: 45, ionosphere: 85 };
 const ROBUST_FULL_SUCCESS = { imaging: 0.9, ionosphere: 0.8 };
 const ROBUST_MIN_SCORE = { imaging: 65, ionosphere: 55 };
-const ELECTRIC_MIN_SCORE = { weather: 90, comms: 75 };
+const ELECTRIC_MIN_SCORE = { weather: 80 };
+const FAST_SERVICE_MIN_SCORE = { comms: 75 };
 const SURE_LAUNCH_RELIABILITY = 0.99;
 const SURE_LAUNCH_MIN_SCORE = { climate: 75 };
 
@@ -207,9 +208,16 @@ const MEDALS = [
   {
     // 全電推進衛星（如 Boeing 702SP）：省下大量推進劑，代價是花半年爬升到 GEO
     id: "all_electric",
-    objectives: ["weather", "comms"],
+    objectives: ["weather"],
     params: (objective) => ({ minScore: ELECTRIC_MIN_SCORE[objective.id] }),
     meets: (design) => design.fuel.electric,
+  },
+  {
+    // 通訊衛星的最佳解是全電推進，但要花半年爬升；化學推進一到 GEO 就能開播，代價是更重、常常得買 Falcon Heavy
+    id: "fast_service",
+    objectives: ["comms"],
+    params: (objective) => ({ minScore: FAST_SERVICE_MIN_SCORE[objective.id] }),
+    meets: (design) => !design.fuel.electric,
   },
 ];
 

@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("results-home-btn").addEventListener("click", goHome);
 
   document.getElementById("tutorial-next-btn").addEventListener("click", tutorialNext);
+  document.getElementById("uplink-btn").addEventListener("click", () => finishUplink(true));
   document.getElementById("tutorial-skip-btn").addEventListener("click", skipAllTutorials);
 
   document.querySelectorAll(".lang-btn").forEach((btn) => {

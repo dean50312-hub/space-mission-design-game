@@ -38,11 +38,38 @@ function eventEffect(design) {
   return (design.event && design.event.effect) || {};
 }
 
+// 衛星用電（不含電推進器）：本體 + 酬載 + 通訊 + 姿態控制
+function designPowerLoadW(design) {
+  const { payload, comm, attitude } = design.parts;
+  return BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0) + (attitude ? attitude.powerW : 0);
+}
+
+// 太陽能板依需求定大小：軌道平均可用功率要撐得起用電，裝了電推進器還要能讓它全功率運轉
+function powerSystemSpec(design) {
+  const tech = design.parts.power;
+  if (!tech || !design.orbit) return null;
+  const needW = designPowerLoadW(design) + (design.fuel && design.fuel.electric ? design.fuel.powerW : 0);
+  const requiredW = Math.ceil(needW / design.orbit.sunlightFactor / 10) * 10;
+  const ratedW = Math.min(requiredW, tech.maxRatedW);
+  return {
+    ratedW,
+    requiredW,
+    capped: requiredW > tech.maxRatedW,
+    massKg: tech.baseMassKg + ratedW / tech.wPerKg,
+    costM: Math.round((tech.baseCostM + (ratedW / 1000) * tech.costPerKwM) * 10) / 10,
+  };
+}
+
 function designCostM(design) {
   let cost = BUS_CORE.costM;
   if (design.rocket) cost += design.rocket.costM;
   SUBSYSTEM_KEYS.forEach((key) => {
-    if (design.parts[key]) cost += design.parts[key].costM;
+    if (key === "power") {
+      const spec = powerSystemSpec(design);
+      if (spec) cost += spec.costM;
+    } else if (design.parts[key]) {
+      cost += design.parts[key].costM;
+    }
   });
   if (design.fuel) {
     cost += design.fuel.costM;
@@ -53,9 +80,11 @@ function designCostM(design) {
 
 function designDryMassKg(design) {
   let mass = BUS_CORE.massKg;
-  ["power", "comm", "payload", "attitude"].forEach((key) => {
+  ["comm", "payload", "attitude"].forEach((key) => {
     if (design.parts[key]) mass += design.parts[key].massKg;
   });
+  const powerSpec = powerSystemSpec(design);
+  if (powerSpec) mass += powerSpec.massKg;
   if (design.fuel) mass += design.fuel.dryMassKg;
   const structureFraction = design.parts.structure ? design.parts.structure.massFraction : 0;
   mass *= 1 + structureFraction;
@@ -141,18 +170,18 @@ function analyzeDesign(design) {
   const orbit = design.orbit;
   const { power, comm, payload, attitude, structure } = design.parts;
 
-  analysis.powerLoadW =
-    BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0) + (attitude ? attitude.powerW : 0);
+  analysis.powerLoadW = designPowerLoadW(design);
+  analysis.powerSpec = powerSystemSpec(design);
   if (attitude) analysis.pointingDeg = achievedPointingDeg(attitude, orbit);
+  analysis.powerAvailW = power ? analysis.powerSpec.ratedW * orbit.sunlightFactor : 0;
   if (power) {
-    const heatW = Math.min(analysis.powerLoadW, power.powerW * orbit.sunlightFactor);
+    const heatW = Math.min(analysis.powerLoadW, analysis.powerAvailW);
     analysis.thermal = {
       heatW,
       radiatorM2: heatW / RADIATOR_NET_FLUX_W_M2[orbit.id],
       method: THERMAL_METHODS.find((m) => heatW <= m.maxW).id,
     };
   }
-  analysis.powerAvailW = power ? power.powerW * orbit.sunlightFactor : 0;
 
   if (design.fuel) {
     analysis.electricUnpowered = Boolean(power) && design.fuel.electric && analysis.powerAvailW < design.fuel.powerW * ELECTRIC_MIN_POWER_FRACTION;
