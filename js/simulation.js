@@ -143,22 +143,7 @@ async function showAnomalyDecision(ev, design) {
   });
 }
 
-// ---------- 飛行動畫：視角固定在畫面中心，背景場景（地面→雲層→大氣層→太空）往下捲動 ----------
-
-const FLIGHT_START_PERCENT = 4;
-
-function sceneTopForPercent(percent) {
-  const scene = document.getElementById("flight-scene");
-  const track = document.getElementById("flight-track");
-  return -(scene.offsetHeight - track.offsetHeight) * (1 - percent / 100);
-}
-
-function setSceneProgress(percent, durationMs) {
-  const scene = document.getElementById("flight-scene");
-  scene.style.transition = `top ${durationMs}ms ease-in-out`;
-  scene.style.top = `${sceneTopForPercent(percent)}px`;
-  return sleep(durationMs);
-}
+// ---------- 飛行動畫：火箭沿著重力轉向軌跡飛行（畫面由 js/ascentview.js 繪製）----------
 
 function setRocketFlying(on) {
   document.getElementById("rocket").classList.toggle("flying", on);
@@ -272,6 +257,7 @@ async function playStaging(design) {
 
 async function playFairingSeparation(design) {
   const f = ROCKET_STAGING[design.rocket.id].fairing * 100;
+  AscentView.flyTo(FAIRING_SEPARATION_TIME, 1400);
   await flightEvent(t("simulation.event.fairingSep"), () => {
     const c = rocketClip;
     const mid = c.left + (100 - c.left - c.right) / 2;
@@ -336,6 +322,7 @@ let opsValueCap = 1;
 
 function enterOrbitMode(design, valueCap) {
   playBgm("space");
+  AscentView.stop();
   document.getElementById("flight-track").classList.add("orbit-mode");
   opsValueCap = valueCap;
   document.getElementById("ops-hud-label").textContent = t("simulation.hudLabel");
@@ -384,31 +371,14 @@ function updateOpsHud(delivered, extension) {
   });
 }
 
-// image/ui/launchpad.png 顯示高度 180 px，台面在原圖第 62 / 90 列
-const LAUNCHPAD_SURFACE_PX = (180 * 62) / 90;
-
-// 把發射台的台面對齊火箭底部，火箭才會真的立在發射台上
-function alignLaunchSite() {
-  const scene = document.getElementById("flight-scene");
-  const site = document.getElementById("launch-site");
-  const rocketBottom = document.getElementById("rocket-img").getBoundingClientRect().bottom;
-  site.style.top = `${rocketBottom - scene.getBoundingClientRect().top - LAUNCHPAD_SURFACE_PX}px`;
-}
-
 function resetFlightView() {
   OrbitView.stop();
   document.getElementById("flight-track").classList.remove("orbit-mode", "shake", "maxq");
   hideRollMeter();
 
-  const scene = document.getElementById("flight-scene");
-  scene.style.transition = "none";
-  scene.style.top = `${sceneTopForPercent(FLIGHT_START_PERCENT)}px`;
-  void scene.offsetHeight; // 強制 reflow，確保下一次移動會套用 transition
-
   setRocketFlying(false);
   setRocketState("normal");
-  alignLaunchSite();
-  scene.style.transition = "";
+  AscentView.start(document.getElementById("ascent-canvas"), gameState.orbit.id);
 
   document.getElementById("simulation-log").textContent = "";
 
@@ -448,10 +418,6 @@ function stageFlavorText(stage, design, analysis) {
 }
 
 async function animateStageAttempt(stage, index, design, analysis, odds) {
-  const prevPercent = index === 0 ? FLIGHT_START_PERCENT : STAGE_TARGET_PERCENT_BY_ID[STAGES[index - 1].id];
-  const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
-  const midPercent = prevPercent + (targetPercent - prevPercent) * 0.55;
-
   setDotState(index, "active");
   showRollMeter(odds);
   document.getElementById("flight-track").classList.toggle("maxq", stage.id === "ascent");
@@ -459,12 +425,12 @@ async function animateStageAttempt(stage, index, design, analysis, odds) {
     t("simulation.checking", { stage: t("stage." + stage.id) }) + "\n" + stageFlavorText(stage, design, analysis);
 
   setRocketFlying(true);
-  await setSceneProgress(midPercent, 900);
+  const flight = STAGE_FLIGHT[stage.id];
+  await AscentView.flyTo(flight.mid, flight.attemptMs);
 }
 
 async function animateStageResolve(stage, index, passed) {
   const log = document.getElementById("simulation-log");
-  const targetPercent = STAGE_TARGET_PERCENT_BY_ID[stage.id];
   const stageName = t("stage." + stage.id);
 
   if (passed) {
@@ -476,7 +442,8 @@ async function animateStageResolve(stage, index, passed) {
       await sleep(600);
       return;
     }
-    await setSceneProgress(targetPercent, 500);
+    const flight = STAGE_FLIGHT[stage.id];
+    await AscentView.flyTo(flight.end, flight.resolveMs);
     setRocketFlying(false);
     await sleep(300);
   } else {

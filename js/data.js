@@ -144,15 +144,6 @@ const STAGES = [
   { id: "operation" },
 ];
 
-// 火箭升空動畫每個階段抵達後的場景高度（%）
-const STAGE_TARGET_PERCENT_BY_ID = {
-  liftoff: 18,
-  ascent: 40,
-  insertion: 62,
-  deployment: 78,
-  operation: 92,
-};
-
 // 發射失敗中，約 3 成發生在剛起飛，其餘在爬升段
 const LIFTOFF_SHARE_OF_LAUNCH_FAILURE = 0.3;
 
