@@ -282,6 +282,33 @@ p {
   margin-top: 8px;
 }
 
+/* 自訂模式的選項卡片 */
+.cards.custom-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  margin-bottom: 16px;
+}
+
+.custom-card {
+  flex: 1 1 170px;
+}
+
+/* 事件說明很長，卡片上只留三行，完整內容在任務簡報裡 */
+.custom-card .part-stats {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.custom-card-icon {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 6px;
+  image-rendering: pixelated;
+}
+
 /* 本關學習目標 */
 .learning-objectives {
   margin-bottom: 14px;

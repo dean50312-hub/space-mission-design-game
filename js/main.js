@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("home-start-btn").addEventListener("click", startFreePlay);
   document.getElementById("home-campaign-btn").addEventListener("click", startNextCampaignLevel);
+  document.getElementById("home-custom-btn").addEventListener("click", openCustomSetup);
+  document.getElementById("custom-back-btn").addEventListener("click", goHome);
+  document.getElementById("custom-start-btn").addEventListener("click", startCustomGame);
   document.getElementById("home-achievements-btn").addEventListener("click", () => showScreen("achievements"));
   document.getElementById("home-settings-btn").addEventListener("click", () => showScreen("settings"));
   document.getElementById("achievements-back-btn").addEventListener("click", goHome);
@@ -27,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("launch-btn").addEventListener("click", startSimulation);
   document.getElementById("play-again-btn").addEventListener("click", () => {
     if (gameState.campaignLevel) startCampaignLevel(gameState.campaignLevel);
+    else if (gameState.custom) startNewGame();
     else startFreePlay();
   });
   document.getElementById("results-home-btn").addEventListener("click", goHome);
@@ -57,6 +61,10 @@ function renderHomeScreen() {
   const startBtn = document.getElementById("home-start-btn");
   startBtn.disabled = !campaignComplete;
   startBtn.textContent = campaignComplete ? t("home.startGame") : t("home.startGameLocked");
+
+  const customBtn = document.getElementById("home-custom-btn");
+  customBtn.disabled = !campaignComplete;
+  customBtn.textContent = campaignComplete ? t("home.custom") : t("home.customLocked");
 
   const campaignBtn = document.getElementById("home-campaign-btn");
   campaignBtn.textContent = campaignComplete
@@ -92,6 +100,55 @@ function renderHomeScreen() {
 
 function startFreePlay() {
   gameState.campaignLevel = null;
+  gameState.custom = null;
+  startNewGame();
+}
+
+// ---------- 自訂模式：自己挑任務目標和事件，其他和自由遊玩一樣全機制開放 ----------
+
+let customChoice = { objectiveId: MISSION_OBJECTIVES[0].id, eventId: "nominal" };
+
+function openCustomSetup() {
+  renderCustomSetup();
+  showScreen("custom");
+}
+
+function customCard(iconSrc, name, desc, selected, onClick) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "part-card custom-card" + (selected ? " selected" : "");
+  card.innerHTML = `
+    <img class="custom-card-icon" src="${iconSrc}" alt="" />
+    <div class="part-name">${name}</div>
+    <div class="part-stats">${desc}</div>`;
+  card.addEventListener("click", onClick);
+  return card;
+}
+
+function renderCustomSetup() {
+  const objectives = document.getElementById("custom-objectives");
+  objectives.innerHTML = "";
+  MISSION_OBJECTIVES.forEach((o) => {
+    objectives.appendChild(customCard(`image/icons/objective-${o.id}.png`, t("objective." + o.id + ".short"), t("objective." + o.id + ".req"),
+      customChoice.objectiveId === o.id, () => {
+        customChoice.objectiveId = o.id;
+        renderCustomSetup();
+      }));
+  });
+  const events = document.getElementById("custom-events");
+  events.innerHTML = "";
+  EVENTS.forEach((e) => {
+    events.appendChild(customCard(`image/icons/event-${e.id}.png`, t("event." + e.id + ".name"), t("event." + e.id + ".desc"),
+      customChoice.eventId === e.id, () => {
+        customChoice.eventId = e.id;
+        renderCustomSetup();
+      }));
+  });
+}
+
+function startCustomGame() {
+  gameState.campaignLevel = null;
+  gameState.custom = { ...customChoice };
   startNewGame();
 }
 
@@ -102,6 +159,7 @@ function startNextCampaignLevel() {
 
 function startCampaignLevel(level) {
   gameState.campaignLevel = level;
+  gameState.custom = null;
   startNewGame();
 }
 
@@ -187,6 +245,7 @@ function renderCampaignHint(elementId) {
 const SCREEN_BGM = {
   home: "space",
   achievements: "space",
+  custom: "space",
   settings: "space",
   event: "lab",
   selection: "lab",
@@ -282,6 +341,7 @@ function refreshDynamicScreenText() {
     renderCampaignHint("selection-hint");
   }
   if (active.id === "screen-achievements") renderAchievementsGallery();
+  if (active.id === "screen-custom") renderCustomSetup();
   if (active.id === "screen-results" && lastResultsContext) {
     const c = lastResultsContext;
     renderResultsScreen(c.simResult, c.achievements, c.campaignAward, c.scoreInfo);
