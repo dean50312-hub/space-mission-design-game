@@ -282,6 +282,130 @@ p {
   margin-top: 8px;
 }
 
+/* 本關學習目標 */
+.learning-objectives {
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+.learning-objectives.hidden {
+  display: none;
+}
+
+.objectives-title {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.learning-objectives ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.learning-objectives li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.learning-objectives li .glyph,
+.objective-box {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.objective-box {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--line-strong);
+}
+
+.learning-objectives li.done {
+  color: var(--green);
+}
+
+.objectives-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* 結果頁的小測驗 */
+.quiz-list {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  list-style: none;
+}
+
+.quiz-item + .quiz-item {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.quiz-prompt {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 6px;
+}
+
+.quiz-option {
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-deep);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.quiz-option:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.quiz-option.correct {
+  opacity: 1;
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.quiz-option.wrong {
+  opacity: 1;
+  border-color: var(--red);
+  color: #ffb3bb;
+}
+
+.quiz-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.quiz-feedback .glyph {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.quiz-feedback.correct { color: var(--green); }
+.quiz-feedback.wrong { color: var(--gold); }
+
 /* ORBIT 的卡關提示 */
 .orbit-hint {
   display: flex;

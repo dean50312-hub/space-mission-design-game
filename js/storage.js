@@ -13,6 +13,7 @@ function defaultSave() {
     unlockedSkills: [],
     medals: {}, // 任務目標 id → 已取得的勳章 id 陣列
     bestScores: {}, // 任務目標 id → 最高精算評分
+    learned: {}, // 學習目標 id → 小測驗答對過
   };
 }
 
@@ -32,6 +33,7 @@ function loadSave() {
       unlockedSkills: Array.isArray(parsed.unlockedSkills) ? parsed.unlockedSkills : [],
       medals: { ...(parsed.medals || {}) },
       bestScores: { ...(parsed.bestScores || {}) },
+      learned: { ...(parsed.learned || {}) },
     };
   } catch (e) {
     return defaultSave();
@@ -100,6 +102,15 @@ function storageResetProgress() {
 
 function storageGetCampaignLevel() {
   return saveData.campaign.currentLevel;
+}
+
+function storageIsObjectiveLearned(id) {
+  return Boolean(saveData.learned[id]);
+}
+
+function storageMarkObjectiveLearned(id) {
+  saveData.learned = { ...saveData.learned, [id]: true };
+  writeSave(saveData);
 }
 
 function storageGetLevelFailures(level) {

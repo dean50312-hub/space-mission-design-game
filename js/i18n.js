@@ -539,6 +539,76 @@ const STRINGS = {
       all_electric: { name: "全電推進", desc: "使用電推進，精算評分達到 {minScore} 分。全電推進衛星（例如波音 702SP）省下大量推進劑，代價是要花約半年爬升到 GEO。" },
       sure_launch: { name: "穩穩送上天", desc: "選用可靠度 {rel} 以上的火箭，精算評分仍達到 {minScore} 分。便宜的火箭省下的錢能買更好的零件，可靠的火箭則讓整個任務少一分全毀的風險——哪個划算？" },
     },
+    learn: {
+      objectivesTitle: "第 {level} 關學習目標",
+      objectivesHint: "任務結束後的小測驗答對，就會在這裡打勾。",
+      quizTitle: "你學到了什麼？",
+      quizHint: "兩題小測驗，不影響分數和過關。",
+      correct: "答對了！",
+      wrong: "再想想：正確答案是「{answer}」。",
+      obj: {
+        o_orbit: "說出為什麼高解析度影像要用 LEO、颱風追蹤卻要用 GEO——離地球近不一定比較好",
+        o_comm: "說出 GEO 衛星為什麼需要更強的通訊系統",
+        o_rocket_eq: "說明推進劑加倍，Δv 為什麼不會跟著加倍",
+        o_electric: "說出電推進的優點和代價",
+        o_torquer: "說明磁力棒到了 GEO 為什麼沒用",
+        o_env: "說明太空環境事件改變的是故障機率，所以零件等級和屏蔽的價值也跟著改變",
+        o_reserve: "說明預備金能做什麼，以及它為什麼可能比把零件升到最高階更有價值",
+        o_repair: "說明零件故障時，花錢修復為什麼不一定是期望值最高的選擇",
+      },
+      q: {
+        q_res_altitude: {
+          prompt: "同一台 1.1 m 望遠鏡，從 LEO（550 km）拍的解析度約 {leo}，從 GEO 拍卻只有約 {geo}。為什麼差這麼多？",
+          options: "繞射極限：解析度和距離成正比，GEO 遠了約 65 倍|GEO 外面的空氣比較多，影像比較模糊|GEO 衛星轉得太快，影像會晃",
+          explain: "解析度 ≈ 1.22 × 波長 × 距離 ÷ 口徑。口徑一樣、距離遠 65 倍，能分辨的最小細節就大 65 倍，所以高解析度影像衛星都在 LEO。",
+        },
+        q_weather_geo: {
+          prompt: "颱風追蹤需要每 10 分鐘拍一次同一片海。為什麼要用離地球遠得多的 GEO？",
+          options: "GEO 繞地球一圈剛好 24 小時，和地球自轉同步，可以一直盯著同一個地方|GEO 離颱風比較近|GEO 的衛星比較便宜",
+          explain: "LEO 衛星每天只經過同一片海約 2 次；GEO 衛星永遠停在同一點上空，GOES 和向日葵每 10 分鐘就能拍一張全圓盤影像。近不一定好，要看任務需要什麼。",
+        },
+        q_geo_comm: {
+          prompt: "同一套通訊系統，在 LEO 每秒能傳 {leo}，在 GEO 只剩 {geo}。原因是？",
+          options: "訊號強度和距離平方成反比：距離遠 65 倍，訊號弱約 4,200 倍|GEO 的地面站比較少|GEO 衛星常常在地球陰影裡，電力不夠",
+          explain: "65² ≈ 4,200。所以 GEO 衛星要用大天線、高功率的 Ka 頻段，資料才傳得回來。",
+        },
+        q_log_dv: {
+          prompt: "乾重 500 kg 的衛星，聯胺推進劑從 100 kg 加到 200 kg，Δv 從 0.39 km/s 變成多少？",
+          options: "約 0.73 km/s，不到兩倍|0.78 km/s，剛好兩倍|超過 0.78 km/s，比兩倍還多",
+          explain: "火箭方程式 Δv = Isp × g₀ × ln(總質量 ÷ 乾質量)。多帶的推進劑本身也要被推著走，所以有對數，效果會越來越小。",
+        },
+        q_electric: {
+          prompt: "霍爾推進器的比衝是聯胺的 7 倍。為什麼不是每顆衛星都用電推進？",
+          options: "推力很小又很耗電：電力不夠的小衛星根本點不著，去 GEO 也要爬好幾個月|電推進只能在大氣層裡使用|電推進一定比化學推進重",
+          explain: "霍爾推進器的推力只有約 0.08 牛頓、要 1,350 W 的電。它很省推進劑，但要有夠大的太陽能板，而且變軌要花很久。",
+        },
+        q_torquer: {
+          prompt: "磁力棒在 LEO 能把指向控制到約 2°，到了 GEO 卻幾乎沒用。為什麼？",
+          options: "地球磁場強度和距離的立方成反比，GEO 的磁場只有 LEO 的約 1/226|GEO 太冷，線圈會結冰|GEO 沒有陽光，磁力棒沒有電",
+          explain: "磁力棒靠和地球磁場作用產生力矩。距離遠約 6 倍，磁場就弱約 6³ ≈ 226 倍，所以 GEO 衛星都用反應輪。",
+        },
+        q_radiation: {
+          prompt: "遇到「太陽粒子事件」時，為什麼零件等級和結構屏蔽變得更重要？",
+          options: "輻射變強，零件每年的故障機率升高，越耐輻射的設計損失越少|太陽粒子會讓火箭飛得比較慢|事件只會扣分數，和設計無關",
+          explain: "事件改變的是風險本身：同樣的設計在強輻射下更容易壞，所以花錢買可靠度的價值也跟著變高。理論最佳設計也會因此不同。",
+        },
+        q_debris: {
+          prompt: "「微小碎片密集」和「軌道碎片密集」兩個事件，應對方式為什麼不同？",
+          options: "1 cm 以下的碎片追蹤不到，只能靠結構屏蔽；10 cm 以上的追蹤得到，可以花推進劑閃避|兩者完全一樣，只是名字不同|大碎片比較危險，所以只能靠屏蔽",
+          explain: "地面雷達追蹤得到約 10 cm 以上的碎片，所以能事先閃避，代價是多用推進劑；更小的碎片看不到，只能靠屏蔽硬擋。",
+        },
+        q_reserve: {
+          prompt: "為什麼保留預備金，有時比把某個零件升到最高階更有價值？",
+          options: "預備金能在故障時搶修、撐完壽命後延長任務；最後一點升級帶來的期望值往往比較少|預備金會產生利息|沒花完的預算會直接變成分數",
+          explain: "零件從標準升到高階，期望值可能只多一點點；同樣的錢留作預備金，在故障時能救回衛星，最後還能延長任務。這就是 NASA 一定保留預備金的原因。",
+        },
+        q_repair: {
+          prompt: "零件故障時，免費的降級運作有時比花錢修復更好。為什麼？",
+          options: "修復可能失敗，花掉的預備金也不能再用來延長任務，要比較兩個選項的期望值|花錢修復一定會失敗|降級運作不會損失任何價值",
+          explain: "每個選項的「精算估計」都算進了失敗機率和剩下的預備金能換到的時間。期望值比較高的那個，才是精算師會選的。",
+        },
+      },
+    },
     hint: {
       title: "ORBIT 的提示（這一關已經挑戰 {n} 次）",
       orbit: "軌道選{orbit}：{reason}",
@@ -1251,6 +1321,76 @@ const STRINGS = {
       robust: { name: "Fail-Safe", desc: "Full-success odds of {fs} or better while still scoring {minScore}. Reliability isn't free — think about what's cheapest to give up." },
       all_electric: { name: "All-Electric", desc: "Use electric propulsion and score {minScore}. All-electric satellites (like Boeing's 702SP) save huge amounts of propellant, at the cost of a roughly six-month climb to GEO." },
       sure_launch: { name: "Safe Ride Up", desc: "Use a rocket with {rel} or better reliability and still score {minScore}. A cheaper rocket frees money for better parts; a reliable one cuts the risk of losing everything at once — which pays off?" },
+    },
+    learn: {
+      objectivesTitle: "Level {level} learning goals",
+      objectivesHint: "Answer the quiz after the mission correctly to check these off.",
+      quizTitle: "What did you learn?",
+      quizHint: "Two quick questions — they don't affect your score or clearing the level.",
+      correct: "Correct!",
+      wrong: "Not quite: the answer is “{answer}”.",
+      obj: {
+        o_orbit: "Explain why high-resolution imaging uses LEO but typhoon tracking uses GEO — closer isn't always better",
+        o_comm: "Explain why GEO satellites need stronger communications",
+        o_rocket_eq: "Explain why doubling propellant doesn't double Δv",
+        o_electric: "Name the strengths and costs of electric propulsion",
+        o_torquer: "Explain why magnetorquers stop working at GEO",
+        o_env: "Explain that space-environment events change failure odds, which changes what part grades and shielding are worth",
+        o_reserve: "Explain what the reserve is for, and why it can be worth more than a top-tier part",
+        o_repair: "Explain why paying for a repair isn't always the highest-expected-value choice",
+      },
+      q: {
+        q_res_altitude: {
+          prompt: "The same 1.1 m telescope resolves about {leo} from LEO (550 km) but only about {geo} from GEO. Why such a big gap?",
+          options: "Diffraction limit: resolution scales with distance, and GEO is about 65× farther|There's more air around GEO, so images blur|GEO satellites spin too fast and the image shakes",
+          explain: "Resolution ≈ 1.22 × wavelength × distance ÷ aperture. Same aperture, 65× the distance, 65× coarser detail — which is why high-resolution imagers live in LEO.",
+        },
+        q_weather_geo: {
+          prompt: "Typhoon tracking needs an image of the same ocean every 10 minutes. Why use GEO, which is much farther away?",
+          options: "A GEO orbit takes exactly 24 hours, matching Earth's spin, so it can stare at one spot nonstop|GEO is closer to the typhoon|GEO satellites are cheaper",
+          explain: "A LEO satellite passes the same ocean about twice a day; a GEO satellite hangs over one spot, so GOES and Himawari image the full disk every 10 minutes. Closer isn't always better — it depends on what the mission needs.",
+        },
+        q_geo_comm: {
+          prompt: "The same comms system sends {leo} from LEO but only {geo} from GEO. Why?",
+          options: "Signal strength falls with distance squared: 65× farther means about 4,200× weaker|There are fewer ground stations for GEO|GEO satellites are often in Earth's shadow and short on power",
+          explain: "65² ≈ 4,200. That's why GEO satellites need big, high-power Ka-band antennas to get their data home.",
+        },
+        q_log_dv: {
+          prompt: "A satellite with 500 kg dry mass goes from 100 kg to 200 kg of hydrazine. Its Δv was 0.39 km/s — what is it now?",
+          options: "About 0.73 km/s — less than double|0.78 km/s — exactly double|More than 0.78 km/s — over double",
+          explain: "The rocket equation, Δv = Isp × g₀ × ln(total mass ÷ dry mass), has a logarithm because the extra propellant has to be pushed too, so each extra kilogram helps less.",
+        },
+        q_electric: {
+          prompt: "A Hall thruster has 7× the specific impulse of hydrazine. Why doesn't every satellite use electric propulsion?",
+          options: "Its thrust is tiny and it's power-hungry: small satellites can't even light one, and reaching GEO takes months|Electric thrusters only work inside the atmosphere|Electric propulsion is always heavier than chemical",
+          explain: "A Hall thruster pushes with about 0.08 N and needs 1,350 W. It saves propellant, but needs big solar arrays and takes a long time to change orbit.",
+        },
+        q_torquer: {
+          prompt: "Magnetorquers point to about 2° in LEO but are nearly useless at GEO. Why?",
+          options: "Earth's magnetic field weakens with the cube of distance, so at GEO it's only about 1/226 as strong|GEO is so cold the coils freeze|There's no sunlight at GEO, so the magnetorquers lose power",
+          explain: "Magnetorquers push against Earth's field. About 6× farther means about 6³ ≈ 226× weaker, which is why GEO satellites use reaction wheels.",
+        },
+        q_radiation: {
+          prompt: "Why do part grades and shielding matter more during a Solar Particle Event?",
+          options: "Stronger radiation raises every part's yearly failure odds, and radiation-tolerant designs lose less|Solar particles slow the rocket down|Events only cost points and have nothing to do with the design",
+          explain: "Events change the risk itself: the same design breaks more often under strong radiation, so buying reliability becomes worth more — and the theoretical best design changes too.",
+        },
+        q_debris: {
+          prompt: "Why are Dense Small Debris and Crowded Orbit handled differently?",
+          options: "Debris under 1 cm can't be tracked, so only shielding helps; pieces over 10 cm can be tracked and dodged with propellant|They're identical, just different names|Large debris is more dangerous, so only shielding helps",
+          explain: "Ground radar tracks debris larger than about 10 cm, so you can dodge it at the cost of propellant; smaller pieces are invisible and can only be shielded against.",
+        },
+        q_reserve: {
+          prompt: "Why can keeping a reserve be worth more than upgrading a part to the top tier?",
+          options: "A reserve can rescue the satellite after a failure and extend the mission later; the last upgrade often adds little expected value|A reserve earns interest|Unspent budget turns directly into points",
+          explain: "Going from Standard to Premium may add only a sliver of expected value; the same money as reserve can save the satellite when something breaks and extend the mission at the end. That's why NASA always holds reserves.",
+        },
+        q_repair: {
+          prompt: "When a part fails, carrying on degraded for free is sometimes better than paying for a repair. Why?",
+          options: "Repairs can fail, and reserve spent now can't fund an extended mission later — you have to compare expected values|Paid repairs always fail|Degraded mode loses no value at all",
+          explain: "Each option's actuarial estimate already includes the odds of failure and how much time the remaining reserve could buy. The higher expected value is the actuary's choice.",
+        },
+      },
     },
     hint: {
       title: "ORBIT's hint (you've tried this level {n} times)",

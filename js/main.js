@@ -149,6 +149,7 @@ function renderEventScreen() {
 
   document.getElementById("start-btn").disabled = !gameState.orbit;
   renderCampaignHint("event-hint");
+  renderLearningObjectives();
 }
 
 // ---------- 卡關提示：同一關連續沒過兩次以上，ORBIT 依理論最佳設計透露方向，每多失敗一次多講一點 ----------
@@ -253,8 +254,10 @@ function finishMission(simResult) {
     storageSetLevelFailures(level, campaignAward ? 0 : storageGetLevelFailures(level) + 1);
   }
 
-  lastResultsContext = { simResult, achievements, campaignAward, scoreInfo };
+  const quiz = pickQuiz(gameState.campaignLevel, simResult.design);
+  lastResultsContext = { simResult, achievements, campaignAward, scoreInfo, quiz };
   renderResultsScreen(simResult, achievements, campaignAward, scoreInfo);
+  renderQuiz(quiz);
   showScreen("results");
   showTutorialIfNeeded("results");
 }
@@ -282,6 +285,7 @@ function refreshDynamicScreenText() {
   if (active.id === "screen-results" && lastResultsContext) {
     const c = lastResultsContext;
     renderResultsScreen(c.simResult, c.achievements, c.campaignAward, c.scoreInfo);
+    renderQuiz(c.quiz);
   }
 
   if (!document.getElementById("tutorial-overlay").classList.contains("hidden")) {
