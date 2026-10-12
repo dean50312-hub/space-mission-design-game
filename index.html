@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=66" />
+<link rel="stylesheet" href="css/style.css?v=67" />
 </head>
 <body>
 <main id="app">
@@ -221,6 +221,19 @@
     <button id="settings-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
   </section>
 
+  <!-- 第一次進入網站時先選語言（文字固定中英並列，不經過翻譯） -->
+  <div id="lang-overlay" class="tutorial-overlay lang-overlay hidden">
+    <div class="lang-card panel">
+      <img class="lang-mascot" src="image/icons/mascot-orbit.png" alt="" />
+      <h2 class="lang-title">選擇語言<span>Choose your language</span></h2>
+      <div class="lang-choices">
+        <button type="button" class="btn btn-primary lang-pick-btn" data-lang="zh">中文</button>
+        <button type="button" class="btn btn-primary lang-pick-btn" data-lang="en">English</button>
+      </div>
+      <p class="lang-note">之後可以在「設定」更改 · You can change this later in Settings</p>
+    </div>
+  </div>
+
   <div id="anomaly-overlay" class="tutorial-overlay hidden">
     <div class="anomaly-card panel panel-alert">
       <div class="anomaly-header"><img class="anomaly-badge" src="image/icons/alert.png" alt="" /><h3 id="anomaly-title"></h3></div>
@@ -248,25 +261,25 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=66"></script>
-<script src="js/i18n.js?v=66"></script>
-<script src="js/sound.js?v=66"></script>
-<script src="js/data.js?v=66"></script>
-<script src="js/state.js?v=66"></script>
-<script src="js/mission.js?v=66"></script>
-<script src="js/operations.js?v=66"></script>
-<script src="js/scoring.js?v=66"></script>
-<script src="js/bestdesigns.js?v=66"></script>
-<script src="js/earthmap.js?v=66"></script>
-<script src="js/orbitview.js?v=66"></script>
-<script src="js/ascentview.js?v=66"></script>
-<script src="js/selection.js?v=66"></script>
-<script src="js/simulation.js?v=66"></script>
-<script src="js/results.js?v=66"></script>
-<script src="js/learning.js?v=66"></script>
-<script src="js/achievements.js?v=66"></script>
-<script src="js/settings.js?v=66"></script>
-<script src="js/tutorial.js?v=66"></script>
-<script src="js/main.js?v=66"></script>
+<script src="js/storage.js?v=67"></script>
+<script src="js/i18n.js?v=67"></script>
+<script src="js/sound.js?v=67"></script>
+<script src="js/data.js?v=67"></script>
+<script src="js/state.js?v=67"></script>
+<script src="js/mission.js?v=67"></script>
+<script src="js/operations.js?v=67"></script>
+<script src="js/scoring.js?v=67"></script>
+<script src="js/bestdesigns.js?v=67"></script>
+<script src="js/earthmap.js?v=67"></script>
+<script src="js/orbitview.js?v=67"></script>
+<script src="js/ascentview.js?v=67"></script>
+<script src="js/selection.js?v=67"></script>
+<script src="js/simulation.js?v=67"></script>
+<script src="js/results.js?v=67"></script>
+<script src="js/learning.js?v=67"></script>
+<script src="js/achievements.js?v=67"></script>
+<script src="js/settings.js?v=67"></script>
+<script src="js/tutorial.js?v=67"></script>
+<script src="js/main.js?v=67"></script>
 </body>
 </html>
