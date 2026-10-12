@@ -123,6 +123,23 @@
 - 太陽同步軌道：550 km 高度傾角約 97.6°；地球觀測衛星常用上午 10:30 降交點
 - 地面站：國家太空中心（新竹，北緯 24.8°、東經 121.0°）。550 km 衛星的地面可視範圍約為 acos(R⊕/r) ≈ 22.6°，所以赤道軌道的低軌衛星永遠不會出現在台灣的地平線上，必須用傾斜軌道
 
+### PSLV 與電離層任務（2026-10-12 查證）
+
+- PSLV-XL：1,750 kg 到 620 km SSO、1,425 kg 到次同步轉移軌道（284 × 20,650 km）：[Polar Satellite Launch Vehicle — Wikipedia](https://en.wikipedia.org/wiki/Polar_Satellite_Launch_Vehicle)。價格約 ₹130–200 crore（約 $16–29M），NSIL 沒有公布官方報價，**遊戲取 $25M**
+- PSLV 飛行紀錄：PSLV-C62（2026 年 1 月 12 日）是第 64 次發射，第三節異常導致失敗；前一次 PSLV-C61（2025 年 5 月）同樣失敗：[PSLV-C62 / EOS-N1 Mission — ISRO](https://www.isro.gov.in/Mission_PSLV_C62.html)；[ISRO's first 2026 mission PSLV-C62 fails — Deccan Herald](https://www.deccanherald.com/science/space/isros-first-2026-mission-pslv-c62-fails-3859678)。失敗共 4 次（1993、2017、2025、2026）加 1 次部分失敗（1997），遊戲記為 64 次中 59 次成功。截至 2026 年 10 月，下一次發射（C63）尚未進行
+- 次同步轉移軌道多出的 Δv：從 284 × 20,650 km、傾角 17.9°（GSAT-12 的實際軌道）圓化成 GEO 約需 1.99 km/s，比卡納維爾角 GTO 的 1.83 km/s 多約 0.16 km/s，由霍曼轉移與遠地點變軌公式直接計算
+- 考慮過但沒採用的 Firefly Alpha：7 次發射、3 次成功、2 次失敗、2 次部分失敗：[Firefly Alpha — Wikipedia](https://en.wikipedia.org/wiki/Firefly_Alpha)；[Firefly Alpha FLTA007 launches successfully — NASASpaceFlight](https://www.nasaspaceflight.com/2026/03/firefly-flta007-launch/)
+- Electron 第 13 次發射（2020 年 7 月）因第二節電路接點故障失敗、損失 7 顆衛星：廣為記載
+- 福衛五號 AIP：感測頭 0.58 kg＋支架 0.92 kg＋電子箱約 2 kg＋線束約 1 kg、平均約 4.7 W；量測離子成分、總離子濃度、兩個方向的離子速度、離子與電子溫度；4 種模式（PLP、RPA、IT、IDM）：[FormoSat-5 — eoPortal](https://www.eoportal.org/satellite-missions/formosat-5)
+- 福衛七號 TGRS：約 6 kg、50 W，每天超過 4,000 筆掩星剖面；衛星濕重約 278 kg：[FormoSat-7 / COSMIC-2 — eoPortal](https://www.eoportal.org/satellite-missions/stp2-formosat-7)
+- 福衛五號 720 km 太陽同步軌道、上午／晚上 10:30 地方時；福衛七號 24° 傾角、6 顆衛星：同上兩個 eoPortal 頁面
+- NASA GOLD 從 GEO（SES-14）以遠紫外光觀測高層大氣：廣為記載，用來說明「遙測」與「實地量測」的差別
+- 電推進器功率調節：NSTAR 可在 0.5–2.3 kW 之間運轉：[NSTAR — Astronautix](http://www.astronautix.com/n/nstar.html)。遊戲取「低於額定的 1/4 就點不著」為**遊戲估算值**
+- 整流罩約在 110 km 高度分離（自由分子流加熱降到可接受範圍）、PSLV-XL 有 6 具固體捆綁助推器（其中 2 具空中點火）、Falcon Heavy 2018 年首飛兩支側推進器同時著陸：廣為記載的發射流程
+
+> 電漿儀器的成本、每日資料量、朗繆爾探針的質量與耗電、「7 項參數」的計分方式，以及電離層任務的預算，皆為**遊戲估算值**。
+
+
 ### 字型與美術素材授權
 
 - 俐方體11號（Cubic 11）：[ACh-K/Cubic-11 — GitHub](https://github.com/ACh-K/Cubic-11)，SIL Open Font License 1.1，網頁從 jsDelivr 載入 v1.500

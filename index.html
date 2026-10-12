@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=50" />
+<link rel="stylesheet" href="css/style.css?v=53" />
 </head>
 <body>
 <main id="app">
@@ -75,11 +75,16 @@
       </div>
     </div>
 
+    <div id="event-hint" class="orbit-hint panel hidden"></div>
+
     <div id="event-orbit-group"></div>
 
     <p id="event-budget-note" class="budget-note"></p>
 
-    <button id="start-btn" class="btn btn-primary" data-i18n="event.startBtn"></button>
+    <div class="button-row">
+      <button id="event-home-btn" class="btn btn-secondary" data-i18n="event.homeBtn"></button>
+      <button id="start-btn" class="btn btn-primary" data-i18n="event.startBtn"></button>
+    </div>
   </section>
 
   <section id="screen-selection" class="screen">
@@ -88,11 +93,16 @@
     </ol>
     <h2 data-i18n="selection.title"></h2>
 
+    <div id="selection-hint" class="orbit-hint panel hidden"></div>
+
     <p id="selection-warning" class="warning hidden"></p>
 
     <div id="selection-groups"></div>
 
-    <button id="launch-btn" class="btn btn-primary" disabled data-i18n="selection.launchBtn"></button>
+    <div class="button-row">
+      <button id="selection-back-btn" class="btn btn-secondary" data-i18n="selection.backBtn"></button>
+      <button id="launch-btn" class="btn btn-primary" disabled data-i18n="selection.launchBtn"></button>
+    </div>
   </section>
 
   <section id="screen-simulation" class="screen">
@@ -138,6 +148,7 @@
         <div class="ops-hud-row"><span id="ops-hud-label"></span><span id="ops-hud-value"></span></div>
         <div class="ops-hud-bar"><div id="ops-hud-fill" class="ops-hud-fill"></div><div id="ops-hud-cap" class="ops-hud-cap"></div></div>
         <div id="ops-hud-status" class="ops-hud-status"></div>
+        <div id="ops-hud-time" class="ops-hud-time"></div>
       </div>
       <div id="orbit-caption" class="orbit-caption"></div>
     </div>
@@ -240,23 +251,23 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=50"></script>
-<script src="js/i18n.js?v=50"></script>
-<script src="js/sound.js?v=50"></script>
-<script src="js/data.js?v=50"></script>
-<script src="js/state.js?v=50"></script>
-<script src="js/mission.js?v=50"></script>
-<script src="js/operations.js?v=50"></script>
-<script src="js/scoring.js?v=50"></script>
-<script src="js/bestdesigns.js?v=50"></script>
-<script src="js/earthmap.js?v=50"></script>
-<script src="js/orbitview.js?v=50"></script>
-<script src="js/selection.js?v=50"></script>
-<script src="js/simulation.js?v=50"></script>
-<script src="js/results.js?v=50"></script>
-<script src="js/achievements.js?v=50"></script>
-<script src="js/settings.js?v=50"></script>
-<script src="js/tutorial.js?v=50"></script>
-<script src="js/main.js?v=50"></script>
+<script src="js/storage.js?v=53"></script>
+<script src="js/i18n.js?v=53"></script>
+<script src="js/sound.js?v=53"></script>
+<script src="js/data.js?v=53"></script>
+<script src="js/state.js?v=53"></script>
+<script src="js/mission.js?v=53"></script>
+<script src="js/operations.js?v=53"></script>
+<script src="js/scoring.js?v=53"></script>
+<script src="js/bestdesigns.js?v=53"></script>
+<script src="js/earthmap.js?v=53"></script>
+<script src="js/orbitview.js?v=53"></script>
+<script src="js/selection.js?v=53"></script>
+<script src="js/simulation.js?v=53"></script>
+<script src="js/results.js?v=53"></script>
+<script src="js/achievements.js?v=53"></script>
+<script src="js/settings.js?v=53"></script>
+<script src="js/tutorial.js?v=53"></script>
+<script src="js/main.js?v=53"></script>
 </body>
 </html>

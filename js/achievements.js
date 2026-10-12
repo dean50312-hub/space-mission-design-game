@@ -85,11 +85,7 @@ function renderAchievementsGallery() {
       .map((medal) => {
         const has = storageHasMedal(objective.id, medal.id);
         const p = medal.params(objective);
-        const desc = t(`medal.${medal.id}.desc`, {
-          minScore: p.minScore,
-          share: p.share !== undefined ? fmtPct(p.share) : "",
-          fs: p.fullSuccess !== undefined ? fmtPct(p.fullSuccess) : "",
-        });
+        const desc = medalDescription(medal, p);
         total++;
         if (has) owned++;
         return `<img src="image/icons/medal-${medal.id}.png" class="${has ? "" : "locked"}" title="${t(`medal.${medal.id}.name`)}：${desc}" alt="" />`;

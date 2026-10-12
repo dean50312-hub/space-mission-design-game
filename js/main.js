@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("settings-back-btn").addEventListener("click", goHome);
 
   document.getElementById("start-btn").addEventListener("click", () => showScreen("selection"));
+  document.getElementById("event-home-btn").addEventListener("click", goHome);
+  document.getElementById("selection-back-btn").addEventListener("click", () => {
+    renderEventScreen();
+    showScreen("event");
+  });
   document.getElementById("launch-btn").addEventListener("click", startSimulation);
   document.getElementById("play-again-btn").addEventListener("click", () => {
     if (gameState.campaignLevel) startCampaignLevel(gameState.campaignLevel);
@@ -143,6 +148,39 @@ function renderEventScreen() {
   }
 
   document.getElementById("start-btn").disabled = !gameState.orbit;
+  renderCampaignHint("event-hint");
+}
+
+// ---------- 卡關提示：同一關連續沒過兩次以上，ORBIT 依理論最佳設計透露方向，每多失敗一次多講一點 ----------
+
+const HINT_MIN_FAILURES = 2;
+
+function campaignHintItems() {
+  if (!gameState.campaignLevel) return [];
+  const failures = storageGetLevelFailures(gameState.campaignLevel);
+  if (failures < HINT_MIN_FAILURES) return [];
+  const objective = gameState.missionObjective;
+  const best = bestDesignFor(objective, gameState.event, gameState.features);
+  if (!best) return [];
+  const items = [t("hint.orbit", { orbit: t("orbit." + best.orbit), reason: t(`coverageExplain.${objective.id}.${best.orbit}`) })];
+  if (failures >= HINT_MIN_FAILURES + 1) items.push(t("hint.rocket", { rocket: t("rocket." + best.rocket + ".name") }));
+  if (failures >= HINT_MIN_FAILURES + 2) {
+    items.push(t("hint.payload", { part: hotspotLabel("payload"), tier: t("tier." + best.parts.payload) }));
+  }
+  return items;
+}
+
+function renderCampaignHint(elementId) {
+  const el = document.getElementById(elementId);
+  const items = campaignHintItems();
+  el.classList.toggle("hidden", items.length === 0);
+  if (items.length === 0) return;
+  el.innerHTML = `
+    <img class="orbit-hint-avatar" src="image/icons/mascot-orbit.png" alt="" />
+    <div>
+      <div class="orbit-hint-title">${t("hint.title", { n: storageGetLevelFailures(gameState.campaignLevel) })}</div>
+      <ul>${items.map((item) => `<li>${item}</li>`).join("")}</ul>
+    </div>`;
 }
 
 const SCREEN_BGM = {
@@ -159,7 +197,10 @@ function showScreen(name) {
   playBgm(SCREEN_BGM[name]);
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   document.getElementById(`screen-${name}`).classList.add("active");
-  if (name === "selection") renderSelectionScreen();
+  if (name === "selection") {
+    renderSelectionScreen();
+    renderCampaignHint("selection-hint");
+  }
   if (name === "achievements") renderAchievementsGallery();
 }
 
@@ -207,6 +248,10 @@ function finishMission(simResult) {
     storageCompleteCampaignLevel(gameState.campaignLevel);
     campaignAward = { level: gameState.campaignLevel, points: earned, byScore: !passedByValue };
   }
+  if (gameState.campaignLevel) {
+    const level = gameState.campaignLevel;
+    storageSetLevelFailures(level, campaignAward ? 0 : storageGetLevelFailures(level) + 1);
+  }
 
   lastResultsContext = { simResult, achievements, campaignAward, scoreInfo };
   renderResultsScreen(simResult, achievements, campaignAward, scoreInfo);
@@ -229,7 +274,10 @@ function refreshDynamicScreenText() {
 
   if (active.id === "screen-home") renderHomeScreen();
   if (active.id === "screen-event") renderEventScreen();
-  if (active.id === "screen-selection") renderSelectionScreen();
+  if (active.id === "screen-selection") {
+    renderSelectionScreen();
+    renderCampaignHint("selection-hint");
+  }
   if (active.id === "screen-achievements") renderAchievementsGallery();
   if (active.id === "screen-results" && lastResultsContext) {
     const c = lastResultsContext;

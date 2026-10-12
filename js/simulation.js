@@ -4,7 +4,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const OPERATIONS_ANIMATION_MS = 9000;
+const OPERATIONS_ANIMATION_MS = 12000;
 
 async function runSimulation() {
   const design = currentDesign();
@@ -31,12 +31,14 @@ async function runSimulation() {
         log.textContent = t("simulation.flavor.operation");
         await sleep(900);
       } else {
+        if (ev.stageId === "insertion") await playFairingSeparation(design);
         await animateStageAttempt(STAGES[stageIndex], stageIndex, design, analysis, ev.odds);
       }
     } else if (ev.kind === "stageRoll") {
       await animateRoll(ev.odds, ev.passed);
     } else if (ev.kind === "stageEnd") {
       await animateStageResolve(STAGES[stageIndex], stageIndex, true);
+      if (ev.stageId === "ascent") await playStaging(design);
     } else if (ev.kind === "year") {
       updateOpsHud(ev.delivered, ev.phase === "extension");
       log.textContent = ev.phase === "extension"
@@ -183,9 +185,101 @@ function setRocketState(state) {
     img.src = `image/rocket/rocket-${gameState.rocket.id}.png`;
   }
 
-  // 重型火箭（Falcon Heavy）三支核心並聯，三道火焰；爆炸後就沒有火焰
-  const flames = state === "exploded" ? 0 : gameState.rocket && gameState.rocket.id === "heavy" ? 3 : 1;
-  document.getElementById("exhaust").innerHTML = '<span class="flame"></span>'.repeat(flames);
+  resetRocketClip();
+  // Falcon Heavy 三支核心並聯、PSLV 兩側有固體助推器，所以有三道火焰；爆炸後就沒有火焰
+  const rocketId = gameState.rocket ? gameState.rocket.id : null;
+  setFlames(state === "exploded" ? 0 : ROCKET_STAGING[rocketId] && ROCKET_STAGING[rocketId].boosterSide ? 3 : 1);
+}
+
+function setFlames(count) {
+  const exhaust = document.getElementById("exhaust");
+  exhaust.classList.toggle("narrow", Boolean(gameState.rocket) && gameState.rocket.id === "pslv" && count > 1);
+  exhaust.innerHTML = '<span class="flame"></span>'.repeat(count);
+}
+
+// ---------- 真實的飛行事件：助推器分離、一二節分離、整流罩分離 ----------
+// 數值是 image/rocket/rocket-*.png 上的位置比例：boosterSide = 兩側助推器各占圖寬多少，
+// stageCut = 第一節占圖高多少（從底部算），fairing = 整流罩占圖高多少（從頂部算）
+
+const ROCKET_STAGING = {
+  light: { stageCut: 0.62, fairing: 0.22 },
+  pslv: { boosterSide: 0.25, stageCut: 0.34, fairing: 0.28 },
+  medium: { stageCut: 0.66, fairing: 0.22 },
+  heavy: { boosterSide: 0.35, stageCut: 0.66, fairing: 0.22 },
+};
+
+let rocketClip = { top: 0, right: 0, bottom: 0, left: 0 };
+
+function resetRocketClip() {
+  rocketClip = { top: 0, right: 0, bottom: 0, left: 0 };
+  document.getElementById("rocket-img").style.clipPath = "";
+  document.getElementById("exhaust").style.transform = "";
+  document.querySelectorAll(".rocket-piece").forEach((el) => el.remove());
+}
+
+// 只顯示還沒分離的那一段，尾焰也跟著移到剩下那一節的底部
+function applyRocketClip() {
+  const img = document.getElementById("rocket-img");
+  const c = rocketClip;
+  img.style.clipPath = `inset(${c.top}% ${c.right}% ${c.bottom}% ${c.left}%)`;
+  document.getElementById("exhaust").style.transform = `translateY(${(-c.bottom / 100) * img.offsetHeight}px)`;
+}
+
+// 用火箭圖的一部分做出分離的碎片，往 (dx, dy) 方向飛走並淡出
+function dropPiece(inset, dx, dy, rotateDeg) {
+  const piece = document.getElementById("rocket-img").cloneNode();
+  piece.removeAttribute("id");
+  piece.className = "rocket-piece";
+  piece.style.clipPath = `inset(${inset})`;
+  piece.style.setProperty("--dx", `${dx}px`);
+  piece.style.setProperty("--dy", `${dy}px`);
+  piece.style.setProperty("--rot", `${rotateDeg}deg`);
+  document.getElementById("rocket").appendChild(piece);
+  setTimeout(() => piece.remove(), 1600);
+}
+
+async function flightEvent(text, action) {
+  document.getElementById("simulation-log").textContent = text;
+  action();
+  await sleep(1400);
+}
+
+async function playStaging(design) {
+  const id = design.rocket.id;
+  const cfg = ROCKET_STAGING[id];
+  setRocketFlying(true);
+  if (cfg.boosterSide) {
+    await flightEvent(t("simulation.event.boosterSep_" + id), () => {
+      const keep = 100 - cfg.boosterSide * 100;
+      dropPiece(`0 ${keep}% 0 0`, -28, 60, -16);
+      dropPiece(`0 0 0 ${keep}%`, 28, 60, 16);
+      rocketClip.left = cfg.boosterSide * 100;
+      rocketClip.right = cfg.boosterSide * 100;
+      applyRocketClip();
+      setFlames(1);
+    });
+  }
+  // 主引擎關機（MECO）→ 分離 → 第二節點火
+  await flightEvent(t("simulation.event.stageSep") + t("simulation.event.stageNote_" + id), () => {
+    setRocketFlying(false);
+    setTimeout(() => setRocketFlying(true), 700);
+    const c = rocketClip;
+    dropPiece(`${100 - cfg.stageCut * 100}% ${c.right}% 0 ${c.left}%`, 0, 80, 10);
+    c.bottom = cfg.stageCut * 100;
+    applyRocketClip();
+  });
+}
+
+async function playFairingSeparation(design) {
+  const f = ROCKET_STAGING[design.rocket.id].fairing * 100;
+  await flightEvent(t("simulation.event.fairingSep"), () => {
+    const c = rocketClip;
+    const mid = c.left + (100 - c.left - c.right) / 2;
+    dropPiece(`0 ${100 - mid}% ${100 - f}% ${c.left}%`, -34, 24, -50);
+    dropPiece(`0 ${c.right}% ${100 - f}% ${mid}%`, 34, 24, 50);
+    c.top = f;
+    applyRocketClip();
+  });
 }
 
 function shakeTrack() {
@@ -259,10 +353,25 @@ function enterOrbitMode(design, valueCap) {
     status.classList.toggle("live", visible);
   }, t("simulation.stationName"));
 
-  document.getElementById("orbit-caption").textContent = t("simulation.orbitCaption_" + design.orbit.id, {
-    min: Math.round(info.periodMin),
-    ratio: fmtNum(info.ratio, 2),
+  // 兩種時間尺度：地球自轉和衛星繞行照真實比例（1 天 = 20 秒），任務年份另外快轉
+  const life = design.orbit.designLifeYears;
+  const yearSeconds = OPERATIONS_ANIMATION_MS / life / 1000;
+  document.getElementById("ops-hud-time").textContent = t("simulation.hudTime", {
+    day: EARTH_SPIN_VISUAL_SECONDS,
+    year: fmtNum(yearSeconds, 1),
   });
+  document.getElementById("orbit-caption").textContent =
+    t("simulation.timeScale", {
+      day: EARTH_SPIN_VISUAL_SECONDS,
+      year: fmtNum(yearSeconds, 1),
+      life,
+      hours: fmtNum((life * 365.25 * EARTH_SPIN_VISUAL_SECONDS) / 3600),
+    }) +
+    " · " +
+    t("simulation.orbitCaption_" + design.orbit.id, {
+      min: Math.round(info.periodMin),
+      ratio: fmtNum(info.ratio, 2),
+    });
 }
 
 function updateOpsHud(delivered, extension) {

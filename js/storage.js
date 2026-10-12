@@ -8,7 +8,7 @@ function defaultSave() {
     failCount: 0,
     tutorialSeen: {},
     settings: { lang: "zh", soundOn: true, volume: 0.6 },
-    campaign: { currentLevel: 1, completed: false },
+    campaign: { currentLevel: 1, completed: false, failures: {} }, // failures：關卡 → 連續沒過關的次數
     skillPoints: 0,
     unlockedSkills: [],
     medals: {}, // 任務目標 id → 已取得的勳章 id 陣列
@@ -100,6 +100,15 @@ function storageResetProgress() {
 
 function storageGetCampaignLevel() {
   return saveData.campaign.currentLevel;
+}
+
+function storageGetLevelFailures(level) {
+  return (saveData.campaign.failures || {})[level] || 0;
+}
+
+function storageSetLevelFailures(level, count) {
+  saveData.campaign.failures = { ...(saveData.campaign.failures || {}), [level]: count };
+  writeSave(saveData);
 }
 
 function storageIsCampaignComplete() {

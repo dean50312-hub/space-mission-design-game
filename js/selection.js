@@ -1,13 +1,19 @@
-// 選件畫面：火箭卡片、火箭圖紙上的部件熱點、即時任務預算表
+// 選件畫面：火箭卡片、衛星設計圖上的部件熱點、即時任務預算表
 
+// 熱點放在零件的真實位置（對照 tools/sat-art.py 畫的設計圖，地球在畫面下方）：
+// 推進器噴嘴在背向地球的頂面、太陽能板在兩翼、通訊天線與酬載朝向地球
 const HOTSPOT_DEFS = [
-  { key: "payload", top: 15, left: 50 },
-  { key: "comm", top: 30, left: 34 },
-  { key: "power", top: 47, left: 66 },
-  { key: "structure", top: 63, left: 34 },
-  { key: "attitude", top: 70, left: 66 },
-  { key: "fuel", top: 87, left: 50 },
+  { key: "fuel", top: 16, left: 50 },
+  { key: "attitude", top: 42, left: 59 },
+  { key: "structure", top: 57, left: 40 },
+  { key: "power", top: 49, left: 87 },
+  { key: "comm", top: 79, left: 27 },
+  { key: "payload", top: 78, left: 55 },
 ];
+
+// 推進劑滑桿的上限跟著設計走：自動計算量的 3 倍，自動計算的位置大約在滑桿 1/3 處
+const PROPELLANT_SLIDER_AUTO_MULTIPLE = 3;
+const PROPELLANT_SLIDER_MIN_KG = 50;
 
 let activeHotspot = null;
 let rocketPickerExpanded = true;
@@ -43,6 +49,11 @@ function fmtRate(mbps) {
 function fmtPointing(deg) {
   if (deg >= UNCONTROLLED_POINTING_DEG) return t("selection.uncontrolled");
   return deg >= 1 ? `${fmtNum(deg)}°` : `${fmtNum(deg, 2)}°`;
+}
+
+// 中文句子之間不加空白，英文要
+function sentenceGap() {
+  return getLang() === "zh" ? "" : " ";
 }
 
 function fmtDistance(m) {
@@ -85,7 +96,7 @@ function renderOrbitGroup(onSelect) {
       <div class="part-stats">${t("selection.orbitStats", {
         altitude: fmtNum(orbit.altitudeKm),
         life: orbit.designLifeYears,
-        budget: fmtMoney(MISSION_BUDGET_BY_ORBIT[orbit.id]),
+        budget: fmtMoney(missionBudgetM(gameState.missionObjective, orbit)),
       })}</div>
       <div class="part-proto">${t("orbitInfo." + orbit.id)}</div>
     `;
@@ -246,15 +257,8 @@ function renderBlueprintPanel() {
   const body = document.createElement("div");
   body.className = "blueprint-body";
 
-  if (!gameState.rocket) {
-    const hint = document.createElement("p");
-    hint.className = "blueprint-hint";
-    hint.textContent = t("selection.blueprintHint");
-    body.appendChild(hint);
-  } else {
-    body.appendChild(renderBlueprintFrame());
-    if (activeHotspot) body.appendChild(renderHotspotDetail(activeHotspot));
-  }
+  body.appendChild(renderBlueprintFrame());
+  if (activeHotspot) body.appendChild(renderHotspotDetail(activeHotspot));
 
   const sheet = document.createElement("aside");
   sheet.id = "budget-sheet";
@@ -269,11 +273,23 @@ function renderBlueprintFrame() {
   const frame = document.createElement("div");
   frame.className = "blueprint-frame";
 
+  const kind = gameState.missionObjective.payloadKind;
   const img = document.createElement("img");
   img.className = "blueprint-img";
-  img.src = `image/rocket/blueprint-${gameState.rocket.id}.png`;
-  img.alt = t("rocket." + gameState.rocket.id + ".name");
+  img.src = `image/rocket/blueprint-sat-${kind}.png`;
+  img.alt = t("selection.blueprintTitle");
   frame.appendChild(img);
+
+  const earth = document.createElement("span");
+  earth.className = "blueprint-note blueprint-earth";
+  earth.textContent = t("selection.earthDirection");
+  frame.appendChild(earth);
+  if (kind === "plasma") {
+    const ram = document.createElement("span");
+    ram.className = "blueprint-note blueprint-ram";
+    ram.textContent = t("selection.flightDirection");
+    frame.appendChild(ram);
+  }
 
   HOTSPOT_DEFS.filter((h) => gameState.features[h.key] !== false).forEach((h) => {
     const btn = document.createElement("button");
@@ -363,6 +379,15 @@ function partStatsText(key, tier) {
   }
   if (gameState.missionObjective.payloadKind === "transponder") {
     return t("selection.transponderStats", { ...common, gbps: fmtNum(tier.throughputGbps), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) });
+  }
+  if (gameState.missionObjective.payloadKind === "plasma") {
+    return t("selection.plasmaStats", {
+      ...common,
+      quantities: tier.quantities,
+      data: fmtNum(tier.dataGbitPerDay, tier.dataGbitPerDay < 1 ? 1 : 0),
+      watts: fmtNum(tier.powerW),
+      mass: fmtNum(tier.massKg),
+    });
   }
   return t("selection.opticalStats", {
     ...common,
@@ -457,13 +482,18 @@ function renderFuelCards() {
   return wrap;
 }
 
+function propellantSliderMaxKg() {
+  const range = Math.max(PROPELLANT_SLIDER_MIN_KG, autoPropellantKg(currentDesign()) * PROPELLANT_SLIDER_AUTO_MULTIPLE);
+  return Math.min(PROPELLANT_MAX_KG, Math.max(Math.ceil(range / 50) * 50, gameState.propellantKg));
+}
+
 function renderPropellantControls() {
   const wrap = document.createElement("div");
   wrap.className = "fuel-controls";
 
   wrap.innerHTML = `
     <div class="meter-label"><span>${t("selection.propellantLabel")}</span><span id="propellant-value"></span></div>
-    <input type="range" id="propellant-slider" class="fuel-slider" min="0" max="${PROPELLANT_MAX_KG}" step="${PROPELLANT_STEP_KG}" value="${gameState.propellantKg}" />
+    <input type="range" id="propellant-slider" class="fuel-slider" min="0" max="${propellantSliderMaxKg()}" step="${PROPELLANT_STEP_KG}" value="${gameState.propellantKg}" />
     <p id="propellant-summary" class="fuel-summary"></p>
     <button type="button" id="propellant-auto-btn" class="text-link-btn">${t("selection.propellantAutoBtn", { margin: fmtPct(AUTO_PROPELLANT_MARGIN) })}</button>
     <p class="detail-explainer">${t("explainer.rocketEquation")}</p>
@@ -475,7 +505,9 @@ function renderPropellantControls() {
   });
   wrap.querySelector("#propellant-auto-btn").addEventListener("click", () => {
     gameState.propellantKg = autoPropellantKg(currentDesign());
-    wrap.querySelector("#propellant-slider").value = gameState.propellantKg;
+    const slider = wrap.querySelector("#propellant-slider");
+    slider.max = propellantSliderMaxKg();
+    slider.value = gameState.propellantKg;
     updateBudgetSheet();
   });
 
@@ -497,8 +529,9 @@ function updatePropellantReadout(analysis) {
 
 // ---------- 任務預算表 ----------
 
-function sheetLine({ icon, labelKey, valueText, ratio, status, explainKey, explainParams }) {
+function sheetLine({ icon, labelKey, valueText, ratio, status, explainKey, explainParams, extraText }) {
   const pct = Math.max(0, Math.min(100, ratio * 100));
+  const extra = extraText ? sentenceGap() + extraText : "";
   return `
     <details class="sheet-line ${status}" data-key="${labelKey}">
       <summary>
@@ -506,9 +539,17 @@ function sheetLine({ icon, labelKey, valueText, ratio, status, explainKey, expla
         <span class="sheet-value">${valueText}</span>
         <span class="sheet-bar"><span class="sheet-bar-fill" style="width:${pct}%"></span></span>
       </summary>
-      <p class="sheet-explain">${t(explainKey, explainParams)}</p>
+      <p class="sheet-explain">${t(explainKey, explainParams)}${extra}</p>
     </details>
   `;
+}
+
+function electricUnpoweredText(analysis) {
+  return t("factorExplain.electricUnpowered", {
+    need: fmtNum(gameState.fuel.powerW * ELECTRIC_MIN_POWER_FRACTION),
+    have: fmtNum(analysis.powerAvailW),
+    fuel: t("fuel." + gameState.fuel.id),
+  });
 }
 
 function statusForLimit(used, limit) {
@@ -601,6 +642,7 @@ function renderBudgetLines(analysis) {
   }
 
   if (gameState.fuel && analysis.dvRequired) {
+    const extra = orbit.id === "geo" && gameState.rocket ? gameState.rocket.geoTransferExtraDvKmS || 0 : 0;
     lines.push(sheetLine({
       icon: "dv",
       labelKey: "sheet.dv",
@@ -611,6 +653,10 @@ function renderBudgetLines(analysis) {
         : statusForSupply(analysis.dv, analysis.dvRequired.total),
       explainKey: "sheetExplain.dv_" + orbit.id + (gameState.fuel.electric && orbit.id === "geo" ? "_electric" : ""),
       explainParams: { insert: fmtNum(analysis.dvRequired.insert, 2), ops: fmtNum(analysis.dvRequired.ops, 2) },
+      extraText: [
+        extra > 0 ? t("sheetExplain.dv_subgto", { rocket: t("rocket." + gameState.rocket.id + ".name"), extra: fmtNum(extra, 2) }) : "",
+        analysis.electricUnpowered ? electricUnpoweredText(analysis) : "",
+      ].filter(Boolean).join(sentenceGap()),
     }));
   }
 
@@ -644,6 +690,9 @@ function factorExplanation(key, analysis) {
     if (req.type === "resolution") {
       return t("factorExplain.resolution", { have: fmtDistance(analysis.gsdM), need: fmtDistance(req.maxGsdM) });
     }
+    if (req.type === "quantities") {
+      return t("factorExplain.quantities", { have: gameState.parts.payload.quantities, need: req.count });
+    }
     return t("factorExplain.bands", {
       have: gameState.parts.payload.bands,
       need: req.bands,
@@ -662,6 +711,7 @@ function factorExplanation(key, analysis) {
     }
     return t("factorExplain.pointing", { have: fmtPointing(analysis.pointingDeg), need: fmtPointing(objective.pointingDeg) });
   }
+  if (analysis.electricUnpowered) return electricUnpoweredText(analysis);
   if (analysis.stranded) return t("factorExplain.stranded");
   const parts = [t("factorExplain.lifetime", { pct: fmtPct(analysis.dvLifeFactor) })];
   if (analysis.transferYears > 0) {

@@ -264,6 +264,20 @@ def objective_comms():
     return ic.outline()
 
 
+def objective_ionosphere():
+    ic = Icon(32)
+    # 地平線上方的電離層：綠、紫兩層發光帶（和極光同一群被太陽游離的粒子），衛星就飛在帶子裡面
+    ic.circle(16, 46, 22, "B")
+    ic.circle(15, 45, 21, "b")
+    ic.ellipse(4, 25, 14, 30, "e")
+    for k, c in ((17, "g"), (13, "v")):
+        ic.arc([16 - 30, 46 - 22 - k, 16 + 30, 46 + 22 + k], 200, 340, c, 2)
+    satellite(ic, 16, 10, "l")
+    ic.px(16, 13, "c")
+    ic.px(16, 15, "c")
+    return ic.outline()
+
+
 # ---------- 事件 ----------
 
 def event_solar_flare():
@@ -606,6 +620,19 @@ def medal_all_electric():
     return ic.outline()
 
 
+def medal_sure_launch():
+    ic = Icon(32)
+    medal_base(ic, "c", "C", "L")
+    # 獎牌中央一枚往上飛的小火箭
+    ic.poly([(15, 13), (17, 13), (18, 17), (18, 24), (14, 24), (14, 17)], "w")
+    ic.px(15, 14, "W")
+    ic.rect(15, 17, 16, 18, "c")
+    ic.poly([(14, 21), (12, 25), (14, 24)], "S")
+    ic.poly([(18, 21), (20, 25), (18, 24)], "S")
+    ic.rect(15, 25, 17, 26, "o")
+    return ic.outline()
+
+
 def mascot_orbit():
     ic = Icon(32)
     ic.line([(16, 2), (16, 7)], "S", 1)
@@ -812,6 +839,7 @@ ICONS = {
     "objective-climate": objective_climate,
     "objective-weather": objective_weather,
     "objective-comms": objective_comms,
+    "objective-ionosphere": objective_ionosphere,
     "event-solar_flare": event_solar_flare,
     "event-geomagnetic_storm": event_geomagnetic_storm,
     "event-bad_weather": event_bad_weather,
@@ -841,6 +869,7 @@ ICONS = {
     "medal-frugal": medal_frugal,
     "medal-robust": medal_robust,
     "medal-all_electric": medal_all_electric,
+    "medal-sure_launch": medal_sure_launch,
     "mascot-orbit": mascot_orbit,
     "alert": alert,
     "locked": locked,

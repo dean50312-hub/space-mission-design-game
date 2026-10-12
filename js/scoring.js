@@ -50,7 +50,7 @@ function allScenarios() {
 function* candidateDesigns(objective, event, features) {
   const budgetDelta = (event && event.effect.budgetDeltaM) || 0;
   for (const orbit of ORBITS) {
-    const budgetM = MISSION_BUDGET_BY_ORBIT[orbit.id] + budgetDelta;
+    const budgetM = missionBudgetM(objective, orbit) + budgetDelta;
     const fuels = features.fuel ? FUELS : [defaultFuelForOrbit(orbit.id)];
     const attitudes = features.attitude ? SUBSYSTEMS.attitude : [defaultAttitude()];
     for (const rocket of ROCKETS) {
@@ -123,9 +123,9 @@ function searchBestDesign(objective, event, features, filter) {
 // 所有會影響最佳設計的平衡數值。只要有任何一個改了，js/bestdesigns.js 就過期了
 function balanceFingerprint() {
   const text = JSON.stringify([
-    MISSION_BUDGET_BY_ORBIT, ORBITS, ROCKETS, BUS_CORE, GRADE_RELIABILITY_LEO_5YR, DEPLOY_MECHANISM_RELIABILITY,
+    ORBITS, ROCKETS, BUS_CORE, GRADE_RELIABILITY_LEO_5YR, DEPLOY_MECHANISM_RELIABILITY,
     SUBSYSTEMS, PAYLOADS, FUELS, TOXIC_HANDLING_COST_M, PROPELLANT_MAX_KG, PROPELLANT_STEP_KG, AUTO_PROPELLANT_MARGIN,
-    ELECTRIC_TRANSFER_DV_FACTOR, ELECTRIC_TRANSFER_YEARS, RADIATION_BELT_FACTOR, LIFTOFF_SHARE_OF_LAUNCH_FAILURE,
+    ELECTRIC_TRANSFER_DV_FACTOR, ELECTRIC_TRANSFER_YEARS, ELECTRIC_MIN_POWER_FRACTION, RADIATION_BELT_FACTOR, LIFTOFF_SHARE_OF_LAUNCH_FAILURE,
     MISSION_OBJECTIVES, EXTENDED_MISSION_COST_PER_YEAR_M, EXTENSION_MAX_FRACTION, RECOVERABLE_ANOMALY_SHARE,
     OPS_EVENT_RATE_PER_YEAR, EV_SIMULATION_RUNS, EV_SIMULATION_SEED, COMPONENT_ANOMALIES, TORQUER_ANOMALY, OPS_EVENTS, EVENTS,
     MAGNETORQUER_REFERENCE_ALTITUDE_KM, UNCONTROLLED_POINTING_DEG,
@@ -170,10 +170,12 @@ function scoreGrade(score) {
 // 門檻都用 tools/best-designs.html 驗證過：在一般情境下拿得到，但要刻意取捨
 
 const FRUGAL_BUDGET_SHARE = 0.7;
-const FRUGAL_MIN_SCORE = { imaging: 75, climate: 70, weather: 85, comms: 45 };
-const ROBUST_FULL_SUCCESS = 0.92;
-const ROBUST_MIN_SCORE = 65;
+const FRUGAL_MIN_SCORE = { imaging: 75, climate: 70, weather: 70, comms: 45, ionosphere: 85 };
+const ROBUST_FULL_SUCCESS = { imaging: 0.9, ionosphere: 0.8 };
+const ROBUST_MIN_SCORE = { imaging: 65, ionosphere: 55 };
 const ELECTRIC_MIN_SCORE = { weather: 90, comms: 75 };
+const SURE_LAUNCH_RELIABILITY = 0.99;
+const SURE_LAUNCH_MIN_SCORE = { climate: 75 };
 
 const MEDALS = [
   {
@@ -189,9 +191,16 @@ const MEDALS = [
   {
     // 可靠度不是免費的：要把完全成功機率拉到很高，通常得犧牲任務價值
     id: "robust",
-    objectives: ["imaging", "climate"],
-    params: () => ({ minScore: ROBUST_MIN_SCORE, fullSuccess: ROBUST_FULL_SUCCESS }),
+    objectives: ["imaging", "ionosphere"],
+    params: (objective) => ({ minScore: ROBUST_MIN_SCORE[objective.id], fullSuccess: ROBUST_FULL_SUCCESS[objective.id] }),
     meets: (design, analysis, p) => analysis.fullSuccess >= p.fullSuccess,
+  },
+  {
+    // 便宜的火箭省下的錢能買更好的零件；可靠的火箭讓整個任務少一分全損的風險
+    id: "sure_launch",
+    objectives: ["climate"],
+    params: (objective) => ({ minScore: SURE_LAUNCH_MIN_SCORE[objective.id], reliability: SURE_LAUNCH_RELIABILITY }),
+    meets: (design, analysis, p) => rocketReliability(design.rocket) >= p.reliability,
   },
   {
     // 全電推進衛星（如 Boeing 702SP）：省下大量推進劑，代價是花半年爬升到 GEO

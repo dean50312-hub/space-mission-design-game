@@ -30,7 +30,7 @@ function resetForNewGame() {
 }
 
 function recomputeBudget() {
-  const base = gameState.orbit ? MISSION_BUDGET_BY_ORBIT[gameState.orbit.id] : 0;
+  const base = gameState.orbit ? missionBudgetM(gameState.missionObjective, gameState.orbit) : 0;
   const delta = (gameState.event && gameState.event.effect.budgetDeltaM) || 0;
   gameState.budget = base + delta;
 }

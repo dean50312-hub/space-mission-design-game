@@ -34,7 +34,9 @@ image/
 | ~~輕型火箭~~ ✅ | `rocket/rocket-light.png` | — | 已完成：致敬 Rocket Lab Electron（碳纖維黑色小型火箭） |
 | ~~中型火箭~~ ✅ | `rocket/rocket-medium.png` | — | 已完成：致敬 SpaceX Falcon 9（白色機身+柵格翼） |
 | ~~重型火箭~~ ✅ | `rocket/rocket-heavy.png` | — | 已完成：致敬 SpaceX Falcon Heavy（中央核心+雙側助推器） |
-| ~~火箭圖紙×3~~ ✅ | `rocket/blueprint-light.png`<br>`rocket/blueprint-medium.png`<br>`rocket/blueprint-heavy.png` | 240×480 | 已完成：程式碼生成的純線條技術圖紙版火箭，供選件畫面的「圖紙+熱點」互動使用 |
+| ~~衛星設計圖×3~~ ✅ | `rocket/blueprint-sat-optical.png`<br>`rocket/blueprint-sat-transponder.png`<br>`rocket/blueprint-sat-plasma.png` | 320×320 | 已完成（2026-10-12）：`tools/sat-art.py` 生成的衛星線稿，取代原本的火箭圖紙。零件熱點在真實位置，三種酬載外觀不同（朝地望遠鏡／轉發器艙＋反射器／迎風面電漿探測儀＋掩星天線） |
+| ~~PSLV 火箭~~ ✅ | `rocket/rocket-pslv.png` | 160×320 | 已完成（2026-10-12）：`tools/sat-art.py` 生成，致敬印度 PSLV-XL（核心級＋兩側固體捆綁助推器） |
+| ~~電漿儀器×3~~ ✅ | `parts/payload-plasma-economy.png`<br>`parts/payload-plasma-standard.png`<br>`parts/payload-plasma-premium.png` | 64×64 | 已完成（2026-10-12）：`tools/sat-art.py` 生成（多針朗繆爾探針／福衛五號 AIP 級電漿探測儀／AIP＋GNSS 掩星天線） |
 | ~~電力系統×3~~ ✅ | `parts/power-economy.png`<br>`parts/power-standard.png`<br>`parts/power-premium.png` | — | 已完成：程式碼生成（機身貼附式電池/展開式太陽能板/ROSA 捲展式太陽能板）。v2 把高階從 RTG 換成 ROSA：地球軌道衛星實際上用太陽能，RTG 功率只有約 100 W |
 | ~~通訊系統×3~~ ✅ | `parts/comm-economy.png`<br>`parts/comm-standard.png`<br>`parts/comm-premium.png` | — | 已完成：程式碼生成（S 頻段小天線/X 頻段碟形天線/Ka 頻段高增益雙碟） |
 | ~~光學酬載×3~~ ✅ | `parts/payload-optical-economy.png`<br>`parts/payload-optical-standard.png`<br>`parts/payload-optical-premium.png` | — | 已完成（v2 由 science-*.png 更名）：立方衛星相機/多光譜成像儀/大口徑望遠鏡。高階目前仍是 JWST 金色六角鏡造型，與 WorldView-3 的實際外觀不符，之後可重畫成長鏡筒望遠鏡 |

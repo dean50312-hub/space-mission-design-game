@@ -4,9 +4,6 @@
 const G0 = 9.80665; // m/s²，標準重力加速度（火箭方程式用）
 const VISIBLE_WAVELENGTH_M = 550e-9; // 可見光波長，用於繞射極限解析度
 
-// 任務預算（百萬美元）依軌道而定：GEO 衛星較大、較貴
-const MISSION_BUDGET_BY_ORBIT = { leo: 210, geo: 230 };
-
 const ORBITS = [
   {
     id: "leo",
@@ -33,8 +30,10 @@ const ORBITS = [
 ];
 
 // 火箭：真實價格與運力（可回收構型），可靠度用飛行紀錄以拉普拉斯接續法則估計
+// PSLV 只能送到次同步轉移軌道（284 × 20,650 km、傾角約 18°），圓化成 GEO 比從卡納維爾角的 GTO 多約 0.16 km/s
 const ROCKETS = [
   { id: "light", costM: 7.5, capacityKg: { leo: 200, gto: 0 }, flights: 88, successes: 84 },
+  { id: "pslv", costM: 25, capacityKg: { leo: 1750, gto: 1425 }, flights: 64, successes: 59, geoTransferExtraDvKmS: 0.16 },
   { id: "medium", costM: 74, capacityKg: { leo: 17500, gto: 5500 }, flights: 690, successes: 687 },
   { id: "heavy", costM: 97, capacityKg: { leo: 57000, gto: 8000 }, flights: 13, successes: 13 },
 ];
@@ -96,6 +95,12 @@ const PAYLOADS = {
     { id: "standard", throughputGbps: 10, powerW: 4500, massKg: 600, costM: 50, grade: "qualified" },
     { id: "premium", throughputGbps: 100, powerW: 12000, massKg: 1400, costM: 90, grade: "redundant" },
   ],
+  // 電離層電漿儀器：quantities 為能量測的物理量數目（福衛五號 AIP 量 6 項；加上掩星接收機多了垂直剖面）
+  plasma: [
+    { id: "economy", quantities: 2, dataGbitPerDay: 0.2, powerW: 2, massKg: 1, costM: 1, grade: "cots" },
+    { id: "standard", quantities: 6, dataGbitPerDay: 2, powerW: 5, massKg: 5, costM: 5, grade: "qualified" },
+    { id: "premium", quantities: 7, dataGbitPerDay: 4, powerW: 55, massKg: 12, costM: 14, grade: "redundant" },
+  ],
 };
 
 const SUBSYSTEM_KEYS = ["power", "comm", "payload", "attitude", "structure"];
@@ -121,12 +126,14 @@ const FUELS = [
 
 const TOXIC_HANDLING_COST_M = 2; // 毒性推進劑加注需要 SCAPE 防護作業
 const PROPELLANT_MAX_KG = 6000;
-const PROPELLANT_STEP_KG = 25;
+const PROPELLANT_STEP_KG = 5; // 小衛星只需要幾公斤推進劑，調整單位不能太粗
 const AUTO_PROPELLANT_MARGIN = 0.1; // 「自動計算」預留 10% Δv 餘量
 
 // 電推進：低推力螺旋爬升比脈衝式轉移多耗 Δv，而且要花數個月穿越范艾倫輻射帶
 const ELECTRIC_TRANSFER_DV_FACTOR = 1.3;
 const ELECTRIC_TRANSFER_YEARS = 0.5;
+// 電推進器可以降功率運轉（NSTAR 可在 0.5–2.3 kW 之間調節），但可用電力低於額定的約 1/4 就點不著
+const ELECTRIC_MIN_POWER_FRACTION = 0.25;
 const RADIATION_BELT_FACTOR = 3;
 
 const STAGES = [
@@ -150,6 +157,7 @@ const STAGE_TARGET_PERCENT_BY_ID = {
 const LIFTOFF_SHARE_OF_LAUNCH_FAILURE = 0.3;
 
 // 任務目標：每種任務在不同軌道的「覆蓋率」都來自真實幾何限制
+// budgetM：任務預算（百萬美元），依軌道而定。預算刻意抓緊：把每個部件都選最好的一定超支，要自己取捨
 const MISSION_OBJECTIVES = [
   {
     id: "imaging",
@@ -157,6 +165,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 1, geo: 1 },
     requirement: { type: "resolution", maxGsdM: 0.5 },
     pointingDeg: 0.05, // 窄視野相機：指向偏 0.05° 在 550 km 高度就偏了約 0.5 km
+    budgetM: { leo: 175, geo: 195 },
   },
   {
     id: "climate",
@@ -164,6 +173,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 1, geo: 0.42 }, // GEO 只看得到 42% 的地球，看不到南北緯 81° 以上
     requirement: { type: "bands", bands: 29, maxGsdM: 1000 },
     pointingDeg: 0.5, // 寬刈幅（MODIS 約 2,330 km），容許的指向誤差較大
+    budgetM: { leo: 175, geo: 195 },
   },
   {
     id: "weather",
@@ -171,6 +181,7 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 2 / 144, geo: 1 }, // 需要每 10 分鐘一張（每天 144 張），LEO 每天只經過約 2 次
     requirement: { type: "bands", bands: 16, maxGsdM: 2000 },
     pointingDeg: 0.05, // 從 36,000 km 外拍 2 km 解析度，每個像素只有約 0.003°
+    budgetM: { leo: 140, geo: 160 },
   },
   {
     id: "comms",
@@ -178,8 +189,23 @@ const MISSION_OBJECTIVES = [
     coverage: { leo: 35 / 1440, geo: 1 }, // 單顆 LEO 衛星每天只在頭頂出現約 35 分鐘
     requirement: { type: "throughput", gbps: 30 },
     pointingDeg: 0.1, // 點波束寬度約 0.5°，天線指向誤差要遠小於波束寬度
+    budgetM: { leo: 210, geo: 230 },
+  },
+  {
+    // 電離層要「身在其中」才量得到：F 層電子密度峰值約在 250–400 km，頂部延伸到約 1,000 km；
+    // GEO（35,786 km）遠在電離層之外，所以覆蓋為 0
+    id: "ionosphere",
+    payloadKind: "plasma",
+    coverage: { leo: 1, geo: 0 },
+    requirement: { type: "quantities", count: 7 },
+    pointingDeg: 2, // 探針只要大致朝向飛行方向；離子漂移靠精確「知道」姿態來修正，不需要精確「控制」
+    budgetM: { leo: 40, geo: 40 },
   },
 ];
+
+function missionBudgetM(objective, orbit) {
+  return objective.budgetM[orbit.id];
+}
 
 // 劇情關卡過關門檻：交付的任務價值
 const CAMPAIGN_PASS_VALUE = 0.5;

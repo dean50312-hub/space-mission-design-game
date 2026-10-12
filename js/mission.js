@@ -76,7 +76,8 @@ function deltaVKmS(isp, wetKg, dryKg) {
 function requiredDeltaV(design) {
   const orbit = design.orbit;
   const electric = Boolean(design.fuel && design.fuel.electric);
-  const insert = orbit.dvInsertKmS * (electric ? ELECTRIC_TRANSFER_DV_FACTOR : 1);
+  const transferExtra = orbit.id === "geo" && design.rocket ? design.rocket.geoTransferExtraDvKmS || 0 : 0;
+  const insert = (orbit.dvInsertKmS + transferExtra) * (electric ? ELECTRIC_TRANSFER_DV_FACTOR : 1);
   const extra = orbit.id === "leo" ? eventEffect(design).leoExtraDvKmS || 0 : 0;
   const ops = orbit.dvOpsKmS + extra;
   return { insert, ops, total: insert + ops };
@@ -154,14 +155,15 @@ function analyzeDesign(design) {
   analysis.powerAvailW = power ? power.powerW * orbit.sunlightFactor : 0;
 
   if (design.fuel) {
-    analysis.dv = deltaVKmS(design.fuel.isp, wetKg, dryKg);
+    analysis.electricUnpowered = Boolean(power) && design.fuel.electric && analysis.powerAvailW < design.fuel.powerW * ELECTRIC_MIN_POWER_FRACTION;
+    analysis.dv = analysis.electricUnpowered ? 0 : deltaVKmS(design.fuel.isp, wetKg, dryKg);
     analysis.dvRequired = requiredDeltaV(design);
   }
 
   if (payload && design.objective.payloadKind === "optical") {
     analysis.gsdM = groundSampleDistanceM(payload.apertureM, orbit.altitudeKm);
-    analysis.dataGenGbit = payload.dataGbitPerDay;
   }
+  if (payload && payload.dataGbitPerDay !== undefined) analysis.dataGenGbit = payload.dataGbitPerDay;
   if (comm) {
     const contact = orbit.contactHoursPerDay * (orbit.id === "leo" ? effect.leoContactMultiplier || 1 : 1);
     analysis.dataDownGbit = comm.rateMbps[orbit.id] * contact * 3.6;
@@ -177,12 +179,13 @@ function analyzeDesign(design) {
     performance = Math.sqrt(Math.min(1, payload.throughputGbps / req.gbps));
   } else if (req.type === "resolution") {
     performance = Math.sqrt(Math.min(1, req.maxGsdM / analysis.gsdM));
+  } else if (req.type === "quantities") {
+    performance = Math.sqrt(Math.min(1, payload.quantities / req.count));
   } else {
     performance = Math.sqrt(Math.min(1, payload.bands / req.bands) * Math.min(1, req.maxGsdM / analysis.gsdM));
   }
 
-  const delivery =
-    objective.payloadKind === "optical" ? Math.min(1, analysis.dataDownGbit / analysis.dataGenGbit) : 1;
+  const delivery = analysis.dataGenGbit !== undefined ? Math.min(1, analysis.dataDownGbit / analysis.dataGenGbit) : 1;
   const powerFactor = Math.min(1, analysis.powerAvailW / analysis.powerLoadW);
   // 指向不準：相機拍不到目標、天線對不準地面。和性能一樣取平方根，代表價值隨誤差逐漸下降
   const pointing = analysis.pointingDeg >= UNCONTROLLED_POINTING_DEG ? 0 : Math.sqrt(Math.min(1, objective.pointingDeg / analysis.pointingDeg));
@@ -297,7 +300,7 @@ function bestSingleChange(design, features) {
   ORBITS.forEach((orbit) => {
     if (orbit === design.orbit) return;
     const budgetDelta = (design.event && design.event.effect.budgetDeltaM) || 0;
-    const variant = { ...design, orbit, budgetM: MISSION_BUDGET_BY_ORBIT[orbit.id] + budgetDelta };
+    const variant = { ...design, orbit, budgetM: missionBudgetM(design.objective, orbit) + budgetDelta };
     if (!features.fuel) variant.fuel = defaultFuelForOrbit(orbit.id);
     consider(variant, { kind: "orbit", to: orbit, budgetM: variant.budgetM });
   });
