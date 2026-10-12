@@ -12,6 +12,8 @@ const SCORE_GRADES = [
 
 // 劇情關卡：交付夠多價值，或設計本身夠好（運氣差但決策正確）都能過關
 const CAMPAIGN_PASS_SCORE = 85;
+// 任務沒有達成目標（交付不到 CAMPAIGN_PASS_VALUE）時，成績最高只給 B：設計再好，任務失敗就不能拿 S
+const FAILED_MISSION_SCORE_CAP = 84;
 
 // 推進劑候選量：以「自動計算」的量為基準上下調整
 const SEARCH_PROPELLANT_FACTORS = [0.6, 0.8, 0.9, 1, 1.15, 1.3, 1.6, 2];

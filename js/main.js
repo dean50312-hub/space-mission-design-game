@@ -62,9 +62,8 @@ function renderHomeScreen() {
   startBtn.disabled = !campaignComplete;
   startBtn.textContent = campaignComplete ? t("home.startGame") : t("home.startGameLocked");
 
-  const customBtn = document.getElementById("home-custom-btn");
-  customBtn.disabled = !campaignComplete;
-  customBtn.textContent = campaignComplete ? t("home.custom") : t("home.customLocked");
+  // 自訂模式一開始就開放：老師、評審可以直接挑想看的任務和事件
+  document.getElementById("home-custom-btn").textContent = t("home.custom");
 
   const campaignBtn = document.getElementById("home-campaign-btn");
   campaignBtn.textContent = campaignComplete
@@ -301,7 +300,7 @@ function finishMission(simResult) {
   // 過關：交付夠多價值，或設計本身夠好——運氣差但決策正確，審查委員會放行
   let campaignAward = null;
   const passedByValue = simResult.deliveredValue >= CAMPAIGN_PASS_VALUE;
-  const passedByScore = scoreInfo.score !== null && scoreInfo.score >= CAMPAIGN_PASS_SCORE;
+  const passedByScore = scoreInfo.designScore !== null && scoreInfo.designScore >= CAMPAIGN_PASS_SCORE;
   if (gameState.campaignLevel && (passedByValue || passedByScore)) {
     const earned = Math.max(1, Math.round(simResult.deliveredValue * 5));
     storageAddSkillPoints(earned);
@@ -324,10 +323,13 @@ function finishMission(simResult) {
 function scoreMission(simResult) {
   const { design, analysis } = simResult;
   const best = bestDesignFor(design.objective, design.event, gameState.features);
-  const score = actuarialScore(simResult.expectedValue, best);
+  // designScore 只看設計；score 是這次的成績，任務沒達成目標時最高 B，勳章也只在任務達成時頒發
+  const designScore = actuarialScore(simResult.expectedValue, best);
+  const goalMet = simResult.deliveredValue >= CAMPAIGN_PASS_VALUE;
+  const score = designScore === null || goalMet ? designScore : Math.min(designScore, FAILED_MISSION_SCORE_CAP);
   const previousBest = score !== null ? storageRecordScore(design.objective.id, score) : undefined;
-  const medals = evaluateMedals(design.objective, { score, design, analysis });
-  return { score, grade: score !== null ? scoreGrade(score) : null, best, previousBest, medals };
+  const medals = evaluateMedals(design.objective, { score: goalMet ? score : null, design, analysis });
+  return { score, designScore, capped: score !== designScore, grade: score !== null ? scoreGrade(score) : null, best, previousBest, medals };
 }
 
 function refreshDynamicScreenText() {

@@ -207,9 +207,10 @@ function scoreCardHtml(scoreInfo, simResult) {
         <div class="score-record">${record}</div>
       </div>
     </div>
+    ${scoreInfo.capped ? `<p class="score-loss">${glyph("warn")}${t("results.scoreCapped", { design: scoreInfo.designScore, cap: FAILED_MISSION_SCORE_CAP, target: fmtPct(CAMPAIGN_PASS_VALUE) })}</p>` : ""}
     ${luckNoteHtml(simResult)}
-    ${biggestLossHtml(simResult, score)}
-    <p class="score-explain">${t("results.scoreExplain")}</p>`;
+    ${biggestLossHtml(simResult, scoreInfo.designScore)}
+    <p class="score-explain">${t("results.scoreExplain", { target: fmtPct(CAMPAIGN_PASS_VALUE) })}</p>`;
 }
 
 // 這次的結果和期望值差很多時，直接在評分旁邊講清楚：差的部分是運氣，分數評的是設計
@@ -438,7 +439,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
     </div>
     <p class="report-luck">${luckComment(simResult)}</p>
     ${decisionSummary(simResult)}
-    <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult, scoreInfo.score)}</p>
+    <p class="report-hindsight">${glyph("tip")}${hindsightText(simResult, scoreInfo.designScore)}</p>
     ${bestDesignHtml(scoreInfo.best)}
   `;
 
@@ -451,7 +452,7 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
       text = campaignAward.level >= 4
         ? t("results.campaignAllComplete", { points: campaignAward.points })
         : t("results.campaignLevelComplete", { level: campaignAward.level, points: campaignAward.points });
-      if (campaignAward.byScore) text = t("results.campaignPassByScore", { score: scoreInfo.score }) + " " + text;
+      if (campaignAward.byScore) text = t("results.campaignPassByScore", { score: scoreInfo.designScore }) + " " + text;
     }
     campaignNote.textContent = text;
     campaignNote.classList.toggle("retry", !campaignAward);
