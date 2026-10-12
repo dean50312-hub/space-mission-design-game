@@ -64,6 +64,7 @@ function fmtDistance(m) {
 
 function renderSelectionScreen() {
   syncAutoPropulsion();
+  renderSelectionBrief();
   const container = document.getElementById("selection-groups");
   container.innerHTML = "";
 
@@ -71,6 +72,17 @@ function renderSelectionScreen() {
   container.appendChild(renderBlueprintPanel());
 
   updateBudgetSheet();
+}
+
+// 設計畫面最上方再列一次任務需求，選零件時不用回簡報查
+function renderSelectionBrief() {
+  const objective = gameState.missionObjective;
+  document.getElementById("selection-brief").innerHTML = `
+    <img class="selection-brief-icon" src="image/icons/objective-${objective.id}.png" alt="" />
+    <div>
+      <div class="selection-brief-name">${t("objective." + objective.id + ".short")} · ${t("orbit." + gameState.orbit.id)}</div>
+      <div class="selection-brief-req">${t("objective." + objective.id + ".req")}</div>
+    </div>`;
 }
 
 function renderOrbitGroup(onSelect) {
@@ -138,19 +150,6 @@ function renderRocketGroup() {
   titleRow.appendChild(title);
 
   const collapsed = Boolean(gameState.rocket) && !rocketPickerExpanded;
-
-  if (collapsed) {
-    const changeBtn = document.createElement("button");
-    changeBtn.type = "button";
-    changeBtn.className = "text-link-btn";
-    changeBtn.textContent = t("selection.changeRocketBtn");
-    changeBtn.addEventListener("click", () => {
-      rocketPickerExpanded = true;
-      renderSelectionScreen();
-    });
-    titleRow.appendChild(changeBtn);
-  }
-
   group.appendChild(titleRow);
 
   if (collapsed) {
@@ -195,7 +194,9 @@ function renderRocketGroup() {
 
 function renderRocketSummary() {
   const rocket = gameState.rocket;
-  const bar = document.createElement("div");
+  // 整條都能點：玩家想換火箭時，直覺會點火箭本身
+  const bar = document.createElement("button");
+  bar.type = "button";
   bar.className = "rocket-summary";
 
   bar.innerHTML = `
@@ -204,7 +205,12 @@ function renderRocketSummary() {
       <div class="part-name">${t("rocket." + rocket.id + ".name")}</div>
       <div class="part-stats">${rocketStatsText(rocket)}</div>
     </div>
+    <span class="rocket-summary-change">${t("selection.changeRocketBtn")}</span>
   `;
+  bar.addEventListener("click", () => {
+    rocketPickerExpanded = true;
+    renderSelectionScreen();
+  });
 
   return bar;
 }

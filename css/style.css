@@ -835,10 +835,61 @@ details > summary::-webkit-details-marker {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   background: var(--panel-raised);
   border: 2px solid var(--accent);
   border-radius: var(--radius);
   padding: 8px 12px;
+}
+
+.rocket-summary:hover {
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.rocket-summary-text {
+  flex: 1;
+}
+
+.rocket-summary-change {
+  flex-shrink: 0;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  padding: 4px 10px;
+  background: var(--bg-deep);
+}
+
+/* 設計畫面上方的任務需求 */
+.selection-brief {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -6px 0 14px;
+  padding: 6px 10px;
+  border-left: 4px solid var(--accent);
+  background: rgba(79, 209, 255, 0.06);
+}
+
+.selection-brief-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.selection-brief-name {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.selection-brief-req {
+  font-size: 13px;
+  color: var(--text);
 }
 
 .rocket-summary-img {
