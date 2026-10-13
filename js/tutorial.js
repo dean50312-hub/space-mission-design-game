@@ -1,6 +1,6 @@
 // ORBIT 劇情引導：每個畫面第一次出現時，用對話框帶新手認識該畫面
 
-const TUTORIAL_SCREENS = ["home", "event", "selection", "simulation", "results", "operations"];
+const TUTORIAL_SCREENS = ["home", "event", "selection", "simulation", "results", "operations", "uplink", "uplinkGeo"];
 // 劇情關卡開放新機制時的說明；「跳過教學」不會略過它們，因為每關都有新東西要知道
 const LEVEL_INTRO_KEYS = ["level2", "level3", "level4"];
 

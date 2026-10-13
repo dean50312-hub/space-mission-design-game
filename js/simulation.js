@@ -40,6 +40,7 @@ async function runSimulation() {
       await animateStageResolve(STAGES[stageIndex], stageIndex, true);
       if (ev.stageId === "ascent") await playStaging(design);
     } else if (ev.kind === "year") {
+      if (uplinkTutorialPromise) await uplinkTutorialPromise; // 看地面站教學時，任務時間先暫停
       updateOpsHud(ev.delivered, ev.phase === "extension");
       log.textContent = ev.phase === "extension"
         ? t("simulation.extensionYear", { year: ev.year, total: design.orbit.designLifeYears })
@@ -374,10 +375,13 @@ let uplinkStats = { ok: 0, total: 0 };
 let uplinkTimer = null;
 let uplinkInterval = null;
 let uplinkOpen = false;
+let uplinkTutorialPromise = null;
+let uplinkActive = false;
 
 function startUplink(orbitId) {
   stopUplink();
   uplinkStats = { ok: 0, total: 0 };
+  uplinkActive = true;
   // GEO 和地面站永遠連線，改成定時送出例行指令
   if (orbitId === "geo") uplinkInterval = setInterval(promptUplink, UPLINK_GEO_INTERVAL_MS);
 }
@@ -387,12 +391,29 @@ function stopUplink() {
   clearTimeout(uplinkTimer);
   uplinkInterval = null;
   uplinkOpen = false;
+  uplinkActive = false;
   const btn = document.getElementById("uplink-btn");
   if (btn) btn.classList.add("hidden");
 }
 
 function promptUplink() {
-  if (uplinkOpen || !document.getElementById("anomaly-overlay").classList.contains("hidden")) return;
+  if (uplinkOpen || uplinkTutorialPromise) return;
+  if (!document.getElementById("anomaly-overlay").classList.contains("hidden")) return;
+  if (!document.getElementById("tutorial-overlay").classList.contains("hidden")) return;
+  // 第一次出現時先由 ORBIT 說明，看完才開始倒數，不會因為讀教學就錯過這次窗口
+  const tutorialKey = gameState.orbit.id === "geo" ? "uplinkGeo" : "uplink";
+  if (!storageHasSeenTutorial(tutorialKey)) {
+    uplinkTutorialPromise = showTutorialIfNeeded(tutorialKey).then(() => {
+      uplinkTutorialPromise = null;
+      openUplinkWindow();
+    });
+    return;
+  }
+  openUplinkWindow();
+}
+
+function openUplinkWindow() {
+  if (uplinkOpen || !uplinkActive) return;
   uplinkOpen = true;
   uplinkStats.total += 1;
   const btn = document.getElementById("uplink-btn");

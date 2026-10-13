@@ -795,6 +795,14 @@ const STRINGS = {
         "沒花完的預算就是預備金。把錢全部花在零件上不一定最好——NASA 的大型計畫也一定會保留預備金。",
         "通過這一關，就會解鎖自由遊玩！",
       ],
+      uplink: [
+        "衛星經過新竹地面站上空了！LEO 衛星每天只有幾次、每次約 10 分鐘能和同一個地面站通訊，而且要地面站先送出指令，衛星才會開始下傳資料。",
+        "畫面下方出現「發送下傳請求」時，趕快在倒數結束前按下。錯過也沒關係，資料會先存在船上等下一次通訊窗口，不會影響任務價值。",
+      ],
+      uplinkGeo: [
+        "GEO 衛星和新竹地面站 24 小時連線，地面站會定時送出例行指令，確認衛星狀態、安排下傳。",
+        "畫面下方出現「發送例行指令」時，在倒數結束前按下。錯過也沒關係，下一次再送就好，不會影響任務價值。",
+      ],
       operations: [
         "任務控制中心回報異常！衛星運作期間，零件故障或太空環境變化時，要由你來做決定。",
         "花預備金可以挽救衛星；但省下來的預備金，在設計壽命結束後可以用來延長任務。每個選項都有「精算估計」——想想哪個期望值最高。",
@@ -1595,6 +1603,14 @@ const STRINGS = {
         "Final level: operations. Once in orbit, parts can fail — you decide whether to spend reserve on a fix or carry on degraded.",
         "Unspent budget is your reserve. Pouring every dollar into parts isn't always best — NASA's big projects always hold reserve back too.",
         "Clear this level to unlock Free Play!",
+      ],
+      uplink: [
+        "The satellite is over the Hsinchu ground station! A LEO satellite can talk to one station only a few times a day, about 10 minutes each, and it starts downlinking only after the station sends a command.",
+        "When “Send downlink request” appears at the bottom, press it before the countdown runs out. Missing one is fine: the data waits onboard for the next contact window, and the mission value doesn't change.",
+      ],
+      uplinkGeo: [
+        "A GEO satellite stays in contact with the Hsinchu ground station 24/7, and the station sends routine commands to check on it and schedule downlinks.",
+        "When “Send routine command” appears at the bottom, press it before the countdown runs out. Missing one is fine — just send the next one; the mission value doesn't change.",
       ],
       operations: [
         "Mission control reports an anomaly! During operations, you make the call when parts fail or space weather changes.",
