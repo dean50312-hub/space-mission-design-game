@@ -20,12 +20,12 @@ const ASCENT_PROFILE = [
 ];
 const ASCENT_GEO_EXTRA_KMS = 2.4; // 去 GEO 時第二節要多加速，送進近地點約 10.2 km/s 的轉移軌道
 
-// 每個發射階段：判定前停在 mid（例如在 Max-Q 擲骰），成功後飛到 end；ms 是動畫時間
+// 每個發射階段：火箭一路飛到 end（真實飛行時間，秒），成功率判定在飛行途中進行，不會停下來等；ms 是動畫時間
 const STAGE_FLIGHT = {
-  liftoff: { mid: 8, end: 20, attemptMs: 900, resolveMs: 600 },
-  ascent: { mid: 82, end: 165, attemptMs: 1600, resolveMs: 1400 },
-  insertion: { mid: 330, end: 540, attemptMs: 1300, resolveMs: 1600 },
-  deployment: { mid: 550, end: 560, attemptMs: 600, resolveMs: 400 },
+  liftoff: { end: 20, ms: 2800 },
+  ascent: { end: 165, ms: 5200 },
+  insertion: { end: 540, ms: 5000 },
+  deployment: { end: 560, ms: 2000 },
 };
 const FAIRING_SEPARATION_TIME = 200;
 
@@ -305,7 +305,7 @@ const AscentView = (() => {
     lastFrame = now;
     if (tween) {
       const f = Math.min(1, (now - tween.start) / tween.ms);
-      const eased = f * f * (3 - 2 * f);
+      const eased = tween.linear ? f : f * f * (3 - 2 * f);
       flightTime = lerp(tween.from, tween.to, eased);
       if (f >= 1) {
         const done = tween.resolve;
@@ -377,11 +377,19 @@ const AscentView = (() => {
     if (wrap) wrap.style.transform = "";
   }
 
-  // 把飛行時間平滑地推進到 target 秒，動畫結束時 resolve
-  function flyTo(target, ms) {
+  // 把飛行時間推進到 target 秒，動畫結束時 resolve；linear 用在連續飛行，階段之間不會減速
+  function flyTo(target, ms, linear = false) {
     return new Promise((resolve) => {
       if (tween) tween.resolve();
-      tween = { from: flightTime, to: target, ms: Math.max(1, ms), start: performance.now(), resolve };
+      const own = { from: flightTime, to: target, ms: Math.max(1, ms), start: performance.now(), resolve, linear };
+      tween = own;
+      // 分頁在背景時瀏覽器會暫停 requestAnimationFrame，用計時器保證飛行一定會結束，模擬不會卡住
+      setTimeout(() => {
+        if (tween !== own) return;
+        flightTime = target;
+        tween = null;
+        resolve();
+      }, own.ms + 150);
       if (!rafId) {
         flightTime = target;
         tween = null;
@@ -394,5 +402,11 @@ const AscentView = (() => {
     if (canvas && rafId) resize();
   });
 
-  return { start, stop, flyTo };
+  // 失敗時停在當下的位置（爆炸就發生在這裡）
+  function freeze() {
+    if (tween) tween.resolve();
+    tween = null;
+  }
+
+  return { start, stop, flyTo, freeze };
 })();

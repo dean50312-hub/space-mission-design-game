@@ -499,10 +499,14 @@ async function animateStageAttempt(stage, index, design, analysis, odds) {
   document.getElementById("simulation-log").textContent =
     t("simulation.checking", { stage: t("stage." + stage.id) }) + "\n" + stageFlavorText(stage, design, analysis);
 
+  // 火箭不停下來：這一段的飛行一開始就排好，成功率判定在飛行途中進行
   setRocketFlying(true);
   const flight = STAGE_FLIGHT[stage.id];
-  await AscentView.flyTo(flight.mid, flight.attemptMs);
+  stageFlight = AscentView.flyTo(flight.end, flight.ms, true);
+  await sleep(500);
 }
+
+let stageFlight = null;
 
 async function animateStageResolve(stage, index, passed) {
   const log = document.getElementById("simulation-log");
@@ -517,11 +521,11 @@ async function animateStageResolve(stage, index, passed) {
       await sleep(600);
       return;
     }
-    const flight = STAGE_FLIGHT[stage.id];
-    await AscentView.flyTo(flight.end, flight.resolveMs);
-    setRocketFlying(false);
-    await sleep(300);
+    if (stageFlight) await stageFlight;
+    stageFlight = null;
   } else {
+    AscentView.freeze();
+    stageFlight = null;
     setRocketFlying(false);
     document.getElementById("flight-track").classList.remove("maxq");
     if (stage.id !== "operation") setRocketState("exploded");
