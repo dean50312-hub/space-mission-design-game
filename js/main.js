@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSettingsUI();
 
   FX.init();
+  initCodex();
 
   document.getElementById("home-start-btn").addEventListener("click", startFreePlay);
   document.getElementById("home-campaign-btn").addEventListener("click", startNextCampaignLevel);
@@ -149,7 +150,7 @@ function renderCustomSetup() {
   const events = document.getElementById("custom-events");
   events.innerHTML = "";
   EVENTS.forEach((e) => {
-    events.appendChild(customCard(`image/icons/event-${e.id}.png`, t("event." + e.id + ".name"), t("event." + e.id + ".desc"),
+    events.appendChild(customCard(`image/icons/event-${e.id}.png`, t("event." + e.id + ".name"), t("brief.event." + e.id),
       customChoice.eventId === e.id, () => {
         customChoice.eventId = e.id;
         renderCustomSetup();
@@ -196,7 +197,7 @@ function renderEventScreen() {
     const event = gameState.event;
     document.getElementById("event-icon").src = `image/icons/event-${event.id}.png`;
     document.getElementById("event-name").textContent = t("event." + event.id + ".name");
-    document.getElementById("event-desc").textContent = t("event." + event.id + ".desc");
+    document.getElementById("event-desc").innerHTML = `${t("brief.event." + event.id)} ${codexLinkHtml("events", "events-" + event.id)}`;
     eventCard.classList.remove("hidden");
   } else {
     eventCard.classList.add("hidden");
@@ -258,6 +259,7 @@ const SCREEN_BGM = {
   home: "space",
   achievements: "space",
   custom: "space",
+  codex: "space",
   settings: "space",
   event: "lab",
   selection: "lab",

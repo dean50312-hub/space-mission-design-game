@@ -16,9 +16,154 @@ const STRINGS = {
       campaignProgress: "劇情關卡（{level}/{total}）",
       campaignReplay: "重新挑戰劇情關卡",
       achievements: "成就展示",
+      codex: "太空圖鑑",
       settings: "設定",
     },
     nav: { back: "返回" },
+    // 遊戲畫面上的精簡說明：只留做決定需要的一句話，完整介紹在圖鑑
+    brief: {
+      rocket: {
+        light: "最便宜，但只載得動 200 kg，也到不了 GEO。",
+        pslv: "價格和載重都中等；送 GEO 時衛星要自己多爬 0.16 km/s。",
+        medium: "載重大、飛行紀錄最多，大多數任務的首選。",
+        heavy: "載重最大，但只飛過 13 次，可靠度的不確定性較高。",
+      },
+      orbit: {
+        leo: "離地近、看得清楚；但每天只能和地面站通訊幾次。",
+        geo: "一直盯著同一個半球、全天連線；但遠 65 倍，最後一段要衛星自己爬。",
+      },
+      part: {
+        power: {
+          economy: "貼在機身上，最不會壞；但最多只能發 300 W。",
+          standard: "展開式太陽能板，重量和價格最平衡。",
+          premium: "每公斤發電最多，附備份電池；但最貴。",
+        },
+        comm: {
+          economy: "又輕又省電，但傳大量影像會塞車。",
+          standard: "X 頻段，地球觀測衛星的標準配備。",
+          premium: "Ka 頻段＋專屬地面站，速率最高，附備份發射機。",
+        },
+        attitude: {
+          economy: "便宜耐用，但指向只有 2°，在 GEO 幾乎沒用。",
+          standard: "反應輪＋星象儀，指向可達 0.02°。",
+          premium: "多一顆備份反應輪，壞一顆也能精確指向。",
+        },
+        structure: {
+          economy: "最輕最便宜，但幾乎擋不住輻射和碎片。",
+          standard: "鋁蜂巢板，通過完整發射測試，最常見。",
+          premium: "厚外殼加碎片防護層，最耐打，也最重。",
+        },
+        payload_optical: {
+          economy: "小相機，4 個波段，解析度只有幾公尺。",
+          standard: "50 cm 口徑，16 個波段。",
+          premium: "1.1 m 口徑，29 個波段，看得出車子的形狀。",
+        },
+        payload_transponder: {
+          economy: "約 1 Gbps，傳統電視廣播的等級。",
+          standard: "點波束重複使用頻率，約 10 Gbps。",
+          premium: "上百 Gbps，但非常耗電、非常重。",
+        },
+        payload_plasma: {
+          economy: "只有幾百公克，但只量得到 2 項參數。",
+          standard: "福衛五號 AIP 級，量得到 6 項參數。",
+          premium: "再加上 GPS 掩星接收機，湊齊 7 項。",
+        },
+        fuel: {
+          hydrazine: "簡單可靠，但有劇毒，加注要多花錢。",
+          af_m315e: "比聯胺更有力，而且低毒。",
+          biprop: "推力大，GEO 衛星爬升的標準選擇；有劇毒。",
+          hall: "非常省推進劑，但要吃電、推力很小。",
+          ion: "最省推進劑，但最耗電、推力最小。",
+        },
+      },
+      explainer: {
+        power: "你選的是技術，太陽能板的大小會依用電量自動計算。",
+        comm: "負責把資料傳回地面。GEO 比 LEO 遠，訊號弱很多。",
+        attitude: "讓相機、天線和太陽能板對準該對的方向。",
+        structure: "擋住輻射和碎片；越堅固就越重。",
+        payload_optical: "口徑越大看得越清楚，波段越多分得出越多東西。",
+        payload_transponder: "容量越大越耗電，通訊衛星的電大多給了它。",
+        payload_plasma: "要飛在電離層裡才量得到，量的參數越多越好。",
+        fuel: "用來修正軌道、對抗阻力；比衝越高越省推進劑。",
+        rocketEquation: "推進劑加倍，Δv 並不會加倍（火箭方程式）。",
+      },
+      event: {
+        solar_flare: "輻射劑量 +50%，屏蔽差、商規零件更容易壞。",
+        geomagnetic_storm: "LEO 多需要 0.05 km/s Δv；GEO 的電力系統更容易受損。",
+        bad_weather: "雷雨延期發射，預算減少 $5M。",
+        small_debris: "追蹤不到的小碎片只能靠結構擋，結構越好越安全。",
+        orbital_congestion: "要閃避大碎片，LEO 多需要 0.03 km/s Δv。",
+        limited_ground_station: "LEO 每天的通訊時間和傳回的資料量減半。",
+        mass_growth: "零件比預估的重，乾質量 +15%。",
+        budget_cut: "預算減少 $20M。",
+        export_control: "這次不能選高階零件。",
+        launch_manifest: "這次不能選 Falcon 9。",
+        flagship: "酬載必須用高階，但預算多 $20M。",
+        nominal: "太空環境平靜，沒有特殊狀況。",
+      },
+    },
+    codex: {
+      title: "太空圖鑑",
+      hint: "遊戲裡出現的火箭、軌道、零件、事件和科學概念，完整的介紹和真實原型都在這裡。",
+      open: "圖鑑",
+      openTitle: "在圖鑑看完整介紹",
+      backToGame: "返回遊戲",
+      tabs: { rockets: "火箭", orbits: "軌道", parts: "衛星零件", events: "太空事件", objectives: "任務目標", concepts: "科學概念" },
+      concept: {
+        rocketEquation: {
+          name: "火箭方程式",
+          body: "Δv = Isp × g₀ × ln(總質量 ÷ 乾質量)，由俄國的齊奧爾科夫斯基在 1903 年發表。因為有對數，推進劑加倍並不會讓 Δv 加倍：每多帶 1 公斤推進劑，也得多推動這 1 公斤本身。這就是為什麼 GEO 衛星發射時常有一半重量是推進劑，也是為什麼高比衝的電推進器那麼省。遊戲裡衛星的 Δv 就是用這條公式算的。",
+        },
+        orbits: {
+          name: "軌道高度與週期",
+          body: "軌道越高，繞一圈越久（克卜勒第三定律：週期² ∝ 半長軸³）。550 km 的 LEO 繞一圈約 95 分鐘；35,786 km 的 GEO 剛好 24 小時，和地球自轉同步，所以從地面看像停在天空。火箭通常先把 GEO 衛星送進一條橢圓的地球同步轉移軌道（GTO），衛星再自己在最高點點火把軌道繞圓。從卡納維爾角發射時，這一步約需 1.8 km/s 的 Δv。",
+        },
+        inverseSquare: {
+          name: "平方反比定律",
+          body: "訊號從天線發出後往四面八方擴散，能量分攤到越來越大的球面上，所以強度和距離的平方成反比。GEO 約 35,786 km、LEO 約 550 km，距離差約 65 倍，訊號就弱了約 4,200 倍。所以 GEO 通訊衛星需要大天線和高功率，地面的碟型天線也要對得很準。",
+        },
+        diffraction: {
+          name: "繞射極限",
+          body: "光通過望遠鏡的圓形開口時會散開，兩個靠得太近的點就會糊成一團。能分辨的最小角度約是 1.22 × 波長 ÷ 口徑，乘上高度就是地面解析度。所以想從越高的地方看清楚，鏡子就得越大：同一架望遠鏡放到 GEO，解析度會比在 LEO 差約 65 倍。",
+        },
+        angularMomentum: {
+          name: "角動量守恆與反應輪",
+          body: "太空中沒有東西可以推，衛星要轉向就靠角動量守恆：讓內部的飛輪往一個方向加速，衛星本體就往反方向轉。反應輪能做到很精細的指向，但飛輪轉速會慢慢累積，到上限時要用磁力棒或推進器把多出來的角動量「卸載」。飛輪是會磨損的活動零件，所以重要任務會多帶一顆備份。",
+        },
+        magneticField: {
+          name: "地球磁場與距離",
+          body: "地球磁場近似一個磁偶極，強度和距離的立方成反比。磁力棒靠和地磁作用產生力矩，在 LEO 很好用；但 GEO 和地心的距離約是 LEO 的 6 倍，磁場只剩約 1/226，磁力棒幾乎推不動衛星。",
+        },
+        eclipse: {
+          name: "地球陰影與電池",
+          body: "LEO 衛星每繞一圈，約有 35 分鐘躲在地球的陰影裡，這段時間只能靠電池。所以太陽能板不只要供應當下的用電，還要在有陽光時把電池充飽，面積得比平均用電大不少。GEO 衛星大部分時間都照得到太陽，只有春分、秋分前後每天會進入陰影，最長約 72 分鐘。",
+        },
+        radiation: {
+          name: "太空輻射",
+          body: "地球的大氣和磁場擋掉了大部分高能粒子，但太空中的電子元件得直接面對它們。高能粒子打中晶片，可能讓記憶體的位元翻轉，甚至燒毀元件；累積的劑量也會讓零件慢慢老化。對策有兩種：用更厚的結構擋住，或改用抗輻射設計的太空級零件。太陽活躍時，輻射會明顯變強。",
+        },
+        drag: {
+          name: "大氣阻力",
+          body: "LEO 的高度還有非常稀薄的大氣，衛星每天都會被拖慢一點、慢慢掉高度，要靠推進器定期補回來。太陽活動強時，高層大氣受熱膨脹，阻力會大幅增加：2022 年 2 月，38 顆剛發射的 Starlink 就因為一場地磁暴墜入大氣層。任務結束時，還要用剩下的推進劑讓衛星離軌，減少太空垃圾。",
+        },
+        gravityTurn: {
+          name: "重力轉向與最大動壓",
+          body: "火箭升空後不是一直往上飛，而是很快就開始往東傾斜，讓重力把軌跡自然彎成弧線：進入軌道真正需要的是約 7.8 km/s 的水平速度，而不是高度。升空後約 1 分鐘，速度已經很快、空氣卻還不夠稀薄，箭體承受的氣動壓力最大，稱為「最大動壓」（Max-Q），火箭常會在這段降低推力。",
+        },
+        laplace: {
+          name: "從發射紀錄估計可靠度",
+          body: "Falcon Heavy 飛了 13 次全部成功，能說它 100% 可靠嗎？精算上不行，因為樣本太少。遊戲用拉普拉斯接續法則來估計：（成功次數 + 1）÷（發射次數 + 2）。13 次全成功估計約 93.3%；Falcon 9 的 690 次中成功 687 次，估計約 99.4%。紀錄越多，估計值就越接近真正的成功率。",
+        },
+        expectedValue: {
+          name: "期望價值與蒙地卡羅模擬",
+          body: "同一個設計飛一次，可能成功也可能失敗，所以只看一次的結果並不公平。期望價值是「同樣的設計飛很多次，平均能交付多少任務價值」。遊戲用蒙地卡羅模擬：把同一個設計模擬 800 次，每次隨機決定零件會不會故障、事件怎麼發展，再取平均。精算評分看的就是這個平均，而不是這一次的運氣。",
+        },
+        massMargin: {
+          name: "質量餘裕",
+          body: "設計越往後走，零件幾乎總是比當初估計的重：線材、螺絲、支架都會多出來。所以真實任務在概念設計階段，會預留 20–30% 的質量餘裕。火箭的載重是硬上限，超過 1 公斤都不能發射。",
+        },
+      },
+    },
     custom: {
       title: "自訂任務",
       hint: "自己搭配任務目標和太空環境事件，所有機制都開放。適合試試看同一個任務遇到不同事件時，最佳設計會怎麼改變。",
@@ -134,7 +279,8 @@ const STRINGS = {
       ionosphere: {
         short: "電離層探測",
         name: "任務目標：電離層即時探測",
-        desc: "太空中心要直接在電離層裡量測電漿，研究太陽風暴怎麼擾動電離層、讓 GPS 定位出錯和短波通訊中斷（類似福衛五號的先進電離層探測儀 AIP，以及福衛七號的掩星接收機）。這是一顆小型科學衛星，預算只有大型任務的零頭。",
+        desc: "直接在電離層裡量測電漿，研究太陽風暴怎麼干擾 GPS 和短波通訊（類似福衛五號、福衛七號）。小型科學衛星，預算很少。",
+        about: "太空中心要直接在電離層裡量測電漿，研究太陽風暴怎麼擾動電離層、讓 GPS 定位出錯和短波通訊中斷（類似福衛五號的先進電離層探測儀 AIP，以及福衛七號的掩星接收機）。這是一顆小型科學衛星，預算只有大型任務的零頭。",
         req: "需求：衛星要飛在電離層裡（約 80–1,000 km）· 量測 7 項電漿參數",
       },
     },
@@ -828,6 +974,149 @@ const STRINGS = {
       settings: "Settings",
     },
     nav: { back: "Back" },
+    brief: {
+      rocket: {
+        light: "Cheapest, but carries only 200 kg and can't reach GEO.",
+        pslv: "Mid-priced and mid-sized; for GEO the satellite must climb an extra 0.16 km/s.",
+        medium: "Big capacity and the longest track record — the default pick.",
+        heavy: "Biggest capacity, but only 13 flights, so its reliability is less certain.",
+      },
+      orbit: {
+        leo: "Close and sharp, but only a few ground-station passes a day.",
+        geo: "Watches one hemisphere and stays connected 24/7, but it's 65× farther and the satellite must finish the climb itself.",
+      },
+      part: {
+        power: {
+          economy: "Glued to the body, nearly unbreakable — but tops out at 300 W.",
+          standard: "Deployable arrays — the balanced choice on mass and price.",
+          premium: "Most watts per kilogram, with backup batteries — but the priciest.",
+        },
+        comm: {
+          economy: "Light and frugal, but big image volumes will jam it.",
+          standard: "X-band — standard kit for Earth-observation satellites.",
+          premium: "Ka-band plus a dedicated ground station: fastest, with a backup transmitter.",
+        },
+        attitude: {
+          economy: "Cheap and durable, but only 2° pointing — and nearly useless at GEO.",
+          standard: "Reaction wheels + star tracker, about 0.02° pointing.",
+          premium: "A spare reaction wheel: lose one and still point precisely.",
+        },
+        structure: {
+          economy: "Lightest and cheapest, but barely stops radiation or debris.",
+          standard: "Aluminum honeycomb, fully launch-tested — the usual choice.",
+          premium: "Thick shell plus debris shield: toughest, and heaviest.",
+        },
+        payload_optical: {
+          economy: "Small camera, 4 bands, resolution of a few meters.",
+          standard: "50 cm aperture, 16 bands.",
+          premium: "1.1 m aperture, 29 bands — sharp enough to see cars.",
+        },
+        payload_transponder: {
+          economy: "About 1 Gbps — classic TV-broadcast level.",
+          standard: "Spot beams reuse frequencies, about 10 Gbps.",
+          premium: "100+ Gbps, but hugely power-hungry and heavy.",
+        },
+        payload_plasma: {
+          economy: "Just a few hundred grams, but measures only 2 parameters.",
+          standard: "FORMOSAT-5 AIP class: 6 parameters.",
+          premium: "Adds a GPS occultation receiver for all 7.",
+        },
+        fuel: {
+          hydrazine: "Simple and reliable, but toxic — fueling costs extra.",
+          af_m315e: "More punch than hydrazine, and low-toxicity.",
+          biprop: "High thrust — the standard for climbing to GEO; toxic.",
+          hall: "Very frugal with propellant, but needs power and pushes gently.",
+          ion: "The most frugal of all, but the most power-hungry and gentlest.",
+        },
+      },
+      explainer: {
+        power: "You pick the technology; the array size follows your power load automatically.",
+        comm: "Sends data home. GEO is far away, so signals are much weaker.",
+        attitude: "Points cameras, antennas, and arrays where they need to go.",
+        structure: "Shields against radiation and debris; stronger means heavier.",
+        payload_optical: "A bigger aperture sees finer detail; more bands tell more things apart.",
+        payload_transponder: "More capacity, more power — it eats most of a comsat's power.",
+        payload_plasma: "Must fly inside the ionosphere; the more parameters, the better.",
+        fuel: "Corrects the orbit and fights drag; higher Isp saves propellant.",
+        rocketEquation: "Doubling propellant doesn't double Δv (the rocket equation).",
+      },
+      event: {
+        solar_flare: "Radiation dose +50%: weak shielding and COTS parts fail more often.",
+        geomagnetic_storm: "LEO needs 0.05 km/s more Δv; GEO power systems are at greater risk.",
+        bad_weather: "Thunderstorms delay the launch: budget −$5M.",
+        small_debris: "Untrackable debris can only be shielded against — better structure is safer.",
+        orbital_congestion: "Dodging large debris: LEO needs 0.03 km/s more Δv.",
+        limited_ground_station: "LEO contact time and downlinked data are halved.",
+        mass_growth: "Parts came in heavy: dry mass +15%.",
+        budget_cut: "Budget −$20M.",
+        export_control: "No Premium parts this time.",
+        launch_manifest: "Falcon 9 is unavailable this time.",
+        flagship: "The payload must be Premium, but the budget is +$20M.",
+        nominal: "Calm space weather — nothing unusual.",
+      },
+    },
+    codex: {
+      title: "Space Codex",
+      hint: "Every rocket, orbit, part, event, and science idea in the game — with full write-ups and real-world prototypes.",
+      open: "Codex",
+      openTitle: "Read the full entry in the codex",
+      backToGame: "Back to Game",
+      tabs: { rockets: "Rockets", orbits: "Orbits", parts: "Satellite Parts", events: "Space Events", objectives: "Missions", concepts: "Science" },
+      concept: {
+        rocketEquation: {
+          name: "The Rocket Equation",
+          body: "Δv = Isp × g₀ × ln(total mass ÷ dry mass), published by Konstantin Tsiolkovsky in 1903. Because of the logarithm, doubling propellant does not double Δv: every extra kilogram of propellant also has to push itself. That's why GEO satellites are often half propellant at launch, and why high-Isp electric thrusters are so frugal. The game computes your satellite's Δv with exactly this formula.",
+        },
+        orbits: {
+          name: "Orbit Altitude and Period",
+          body: "The higher the orbit, the longer each lap (Kepler's third law: period² ∝ semi-major axis³). A 550 km LEO takes about 95 minutes; GEO at 35,786 km takes exactly 24 hours, matching Earth's spin, so it seems parked in the sky. Rockets usually drop GEO satellites in an elliptical geostationary transfer orbit (GTO), and the satellite fires its own engine at the high point to circularize — about 1.8 km/s of Δv from Cape Canaveral.",
+        },
+        inverseSquare: {
+          name: "The Inverse-Square Law",
+          body: "A signal spreads out in every direction, its energy shared over an ever-larger sphere, so strength falls with the square of distance. GEO (35,786 km) is about 65× farther than LEO (550 km), so the signal is about 4,200× weaker. That's why GEO comsats need big antennas and high power, and ground dishes must point precisely.",
+        },
+        diffraction: {
+          name: "The Diffraction Limit",
+          body: "Light spreads out as it passes through a telescope's round opening, so two points too close together blur into one. The smallest resolvable angle is about 1.22 × wavelength ÷ aperture; multiply by altitude to get ground resolution. To see sharply from higher up you need a bigger mirror: the same telescope at GEO resolves about 65× worse than in LEO.",
+        },
+        angularMomentum: {
+          name: "Angular Momentum and Reaction Wheels",
+          body: "There's nothing to push against in space, so satellites turn using conservation of angular momentum: spin an internal flywheel one way and the body turns the other. Reaction wheels point very precisely, but wheel speed slowly builds up and must be \"dumped\" with magnetorquers or thrusters. Wheels are moving parts that wear out, so important missions carry a spare.",
+        },
+        magneticField: {
+          name: "Earth's Magnetic Field and Distance",
+          body: "Earth's field is roughly a magnetic dipole, so its strength falls with the cube of distance. Magnetorquers push against it to make torque and work well in LEO — but GEO is about 6× farther from Earth's center, the field is only about 1/226 as strong, and magnetorquers can barely turn the satellite.",
+        },
+        eclipse: {
+          name: "Eclipses and Batteries",
+          body: "On every lap, a LEO satellite spends about 35 minutes in Earth's shadow, running on batteries. So the arrays must not only cover the current load but also recharge the batteries in sunlight, which makes them much larger than the average load. GEO satellites are almost always in sunlight, entering shadow only around the equinoxes, for at most about 72 minutes a day.",
+        },
+        radiation: {
+          name: "Space Radiation",
+          body: "Earth's atmosphere and magnetic field block most energetic particles, but electronics in space face them head-on. A particle strike can flip a memory bit or even burn out a component, and the accumulated dose slowly ages parts. There are two defenses: thicker structure to block it, or radiation-hardened space-qualified parts. Radiation rises sharply when the Sun is active.",
+        },
+        drag: {
+          name: "Atmospheric Drag",
+          body: "There's still a whisper of atmosphere at LEO altitudes, slowing satellites a little every day so they gradually sink; thrusters must make up the loss. When the Sun is active the upper atmosphere heats and swells, and drag jumps — in February 2022, a geomagnetic storm brought down 38 freshly launched Starlinks. At end of life, leftover propellant deorbits the satellite to limit space junk.",
+        },
+        gravityTurn: {
+          name: "Gravity Turn and Max-Q",
+          body: "A rocket doesn't just fly straight up: it soon tilts east and lets gravity bend its path into an arc, because reaching orbit takes about 7.8 km/s of sideways speed, not altitude. About a minute after liftoff the rocket is fast but the air is still thick, so aerodynamic pressure peaks — \"maximum dynamic pressure\" (Max-Q) — and rockets often throttle down through it.",
+        },
+        laplace: {
+          name: "Estimating Reliability from Flight Records",
+          body: "Falcon Heavy is 13 for 13 — is it 100% reliable? An actuary can't say so: the sample is too small. The game uses Laplace's rule of succession: (successes + 1) ÷ (flights + 2). Thirteen straight successes estimate about 93.3%; Falcon 9's 687 successes in 690 flights estimate about 99.4%. The longer the record, the closer the estimate gets to the true success rate.",
+        },
+        expectedValue: {
+          name: "Expected Value and Monte Carlo Simulation",
+          body: "A single flight of a design may succeed or fail, so judging by one outcome isn't fair. Expected value is how much mission value the same design would deliver on average if flown many times. The game uses Monte Carlo simulation: fly the design 800 times, randomly deciding each time whether parts fail and how events unfold, then average. The actuarial score uses that average, not this flight's luck.",
+        },
+        massMargin: {
+          name: "Mass Margin",
+          body: "As a design matures, parts almost always come in heavier than first estimated — cables, bolts, and brackets add up. Real missions therefore keep 20–30% mass margin during concept design. A rocket's capacity is a hard limit: even 1 kg over and you can't launch.",
+        },
+      },
+    },
     custom: {
       title: "Custom Mission",
       hint: "Pick any mission and space-environment event yourself, with every mechanic unlocked. Great for seeing how the best design changes when the same mission meets a different event.",
@@ -943,7 +1232,8 @@ const STRINGS = {
       ionosphere: {
         short: "Ionosphere Probe",
         name: "Objective: In-Situ Ionosphere Measurements",
-        desc: "The space agency wants to measure plasma right inside the ionosphere, to study how solar storms disturb it — throwing off GPS positions and cutting shortwave radio (like FORMOSAT-5's Advanced Ionospheric Probe and FORMOSAT-7's radio-occultation receivers). It's a small science satellite with a fraction of a big mission's budget.",
+        desc: "Measure plasma inside the ionosphere to study how solar storms disrupt GPS and radio (like FORMOSAT-5 and FORMOSAT-7). A small science satellite on a small budget.",
+        about: "The space agency wants to measure plasma right inside the ionosphere, to study how solar storms disturb it — throwing off GPS positions and cutting shortwave radio (like FORMOSAT-5's Advanced Ionospheric Probe and FORMOSAT-7's radio-occultation receivers). It's a small science satellite with a fraction of a big mission's budget.",
         req: "Requirements: fly inside the ionosphere (about 80–1,000 km) · measure 7 plasma parameters",
       },
     },

@@ -14,7 +14,7 @@ const FX = (() => {
   const SPARK_COLORS = ["#4fd1ff", "#ffd166", "#ffffff"];
   const CONFETTI_COLORS = ["#ffd166", "#4fd1ff", "#57e389", "#ff7b54", "#ffffff"];
   const CLICKABLE = ".btn, .part-card, .seg-btn, .quiz-option, .anomaly-option, .hotspot, .rocket-summary, " +
-    ".text-link-btn, .btn-link, .uplink-btn, .blueprint-detail-close, .custom-card";
+    ".text-link-btn, .btn-link, .uplink-btn, .blueprint-detail-close, .custom-card, .codex-link";
   const SELECTABLE = ".part-card, .quiz-option, .anomaly-option, .seg-btn";
 
   let starCanvas, starCtx, fxCanvas, fxCtx;

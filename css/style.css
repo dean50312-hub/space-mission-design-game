@@ -781,7 +781,7 @@ details > summary::-webkit-details-marker {
 
 .home-menu-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
 }
 
@@ -1053,6 +1053,128 @@ details > summary::-webkit-details-marker {
 
 .part-card.selected .part-proto {
   color: var(--text-dim);
+}
+
+/* 精簡說明後面的「圖鑑」小連結 */
+.codex-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--accent);
+  border-bottom: 1px dashed var(--accent-deep);
+  cursor: pointer;
+}
+
+.codex-link:hover,
+.codex-link:focus-visible {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+
+.codex-link .glyph {
+  width: 12px;
+  height: 12px;
+}
+
+/* ---------- 太空圖鑑 ---------- */
+
+.codex-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.codex-entries {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.codex-group {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.codex-group .section-title {
+  margin-bottom: 0;
+}
+
+.codex-group-intro {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.codex-entry {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  scroll-margin: 80px;
+}
+
+.codex-icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.codex-icon-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-deep);
+  border: 2px solid var(--line-strong);
+}
+
+.codex-icon-glyph .glyph {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+}
+
+.codex-entry h4 {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.codex-sub {
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.codex-entry p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.codex-entry.codex-flash {
+  animation: codex-flash 1.6s ease-out;
+}
+
+@keyframes codex-flash {
+  0%, 30% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  100% { border-color: var(--line); box-shadow: none; }
+}
+
+@media (max-width: 600px) {
+  .codex-entry { gap: 10px; padding: 10px; }
+  .codex-icon { width: 40px; height: 40px; }
 }
 
 .rocket-summary {

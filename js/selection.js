@@ -110,7 +110,7 @@ function renderOrbitGroup(onSelect) {
         life: orbit.designLifeYears,
         budget: fmtMoney(missionBudgetM(gameState.missionObjective, orbit)),
       })}</div>
-      <div class="part-proto">${t("orbitInfo." + orbit.id)}</div>
+      <div class="part-proto">${t("brief.orbit." + orbit.id)} ${codexLinkHtml("orbits", "orbits-" + orbit.id)}</div>
     `;
 
     card.addEventListener("click", () => {
@@ -172,7 +172,7 @@ function renderRocketGroup() {
       <div class="part-name">${t("rocket." + rocket.id + ".name")}</div>
       ${unavailableTag(available)}
       <div class="part-stats">${rocketStatsText(rocket)}</div>
-      <div class="part-proto">${t("rocket." + rocket.id + ".proto")}</div>
+      <div class="part-proto">${t("brief.rocket." + rocket.id)} ${codexLinkHtml("rockets", "rockets-" + rocket.id)}</div>
     `;
     if (!available) {
       card.disabled = true;
@@ -346,9 +346,10 @@ function renderHotspotDetail(key) {
 
   detail.appendChild(header);
 
+  const group = partGroupKey(key);
   const explainer = document.createElement("p");
   explainer.className = "detail-explainer";
-  explainer.textContent = t("explainer." + (key === "payload" ? "payload_" + gameState.missionObjective.payloadKind : key));
+  explainer.innerHTML = `${t("brief.explainer." + group)} ${codexLinkHtml("parts", "parts-" + group)}`;
   detail.appendChild(explainer);
 
   detail.appendChild(key === "fuel" ? renderFuelCards() : renderSubsystemCards(key));
@@ -414,9 +415,14 @@ function partStatsText(key, tier) {
   });
 }
 
+// 圖鑑和精簡說明用的分組：酬載依任務分成光學、轉發器、電漿三組
+function partGroupKey(key) {
+  return key === "payload" ? "payload_" + gameState.missionObjective.payloadKind : key;
+}
+
 function partProtoText(key, tier) {
-  if (key === "payload") return t(`partProto.payload_${gameState.missionObjective.payloadKind}.${tier.id}`);
-  return t(`partProto.${key}.${tier.id}`);
+  const group = partGroupKey(key);
+  return `${t(`brief.part.${group}.${tier.id}`)} ${codexLinkHtml("parts", `parts-${group}-${tier.id}`)}`;
 }
 
 function renderSubsystemCards(key) {
@@ -486,7 +492,7 @@ function renderFuelCards() {
       <img class="swatch swatch-part" src="image/parts/fuel-${fuel.id}.png" alt="${t("fuel." + fuel.id)}" />
       <div class="part-name">${t("fuel." + fuel.id)}</div>
       <div class="part-stats">${fuelStatsText(fuel)}<br>${fuelNeedText(fuel)}</div>
-      <div class="part-proto">${t("partProto.fuel." + fuel.id)}</div>
+      <div class="part-proto">${t("brief.part.fuel." + fuel.id)} ${codexLinkHtml("parts", "parts-fuel-" + fuel.id)}</div>
     `;
 
     card.addEventListener("click", () => {
@@ -518,7 +524,7 @@ function renderPropellantControls() {
     <input type="range" id="propellant-slider" class="fuel-slider" min="0" max="${propellantSliderMaxKg()}" step="${PROPELLANT_STEP_KG}" value="${gameState.propellantKg}" />
     <p id="propellant-summary" class="fuel-summary"></p>
     <button type="button" id="propellant-auto-btn" class="text-link-btn">${t("selection.propellantAutoBtn", { margin: fmtPct(AUTO_PROPELLANT_MARGIN) })}</button>
-    <p class="detail-explainer">${t("explainer.rocketEquation")}</p>
+    <p class="detail-explainer">${t("brief.explainer.rocketEquation")} ${codexLinkHtml("concepts", "concepts-rocketEquation")}</p>
   `;
 
   wrap.querySelector("#propellant-slider").addEventListener("input", (e) => {
