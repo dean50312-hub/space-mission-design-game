@@ -7,9 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyStaticTranslations();
   initSettingsUI();
 
-  document.addEventListener("click", (e) => {
-    if (e.target.closest(".btn, .part-card, .lang-btn")) sfxClick();
-  });
+  FX.init();
 
   document.getElementById("home-start-btn").addEventListener("click", startFreePlay);
   document.getElementById("home-campaign-btn").addEventListener("click", startNextCampaignLevel);
@@ -178,6 +176,7 @@ function startCampaignLevel(level) {
 
 async function startNewGame() {
   resetForNewGame();
+  FX.resetSheetMemory();
   renderEventScreen();
   showScreen("event");
   if (gameState.campaignLevel >= 2) await showTutorialIfNeeded("level" + gameState.campaignLevel);

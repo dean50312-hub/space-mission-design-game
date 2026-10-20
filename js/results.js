@@ -425,6 +425,8 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
   reason.classList.toggle("hidden", !cause);
 
   document.getElementById("result-score").innerHTML = scoreCardHtml(scoreInfo, simResult) + medalsHtml(scoreInfo);
+  FX.celebrate(scoreInfo.grade);
+  if (scoreInfo.medals.some((m) => m.isNew)) setTimeout(sfxAchievement, 900);
 
   document.getElementById("result-report").innerHTML = `
     <div class="report-numbers">

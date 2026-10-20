@@ -798,6 +798,7 @@ function updateBudgetSheet() {
     sheet.querySelectorAll("details").forEach((d) => {
       if (openKeys.has(d.dataset.key)) d.open = true;
     });
+    FX.sheetUpdated(sheet);
   }
 
   if (gameState.fuel && analysis.dvRequired) updatePropellantReadout(analysis);

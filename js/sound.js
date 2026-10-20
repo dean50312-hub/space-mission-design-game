@@ -35,30 +35,83 @@ function playTone(freq, durationMs, type, startGain) {
   }
 }
 
+// 滑音：頻率從 fromHz 滑到 toHz，8-bit 遊戲常見的「咻」聲
+function playSweep(fromHz, toHz, durationMs, type, startGain) {
+  const settings = storageGetSettings();
+  if (!settings.soundOn) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const end = ctx.currentTime + durationMs / 1000;
+    osc.type = type || "square";
+    osc.frequency.setValueAtTime(fromHz, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(toHz, end);
+    gain.gain.value = (startGain || 0.2) * settings.volume;
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(end);
+  } catch (e) {
+    // Web Audio 不可用時靜默忽略
+  }
+}
+
+// 琶音：一串音符依序彈出
+function playNotes(freqs, stepMs, noteMs, type, startGain) {
+  freqs.forEach((f, i) => setTimeout(() => playTone(f, noteMs, type, startGain), i * stepMs));
+}
+
+// 一次點擊可能同時觸發全域回饋和個別按鈕的音效，短時間內只響一次
+const CLICK_SFX_GAP_MS = 80;
+let lastClickSfxAt = 0;
+
+function clickSfxAllowed() {
+  const now = performance.now();
+  if (now - lastClickSfxAt < CLICK_SFX_GAP_MS) return false;
+  lastClickSfxAt = now;
+  return true;
+}
+
 function sfxClick() {
-  playTone(440, 80, "square", 0.15);
+  if (clickSfxAllowed()) playSweep(620, 900, 60, "square", 0.08);
+}
+
+// 選取零件、答案等「做出選擇」的動作
+function sfxSelect() {
+  if (clickSfxAllowed()) playNotes([523, 784], 55, 70, "square", 0.08);
+}
+
+// 按到不能選的選項（例如事件下停用的零件）
+function sfxDenied() {
+  if (clickSfxAllowed()) playNotes([196, 165], 90, 110, "square", 0.1);
 }
 
 function sfxPass() {
-  playTone(660, 150, "sine", 0.2);
+  playNotes([660, 880], 70, 110, "triangle", 0.2);
 }
 
 function sfxFail() {
-  playTone(140, 400, "sawtooth", 0.25);
+  playSweep(320, 70, 520, "sawtooth", 0.22);
 }
 
 function sfxLaunch() {
-  playTone(220, 500, "triangle", 0.2);
+  playSweep(110, 440, 650, "triangle", 0.22);
 }
 
 function sfxSuccess() {
-  playTone(523, 150, "sine", 0.2);
-  setTimeout(() => playTone(659, 150, "sine", 0.2), 150);
-  setTimeout(() => playTone(784, 250, "sine", 0.2), 300);
+  playNotes([523, 659, 784, 1047], 110, 160, "square", 0.12);
+  setTimeout(() => {
+    playTone(523, 450, "triangle", 0.12);
+    playTone(659, 450, "triangle", 0.12);
+    playTone(784, 450, "triangle", 0.12);
+  }, 460);
 }
 
 function sfxAchievement() {
-  playTone(880, 200, "square", 0.15);
+  playNotes([880, 1175, 1568, 1760], 70, 120, "square", 0.08);
 }
 
 // ---------- 背景音樂 ----------

@@ -55,9 +55,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--bg);
-  background-image: url("../image/ui/starfield.png"),
-    radial-gradient(ellipse at 50% -20%, rgba(79, 209, 255, 0.12), transparent 60%);
-  background-size: 256px 256px, 100% 100%;
+  background-image: radial-gradient(ellipse at 50% -20%, rgba(79, 209, 255, 0.12), transparent 60%);
+  background-size: 100% 100%;
   background-attachment: fixed;
   image-rendering: pixelated;
   color: var(--text);
@@ -73,6 +72,80 @@ body {
 
 img {
   image-rendering: pixelated;
+}
+
+/* 視差星空（最底層）與點擊火花、彩帶（最上層），都不攔截點擊 */
+.fx-stars,
+.fx-particles {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+.fx-stars {
+  z-index: -1;
+}
+
+.fx-particles {
+  z-index: 1000;
+}
+
+/* 選到零件時的「卡入」動畫 */
+.part-card.fx-picked {
+  animation: fx-picked 0.32s steps(4) both;
+}
+
+@keyframes fx-picked {
+  0% { transform: scale(0.94); box-shadow: 0 0 0 2px var(--accent-glow); }
+  50% { transform: scale(1.04); box-shadow: 0 0 0 6px var(--accent-glow), 0 0 18px var(--accent-glow); }
+  100% { transform: scale(1); box-shadow: 0 0 0 2px var(--accent-glow); }
+}
+
+/* 按到不能選的選項 */
+.fx-denied {
+  animation: fx-denied 0.3s steps(6);
+}
+
+@keyframes fx-denied {
+  0%, 100% { translate: 0; }
+  20%, 60% { translate: -3px 0; }
+  40%, 80% { translate: 3px 0; }
+}
+
+/* 預算表數值改變時跳一下，超標時整行抖動 */
+.fx-bump {
+  display: inline-block;
+  animation: fx-bump 0.3s steps(3);
+}
+
+@keyframes fx-bump {
+  0%, 100% { transform: none; }
+  40% { transform: translateY(-3px) scale(1.12); color: var(--accent); }
+}
+
+.sheet-line.bad .fx-bump {
+  animation-name: fx-bump-bad;
+}
+
+@keyframes fx-bump-bad {
+  0%, 100% { transform: none; }
+  40% { transform: translateY(-3px) scale(1.12); color: var(--red); }
+}
+
+.sheet-line.fx-over summary {
+  animation: fx-denied 0.36s steps(6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .part-card.fx-picked,
+  .fx-denied,
+  .fx-bump,
+  .sheet-line.fx-over summary {
+    animation: none;
+  }
 }
 
 #app {
@@ -2284,6 +2357,27 @@ details[open] > summary {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+}
+
+/* 新拿到的勳章：翻轉一圈後持續發光 */
+.medal.new .medal-icon {
+  animation: medal-spin 0.8s steps(8) 0.6s both, medal-glow 1.6s ease-in-out 1.4s infinite alternate;
+}
+
+@keyframes medal-spin {
+  from { transform: rotateY(0deg) scale(1.3); }
+  to { transform: rotateY(360deg) scale(1); }
+}
+
+@keyframes medal-glow {
+  from { filter: drop-shadow(0 0 0 rgba(255, 209, 102, 0)); }
+  to { filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.9)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medal.new .medal-icon {
+    animation: none;
+  }
 }
 
 .medal.locked .medal-icon {
