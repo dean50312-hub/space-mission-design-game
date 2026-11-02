@@ -1079,6 +1079,289 @@ details > summary::-webkit-details-marker {
   height: 12px;
 }
 
+/* ---------- 多人連線 ---------- */
+
+#mp-entry.hidden,
+#mp-lobby.hidden,
+#mp-not-configured.hidden,
+#mp-start-btn.hidden,
+#propellant-auto-btn.hidden,
+.mp-bar.hidden,
+.mp-toast.hidden {
+  display: none;
+}
+
+.mp-form {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mp-form .btn {
+  margin-bottom: 0;
+}
+
+.mp-field {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.mp-input {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg-deep);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+}
+
+.mp-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.mp-code-input {
+  font-family: var(--font-pixel);
+  font-size: 24px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+}
+
+.mp-divider {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.mp-error {
+  min-height: 1em;
+  margin: 0;
+  color: var(--red);
+  font-size: 13px;
+}
+
+.mp-code-box {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.mp-code-box strong {
+  font-family: var(--font-pixel);
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: 10px;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 var(--bg-deep);
+}
+
+.mp-players {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mp-players li {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+}
+
+.mp-host-tag {
+  margin-left: 6px;
+  padding: 0 4px;
+  font-size: 10px;
+  color: var(--bg);
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.mp-roles {
+  margin-bottom: 16px;
+}
+
+.mp-role-card {
+  flex: 1 1 160px;
+}
+
+.mp-role-card .part-name {
+  display: flex;
+  align-items: center;
+}
+
+.mp-role-card.mp-taken {
+  opacity: 0.75;
+}
+
+.mp-role-holder {
+  margin-top: 6px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.mp-role-card.mp-taken .mp-role-holder {
+  color: var(--text-dim);
+}
+
+.mp-setup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.mp-lobby-status {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+/* 不是自己負責的卡片：看得到、點了會提示該找誰 */
+.part-card.mp-locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.part-card.mp-locked:hover {
+  transform: none;
+  border-color: var(--line);
+}
+
+.part-card.mp-locked.selected {
+  opacity: 0.85;
+}
+
+.mp-owner {
+  font-size: 12px;
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+
+#launch-btn.mp-is-ready {
+  color: var(--green);
+}
+
+.mp-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+  max-width: calc(100vw - 16px);
+  padding: 6px 12px;
+  font-size: 12px;
+  background: var(--panel-raised);
+  border: 2px solid var(--accent-deep);
+  border-radius: var(--radius);
+  box-shadow: 3px 3px 0 var(--bg-deep);
+}
+
+.mp-bar-code b {
+  font-family: var(--font-pixel);
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.mp-bar-player {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-dim);
+}
+
+.mp-bar-player.me {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.mp-bar-player.ready {
+  color: var(--green);
+}
+
+.mp-bar-player .glyph {
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+}
+
+body:has(.mp-bar:not(.hidden)) {
+  padding-bottom: 90px;
+}
+
+.mp-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--panel-raised);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  box-shadow: 3px 3px 0 var(--bg-deep);
+}
+
+.mp-team-report {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mp-team-row {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.mp-team-head {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-pixel);
+  font-size: 14px;
+}
+
+.mp-team-choices {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 2px 0 6px;
+}
+
+.mp-team-impact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.mp-impact.ok { color: var(--green); }
+.mp-impact.warn { color: var(--gold); }
+.mp-impact.bad { color: var(--red); }
+
+@media (max-width: 600px) {
+  .mp-setup { grid-template-columns: 1fr; }
+  .mp-code-box strong { font-size: 40px; }
+}
+
 /* ---------- 太空圖鑑 ---------- */
 
 .codex-tabs {

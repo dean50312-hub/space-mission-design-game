@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=76" />
+<link rel="stylesheet" href="css/style.css?v=77" />
 </head>
 <body>
 <main id="app">
@@ -37,6 +37,7 @@
       <ol id="home-campaign-progress" class="campaign-pips"></ol>
       <button id="home-start-btn" class="btn btn-secondary"></button>
       <button id="home-custom-btn" class="btn btn-secondary"></button>
+      <button id="home-mp-btn" class="btn btn-secondary" data-i18n="home.multiplayer"></button>
       <div class="home-menu-row">
         <button id="home-codex-btn" class="btn btn-secondary" data-i18n="home.codex"></button>
         <button id="home-achievements-btn" class="btn btn-secondary" data-i18n="home.achievements"></button>
@@ -193,6 +194,47 @@
     <button id="achievements-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
   </section>
 
+  <section id="screen-mp" class="screen">
+    <h2 data-i18n="mp.title"></h2>
+    <p id="mp-not-configured" class="warning hidden" data-i18n="mp.notConfigured"></p>
+
+    <div id="mp-entry">
+      <p class="section-hint" data-i18n="mp.entryHint"></p>
+      <div class="mp-form panel">
+        <label class="mp-field"><span data-i18n="mp.nameLabel"></span><input id="mp-name" class="mp-input" maxlength="12" /></label>
+        <button id="mp-create-btn" class="btn btn-primary" data-i18n="mp.create"></button>
+        <div class="mp-divider" data-i18n="mp.or"></div>
+        <label class="mp-field"><span data-i18n="mp.codeLabel"></span><input id="mp-code" class="mp-input mp-code-input" maxlength="4" autocomplete="off" /></label>
+        <button id="mp-join-btn" class="btn btn-secondary" data-i18n="mp.join"></button>
+        <p id="mp-error" class="mp-error"></p>
+      </div>
+      <button id="mp-entry-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
+    </div>
+
+    <div id="mp-lobby" class="hidden">
+      <div class="mp-code-box panel">
+        <span data-i18n="mp.roomCode"></span>
+        <strong id="mp-room-code"></strong>
+        <span class="section-hint" data-i18n="mp.shareHint"></span>
+      </div>
+      <h3 class="section-title"><span data-i18n="mp.players"></span><span id="mp-player-count" class="section-count"></span></h3>
+      <ul id="mp-players" class="mp-players"></ul>
+      <h3 class="section-title" data-i18n="mp.roles"></h3>
+      <p class="section-hint" data-i18n="mp.rolesHint"></p>
+      <div id="mp-roles" class="cards mp-roles"></div>
+      <h3 class="section-title" data-i18n="mp.missionSetup"></h3>
+      <div class="mp-setup">
+        <label class="mp-field"><span data-i18n="mp.objective"></span><select id="mp-objective" class="mp-input"></select></label>
+        <label class="mp-field"><span data-i18n="mp.event"></span><select id="mp-event" class="mp-input"></select></label>
+      </div>
+      <p id="mp-lobby-status" class="mp-lobby-status"></p>
+      <div class="button-row">
+        <button id="mp-leave-btn" class="btn btn-secondary" data-i18n="mp.leave"></button>
+        <button id="mp-start-btn" class="btn btn-primary" data-i18n="mp.start"></button>
+      </div>
+    </div>
+  </section>
+
   <section id="screen-codex" class="screen">
     <h2 data-i18n="codex.title"></h2>
     <p class="section-hint" data-i18n="codex.hint"></p>
@@ -254,6 +296,10 @@
     </div>
   </div>
 
+  <!-- 多人連線：底部隊伍列與提示訊息 -->
+  <div id="mp-bar" class="mp-bar hidden"></div>
+  <div id="mp-toast" class="mp-toast hidden"></div>
+
   <div id="tutorial-overlay" class="tutorial-overlay hidden">
     <div class="tutorial-card panel">
       <img class="tutorial-avatar" src="image/icons/mascot-orbit.png" alt="" />
@@ -271,27 +317,30 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=76"></script>
-<script src="js/i18n.js?v=76"></script>
-<script src="js/sound.js?v=76"></script>
-<script src="js/fx.js?v=76"></script>
-<script src="js/data.js?v=76"></script>
-<script src="js/state.js?v=76"></script>
-<script src="js/mission.js?v=76"></script>
-<script src="js/operations.js?v=76"></script>
-<script src="js/scoring.js?v=76"></script>
-<script src="js/bestdesigns.js?v=76"></script>
-<script src="js/earthmap.js?v=76"></script>
-<script src="js/orbitview.js?v=76"></script>
-<script src="js/ascentview.js?v=76"></script>
-<script src="js/selection.js?v=76"></script>
-<script src="js/simulation.js?v=76"></script>
-<script src="js/results.js?v=76"></script>
-<script src="js/learning.js?v=76"></script>
-<script src="js/achievements.js?v=76"></script>
-<script src="js/settings.js?v=76"></script>
-<script src="js/codex.js?v=76"></script>
-<script src="js/tutorial.js?v=76"></script>
-<script src="js/main.js?v=76"></script>
+<script src="js/storage.js?v=77"></script>
+<script src="js/i18n.js?v=77"></script>
+<script src="js/sound.js?v=77"></script>
+<script src="js/fx.js?v=77"></script>
+<script src="js/data.js?v=77"></script>
+<script src="js/state.js?v=77"></script>
+<script src="js/mission.js?v=77"></script>
+<script src="js/operations.js?v=77"></script>
+<script src="js/scoring.js?v=77"></script>
+<script src="js/bestdesigns.js?v=77"></script>
+<script src="js/earthmap.js?v=77"></script>
+<script src="js/orbitview.js?v=77"></script>
+<script src="js/ascentview.js?v=77"></script>
+<script src="js/selection.js?v=77"></script>
+<script src="js/simulation.js?v=77"></script>
+<script src="js/results.js?v=77"></script>
+<script src="js/learning.js?v=77"></script>
+<script src="js/achievements.js?v=77"></script>
+<script src="js/settings.js?v=77"></script>
+<script src="js/codex.js?v=77"></script>
+<script src="js/netconfig.js?v=77"></script>
+<script src="js/net.js?v=77"></script>
+<script src="js/multiplayer.js?v=77"></script>
+<script src="js/tutorial.js?v=77"></script>
+<script src="js/main.js?v=77"></script>
 </body>
 </html>

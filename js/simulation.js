@@ -6,12 +6,12 @@ function sleep(ms) {
 
 const OPERATIONS_ANIMATION_MS = 12000;
 
-async function runSimulation() {
+async function runSimulation(seed, round = null) {
   const design = currentDesign();
   const analysis = analyzeDesign(design);
   const features = gameState.features;
   const expectedValue = computeExpectedValue(design, features, analysis);
-  const gen = missionTimeline(analysis, design, features, makeRng((Math.random() * 2 ** 32) >>> 0));
+  const gen = missionTimeline(analysis, design, features, makeRng(seed !== undefined ? seed : (Math.random() * 2 ** 32) >>> 0));
 
   const log = document.getElementById("simulation-log");
   const yearStepMs = Math.round(OPERATIONS_ANIMATION_MS / design.orbit.designLifeYears);
@@ -19,6 +19,8 @@ async function runSimulation() {
   let step = gen.next();
 
   while (!step.done) {
+    // 多人連線時房主讓大家回到大廳，這次飛行就停下來
+    if (mpFlightStale(round)) return null;
     const ev = step.value;
     let reply;
 
@@ -63,6 +65,7 @@ async function runSimulation() {
     step = gen.next(reply);
   }
 
+  if (mpFlightStale(round)) return null;
   const outcome = step.value;
   stopUplink();
   const overallSuccess = outcome.failedStageId === null;
@@ -121,6 +124,15 @@ async function showAnomalyDecision(ev, design) {
   const list = document.getElementById("anomaly-options");
   list.innerHTML = "";
 
+  // 多人連線：由「通訊與飛控」決定，其他人看得到選項，但要等對方選
+  const decisionNo = MP.active ? MP.decisionIndex++ : null;
+  const waitingForTeammate = MP.active && !mpHasRole("flight");
+  if (waitingForTeammate) {
+    const holder = mpRoleHolder("flight");
+    document.getElementById("anomaly-hint").innerHTML =
+      t("mp.waitDecision", { name: mpEscape(holder ? mpPlayerName(holder) : "?"), role: t("mp.role.flight.name") });
+  }
+
   return new Promise((resolve) => {
     ev.choices.forEach((choice, index) => {
       const btn = document.createElement("button");
@@ -135,14 +147,22 @@ async function showAnomalyDecision(ev, design) {
           ? t("anomalyUi.estimate", { value: fmtPct(Math.max(0, choice.estimate), choice.estimate < 0.1 ? 1 : 0) })
           : t("anomalyUi.cannotAfford")}</span>
       `;
+      if (waitingForTeammate) btn.disabled = true;
       btn.addEventListener("click", () => {
         sfxClick();
         overlay.classList.add("hidden");
+        if (decisionNo !== null) mpSendDecision(decisionNo, index);
         resolve(index);
       });
       list.appendChild(btn);
     });
     overlay.classList.remove("hidden");
+    if (waitingForTeammate) {
+      mpWaitDecision(decisionNo).then((index) => {
+        overlay.classList.add("hidden");
+        resolve(index);
+      });
+    }
   });
 }
 
@@ -380,6 +400,8 @@ let uplinkActive = false;
 
 function startUplink(orbitId) {
   stopUplink();
+  // 多人連線時，地面站上行由「通訊與飛控」負責
+  if (MP.active && !mpHasRole("flight")) return;
   uplinkStats = { ok: 0, total: 0 };
   uplinkActive = true;
   // GEO 和地面站永遠連線，改成定時送出例行指令

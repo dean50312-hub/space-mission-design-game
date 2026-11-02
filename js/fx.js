@@ -182,7 +182,7 @@ const FX = (() => {
     if (e.button !== 0) return;
     const el = e.target.closest(CLICKABLE);
     if (!el) return;
-    if (el.disabled || el.classList.contains("unavailable")) {
+    if (el.disabled || el.classList.contains("unavailable") || el.classList.contains("mp-locked")) {
       denied(el);
       return;
     }

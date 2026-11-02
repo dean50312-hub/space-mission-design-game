@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   FX.init();
   initCodex();
+  initMultiplayer();
 
   document.getElementById("home-start-btn").addEventListener("click", startFreePlay);
   document.getElementById("home-campaign-btn").addEventListener("click", startNextCampaignLevel);
@@ -20,19 +21,28 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("achievements-back-btn").addEventListener("click", goHome);
   document.getElementById("settings-back-btn").addEventListener("click", goHome);
 
-  document.getElementById("start-btn").addEventListener("click", () => showScreen("selection"));
-  document.getElementById("event-home-btn").addEventListener("click", goHome);
+  // 多人連線時，這些按鈕改走房間流程（js/multiplayer.js）
+  document.getElementById("start-btn").addEventListener("click", () => (MP.active ? mpGoDesign() : showScreen("selection")));
+  document.getElementById("event-home-btn").addEventListener("click", () => (MP.active ? mpLeaveToHome() : goHome()));
   document.getElementById("selection-back-btn").addEventListener("click", () => {
+    if (MP.active) {
+      mpBackToBriefing();
+      return;
+    }
     renderEventScreen();
     showScreen("event");
   });
-  document.getElementById("launch-btn").addEventListener("click", startSimulation);
+  document.getElementById("launch-btn").addEventListener("click", () => (MP.active ? mpToggleReady() : startSimulation()));
   document.getElementById("play-again-btn").addEventListener("click", () => {
-    if (gameState.campaignLevel) startCampaignLevel(gameState.campaignLevel);
+    if (MP.active) mpBackToLobby();
+    else if (gameState.campaignLevel) startCampaignLevel(gameState.campaignLevel);
     else if (gameState.custom) startNewGame();
     else startFreePlay();
   });
-  document.getElementById("results-home-btn").addEventListener("click", goHome);
+  document.getElementById("results-home-btn").addEventListener("click", () => {
+    if (MP.active) mpLeave();
+    goHome();
+  });
 
   document.getElementById("tutorial-next-btn").addEventListener("click", tutorialNext);
   document.getElementById("uplink-btn").addEventListener("click", () => finishUplink(true));
@@ -260,6 +270,7 @@ const SCREEN_BGM = {
   achievements: "space",
   custom: "space",
   codex: "space",
+  mp: "space",
   settings: "space",
   event: "lab",
   selection: "lab",
@@ -278,16 +289,20 @@ function showScreen(name) {
   if (name === "achievements") renderAchievementsGallery();
 }
 
-async function startSimulation() {
+// seed：多人連線時由房主送出，所有人用同一個種子模擬，結果才會一樣；單人時不傳，每次隨機
+async function startSimulation(seed) {
+  const round = MP.active ? MP.flightRound : null;
   showScreen("simulation");
   resetFlightView();
   sfxLaunch();
 
   await showTutorialIfNeeded("simulation");
 
-  const simResult = await runSimulation();
+  const simResult = await runSimulation(seed, round);
+  if (!simResult || mpFlightStale(round)) return;
 
   await sleep(500);
+  if (mpFlightStale(round)) return;
   finishMission(simResult);
 }
 
@@ -331,6 +346,7 @@ function finishMission(simResult) {
   lastResultsContext = { simResult, achievements, campaignAward, scoreInfo, quiz };
   renderResultsScreen(simResult, achievements, campaignAward, scoreInfo);
   renderQuiz(quiz);
+  mpDecorateResults();
   showScreen("results");
   showTutorialIfNeeded("results");
 }
@@ -359,6 +375,7 @@ function refreshDynamicScreenText() {
   }
   if (active.id === "screen-achievements") renderAchievementsGallery();
   if (active.id === "screen-custom") renderCustomSetup();
+  if (active.id === "screen-mp" && MP.active) mpRenderLobby();
   if (active.id === "screen-results" && lastResultsContext) {
     const c = lastResultsContext;
     renderResultsScreen(c.simResult, c.achievements, c.campaignAward, c.scoreInfo);

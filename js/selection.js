@@ -113,7 +113,13 @@ function renderOrbitGroup(onSelect) {
       <div class="part-proto">${t("brief.orbit." + orbit.id)} ${codexLinkHtml("orbits", "orbits-" + orbit.id)}</div>
     `;
 
+    if (MP.active && !mpCanEdit("orbit")) card.classList.add("mp-locked");
+
     card.addEventListener("click", () => {
+      if (MP.active) {
+        if (mpTryEdit("orbit")) mpSetDesign({ orbit: orbit.id });
+        return;
+      }
       gameState.orbit = orbit;
       recomputeBudget();
       onSelect();
@@ -179,7 +185,13 @@ function renderRocketGroup() {
       card.classList.add("unavailable");
     }
 
+    if (MP.active && !mpCanEdit("rocket")) card.classList.add("mp-locked");
+
     card.addEventListener("click", () => {
+      if (MP.active) {
+        if (mpTryEdit("rocket")) mpSetDesign({ rocket: rocket.id });
+        return;
+      }
       gameState.rocket = rocket;
       rocketPickerExpanded = false;
       renderSelectionScreen();
@@ -346,6 +358,13 @@ function renderHotspotDetail(key) {
 
   detail.appendChild(header);
 
+  if (MP.active) {
+    const owner = document.createElement("p");
+    owner.className = "mp-owner";
+    owner.innerHTML = mpOwnerText(key);
+    detail.appendChild(owner);
+  }
+
   const group = partGroupKey(key);
   const explainer = document.createElement("p");
   explainer.className = "detail-explainer";
@@ -449,7 +468,15 @@ function renderSubsystemCards(key) {
       card.classList.add("unavailable");
     }
 
+    if (MP.active && !mpCanEdit(key)) card.classList.add("mp-locked");
+
     card.addEventListener("click", () => {
+      if (MP.active) {
+        if (!mpTryEdit(key)) return;
+        activeHotspot = null;
+        mpSetDesign({ [key]: tier.id });
+        return;
+      }
       gameState.parts[key] = tier;
       activeHotspot = null;
       renderSelectionScreen();
@@ -495,8 +522,16 @@ function renderFuelCards() {
       <div class="part-proto">${t("brief.part.fuel." + fuel.id)} ${codexLinkHtml("parts", "parts-fuel-" + fuel.id)}</div>
     `;
 
+    if (MP.active && !mpCanEdit("fuel")) card.classList.add("mp-locked");
+
     card.addEventListener("click", () => {
       const firstPick = !gameState.fuel;
+      if (MP.active) {
+        if (!mpTryEdit("fuel")) return;
+        const kg = firstPick ? autoPropellantKg({ ...currentDesign(), fuel }) : gameState.propellantKg;
+        mpSetDesign({ fuel: fuel.id, propellantKg: kg });
+        return;
+      }
       gameState.fuel = fuel;
       if (firstPick) gameState.propellantKg = autoPropellantKg(currentDesign());
       renderSelectionScreen();
@@ -527,12 +562,18 @@ function renderPropellantControls() {
     <p class="detail-explainer">${t("brief.explainer.rocketEquation")} ${codexLinkHtml("concepts", "concepts-rocketEquation")}</p>
   `;
 
+  const editable = mpCanEdit("fuel");
+  wrap.querySelector("#propellant-slider").disabled = !editable;
+  wrap.querySelector("#propellant-auto-btn").classList.toggle("hidden", !editable);
+
   wrap.querySelector("#propellant-slider").addEventListener("input", (e) => {
     gameState.propellantKg = Number(e.target.value);
     updateBudgetSheet();
+    if (MP.active) mpSetPropellantThrottled(gameState.propellantKg);
   });
   wrap.querySelector("#propellant-auto-btn").addEventListener("click", () => {
     gameState.propellantKg = autoPropellantKg(currentDesign());
+    if (MP.active) mpSetDesign({ propellantKg: gameState.propellantKg });
     const slider = wrap.querySelector("#propellant-slider");
     slider.max = propellantSliderMaxKg();
     slider.value = gameState.propellantKg;
@@ -818,4 +859,5 @@ function updateBudgetSheet() {
   warning.classList.toggle("hidden", messages.length === 0);
 
   document.getElementById("launch-btn").disabled = isLaunchBlocked(analysis);
+  mpDecorateLaunchBtn();
 }
