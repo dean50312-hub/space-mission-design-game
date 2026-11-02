@@ -2,15 +2,15 @@
 
 多人模式用 Firebase Realtime Database 即時同步房間資料。網站本身仍放在 GitHub Pages，不需要自己架伺服器。免費的 Spark 方案最多同時 100 個連線，約 25 間 4 人房。
 
-設定完成前，正式網站上不會顯示「多人連線」按鈕。開發測試可以在網址加上 `?net=local`，用同一個瀏覽器的多個分頁互連（不需要 Firebase）。
+已設定完成（專案 space-c-16630），js/netconfig.js 裡有設定。若 netconfig.js 是 null，正式網站上不會顯示「多人連線」按鈕。開發測試可以在網址加上 `?net=local`，用同一個瀏覽器的多個分頁互連（不需要 Firebase）。
 
 ## 一、建立 Firebase 專案（組員用自己的 Google 帳號）
 
 1. 到 <https://console.firebase.google.com/> →「新增專案」，名稱自訂（例如 `space-actuary`）。Google Analytics 可以關掉。
-2. 左側選單「建構 → Realtime Database」→「建立資料庫」。
+2. 左側選單「資料庫與儲存空間（Databases & Storage）→ Realtime Database」（舊版主控台叫「建構 → Realtime Database」）→「建立資料庫」。注意是 Realtime Database，不是 Firestore Database。
    - 位置選「新加坡（asia-southeast1）」，台灣連線比較快。
    - 安全規則先選「以鎖定模式啟動」，下一步再換成我們的規則。
-3. 「規則」分頁，整段換成下面這份，按「發布」：
+3. 建好後頁面上方會出現「資料／規則／備份／用量」分頁。點「規則」，整段換成下面這份，按「發布」：
 
 ```json
 {
