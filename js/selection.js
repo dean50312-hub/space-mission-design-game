@@ -860,4 +860,5 @@ function updateBudgetSheet() {
 
   document.getElementById("launch-btn").disabled = isLaunchBlocked(analysis);
   mpDecorateLaunchBtn();
+  mpRenderNegotiation(analysis);
 }

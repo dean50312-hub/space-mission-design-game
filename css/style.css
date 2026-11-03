@@ -1087,7 +1087,9 @@ details > summary::-webkit-details-marker {
 #mp-start-btn.hidden,
 #propellant-auto-btn.hidden,
 .mp-bar.hidden,
-.mp-toast.hidden {
+.mp-toast.hidden,
+.mp-chat.hidden,
+.mp-negotiate.hidden {
   display: none;
 }
 
@@ -1357,8 +1359,186 @@ body:has(.mp-bar:not(.hidden)) {
 .mp-impact.warn { color: var(--gold); }
 .mp-impact.bad { color: var(--red); }
 
+.mp-chat-toggle {
+  position: relative;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--bg-deep);
+  border: 2px solid var(--accent-deep);
+  border-radius: var(--radius);
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.mp-chat-toggle.open {
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.mp-unread {
+  margin-left: 4px;
+  padding: 0 5px;
+  color: var(--bg);
+  background: var(--red);
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.mp-chat {
+  position: fixed;
+  right: 12px;
+  bottom: 64px;
+  z-index: 95;
+  width: min(340px, calc(100vw - 24px));
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 8px;
+  height: min(420px, 60vh);
+  padding: 10px;
+  background: var(--bg-deep);
+  background-clip: padding-box;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.mp-chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-pixel);
+}
+
+.mp-chat-log {
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.mp-chat-msg b {
+  margin-right: 6px;
+  color: var(--accent);
+}
+
+.mp-chat-msg.me b {
+  color: var(--gold);
+}
+
+.mp-chat-msg.sys {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.mp-chat-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mp-chat-chip {
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg-deep);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.mp-chat-chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.mp-chat-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+}
+
+.mp-chat-input-row .btn {
+  width: auto;
+  white-space: nowrap;
+  margin-bottom: 0;
+  padding: 6px 12px;
+}
+
+.mp-negotiate {
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.mp-nego-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 4px;
+  font-family: var(--font-pixel);
+  color: var(--gold);
+}
+
+.mp-nego-hint,
+.mp-nego-calc {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+
+.mp-nego-spend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.mp-nego-spend span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mp-nego-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.mp-nego-main {
+  flex: 1;
+}
+
+.mp-nego-label {
+  font-size: 14px;
+}
+
+.mp-nego-fix {
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 10px;
+  color: var(--bg);
+  background: var(--green);
+  border-radius: 2px;
+}
+
+.mp-nego-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.mp-nego-btn {
+  width: auto;
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 @media (max-width: 600px) {
   .mp-setup { grid-template-columns: 1fr; }
+  .mp-nego-option { flex-direction: column; align-items: stretch; }
   .mp-code-box strong { font-size: 40px; }
 }
 

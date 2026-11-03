@@ -138,8 +138,10 @@ function mpRenderBar() {
   }
   const host = mpHostId();
   const showReady = MP.room.phase === "design";
+  const unread = mpUnreadCount();
   bar.innerHTML = `
     <span class="mp-bar-code">${t("mp.roomShort")} <b>${MP.code}</b></span>
+    <button type="button" class="mp-chat-toggle${mpChatOpen ? " open" : ""}" data-chat-toggle>${t("mp.chat")}${unread ? `<span class="mp-unread">${unread}</span>` : ""}</button>
     ${mpPlayers().map((p) => {
       const roles = MP_ROLES.filter((r) => mpRoleHolder(r) === p.pid);
       return `
@@ -273,6 +275,8 @@ async function mpLeave() {
   MP.room = null;
   MP.code = null;
   mpAbortFlight();
+  mpChatOpen = false;
+  mpRenderChat();
   mpRenderBar();
   try {
     await MP.net.update(code, patch);
@@ -303,6 +307,7 @@ function mpOnRoom(room) {
   MP.room = room;
   if (MP.room.phase !== "flight") MP.launching = false;
   mpHostHousekeeping();
+  mpRenderChat();
   mpRenderBar();
 
   const phase = room.phase;
@@ -347,6 +352,12 @@ function mpHostHousekeeping() {
   Object.keys(roles).forEach((r) => {
     if (roles[r] && !MP.room.players[roles[r]]) patch["roles/" + r] = null;
   });
+  const chatKeys = Object.keys(MP.room.chat || {}).sort();
+  if (chatKeys.length > MP_CHAT_PRUNE_AT) {
+    chatKeys.slice(0, chatKeys.length - MP_CHAT_KEEP).forEach((k) => {
+      patch["chat/" + k] = null;
+    });
+  }
   if (Object.keys(patch).length) MP.net.update(MP.code, patch);
 }
 
@@ -395,6 +406,8 @@ function mpApplyDesign(d) {
 
 // 改設計：寫進房間，同時取消所有人的「準備好」（設計變了要重新確認）
 function mpSetDesign(patch) {
+  const log = mpDesignChangeText(patch);
+  if (log) mpSendChat(log, true);
   const update = {};
   Object.keys(patch).forEach((k) => {
     update["design/" + k] = patch[k];
@@ -628,29 +641,27 @@ function mpTeamReportHtml(simResult) {
   if (!MP.active || !MP.room) return "";
   const { design, analysis } = simResult;
   const f = analysis.factors;
-  const name = (key, obj) => (obj ? obj : "—");
   const tierName = (key) => (design.parts[key] ? t("tier." + design.parts[key].id) : "—");
-  const power = powerSystemSpec(design);
-  const partCost = (key) => (design.parts[key] ? design.parts[key].costM : 0);
+  const costs = mpRoleCosts(design);
   const rows = {
     director: {
-      choices: `${name("orbit", design.orbit && t("orbit." + design.orbit.id))} · ${name("rocket", design.rocket && t("rocket." + design.rocket.id + ".name"))}`,
-      costM: design.rocket ? design.rocket.costM : 0,
+      choices: `${design.orbit ? t("orbit." + design.orbit.id) : "—"} · ${design.rocket ? t("rocket." + design.rocket.id + ".name") : "—"}`,
+      costM: costs.director,
       impact: [[t("factor.coverage"), f.coverage], [t("mp.launchReliability"), analysis.reliability.launch]],
     },
     scientist: {
       choices: `${hotspotLabel("payload")}：${tierName("payload")}`,
-      costM: partCost("payload"),
+      costM: costs.scientist,
       impact: [[t("factor.performance"), f.performance]],
     },
     engineer: {
       choices: ["power", "structure", "attitude"].map((k) => `${hotspotLabel(k)}：${tierName(k)}`).join(" · "),
-      costM: (power ? power.costM : 0) + partCost("structure") + partCost("attitude"),
+      costM: costs.engineer,
       impact: [[t("factor.power"), f.power], [t("factor.pointing"), f.pointing]],
     },
     flight: {
       choices: `${hotspotLabel("comm")}：${tierName("comm")} · ${design.fuel ? t("fuel." + design.fuel.id) : "—"}`,
-      costM: partCost("comm") + (design.fuel ? design.fuel.costM : 0),
+      costM: costs.flight,
       impact: [[t("factor.delivery"), f.delivery], [t("factor.lifetime"), f.lifetime]],
       extra: (simResult.decisions || []).length ? t("mp.decisionsMade", { n: simResult.decisions.length }) : "",
     },
@@ -677,6 +688,267 @@ function mpTeamReportHtml(simResult) {
     </div>`;
 }
 
+// ---------- 聊天室：隊友不在身邊時也能溝通；改設計時系統自動貼一則紀錄 ----------
+
+const MP_CHAT_MAX_LENGTH = 120;
+const MP_CHAT_KEEP = 80; // 房主只保留最近 80 則，避免房間資料越長越大
+const MP_CHAT_PRUNE_AT = 100;
+
+let mpChatOpen = false;
+let mpChatSeen = 0; // 看過的最後一則訊息時間，用來算未讀數
+
+function mpChatMessages(room = MP.room) {
+  const chat = (room && room.chat) || {};
+  return Object.keys(chat).sort().map((k) => chat[k]);
+}
+
+function mpSendChat(text, system = false) {
+  const clean = String(text).trim().slice(0, MP_CHAT_MAX_LENGTH);
+  if (!clean || !MP.active) return;
+  const ts = Date.now();
+  // 以時間開頭的 key：字典順序就是時間順序
+  const key = ts.toString(36) + MP.pid.slice(-4);
+  MP.net.update(MP.code, { ["chat/" + key]: { pid: MP.pid, name: mpPlayerName(MP.pid), text: clean, sys: system, ts } });
+}
+
+function mpSubmitChatInput() {
+  const input = document.getElementById("mp-chat-input");
+  mpSendChat(input.value);
+  input.value = "";
+}
+
+function mpToggleChat(open = !mpChatOpen) {
+  mpChatOpen = open;
+  document.getElementById("mp-chat").classList.toggle("hidden", !open || !MP.active);
+  if (open) {
+    mpRenderChat();
+    document.getElementById("mp-chat-input").focus();
+  }
+  mpRenderBar();
+}
+
+function mpUnreadCount() {
+  if (mpChatOpen) return 0;
+  return mpChatMessages().filter((m) => m.ts > mpChatSeen && m.pid !== MP.pid).length;
+}
+
+function mpRenderChat() {
+  const panel = document.getElementById("mp-chat");
+  if (!MP.active) {
+    panel.classList.add("hidden");
+    return;
+  }
+  if (!mpChatOpen) return;
+  const messages = mpChatMessages();
+  const log = document.getElementById("mp-chat-log");
+  const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+  log.innerHTML = messages.length
+    ? messages.map((m) => m.sys
+      ? `<div class="mp-chat-msg sys">${mpEscape(m.text)}</div>`
+      : `<div class="mp-chat-msg${m.pid === MP.pid ? " me" : ""}"><b>${mpEscape(m.name)}</b>${mpEscape(m.text)}</div>`).join("")
+    : `<div class="mp-chat-msg sys">${t("mp.chatEmpty")}</div>`;
+  if (atBottom || messages.length && messages[messages.length - 1].pid === MP.pid) log.scrollTop = log.scrollHeight;
+  if (messages.length) mpChatSeen = messages[messages.length - 1].ts;
+  document.getElementById("mp-chat-quick").innerHTML = tt("mp.chatQuick")
+    .map((q, i) => `<button type="button" class="mp-chat-chip" data-quick="${i}">${mpEscape(q)}</button>`).join("");
+}
+
+// 設計改動的說明：「小華 把 結構與屏蔽 換成 高階（+$8M）」
+function mpDesignChangeText(patch) {
+  const before = currentDesign();
+  const after = { ...before, parts: { ...before.parts } };
+  const items = [];
+  Object.keys(patch).forEach((key) => {
+    const id = patch[key];
+    if (key === "orbit") {
+      after.orbit = ORBITS.find((o) => o.id === id);
+      items.push([t("selection.orbitGroup"), t("orbit." + id)]);
+    } else if (key === "rocket") {
+      after.rocket = ROCKETS.find((r) => r.id === id);
+      items.push([t("selection.rocketGroup"), t("rocket." + id + ".name")]);
+    } else if (key === "fuel") {
+      after.fuel = FUELS.find((f) => f.id === id);
+      items.push([hotspotLabel("fuel"), t("fuel." + id)]);
+    } else if (SUBSYSTEM_KEYS.includes(key)) {
+      const options = key === "payload" ? payloadOptionsFor(gameState.missionObjective) : SUBSYSTEMS[key];
+      after.parts[key] = options.find((o) => o.id === id);
+      items.push([hotspotLabel(key), t("tier." + id)]);
+    }
+  });
+  if (!items.length) return "";
+  const delta = Math.round((designCostM(after) - designCostM(before)) * 10) / 10;
+  const deltaText = delta === 0 ? "±$0M" : (delta > 0 ? "+" : "−") + fmtMoney(Math.abs(delta));
+  return t("mp.sysChange", {
+    name: mpPlayerName(MP.pid),
+    changes: items.map(([label, value]) => t("mp.sysItem", { item: label, value })).join(t("mp.listSep")),
+    delta: deltaText,
+  });
+}
+
+// ---------- 協商面板：超出預算或質量時才出現，列出最划算的降級，由負責的人決定要不要讓步 ----------
+
+let mpNegoCache = { key: null, options: [], baseEv: 0 };
+let mpNegoTimer = null;
+
+function mpDesignKey(d) {
+  return [d.orbit && d.orbit.id, d.rocket && d.rocket.id, ...SUBSYSTEM_KEYS.map((k) => d.parts[k] && d.parts[k].id), d.fuel && d.fuel.id, d.propellantKg].join("|");
+}
+
+// 每個角色花了多少：火箭、酬載、電力＋結構＋姿態、通訊＋推進（含毒性推進劑的加注費用）
+function mpRoleCosts(design) {
+  const partCost = (key) => (design.parts[key] ? design.parts[key].costM : 0);
+  const power = design.parts.power ? powerSystemSpec(design) : null;
+  const fuelCost = design.fuel ? design.fuel.costM + (design.fuel.toxic ? TOXIC_HANDLING_COST_M : 0) : 0;
+  return {
+    director: design.rocket ? design.rocket.costM : 0,
+    scientist: partCost("payload"),
+    engineer: (power ? power.costM : 0) + partCost("structure") + partCost("attitude"),
+    flight: partCost("comm") + fuelCost,
+  };
+}
+
+// 只改一項、而且會省錢或減重的選項：零件降一級、換便宜的火箭或推進系統
+function mpNegotiationOptions(design) {
+  const features = gameState.features;
+  const base = analyzeDesign(design);
+  const baseEv = base.complete ? computeExpectedValue(design, features, base) : 0;
+  const options = [];
+  const consider = (key, value, label, variant) => {
+    const a = analyzeDesign(variant);
+    const saveM = Math.round((base.costM - a.costM) * 10) / 10;
+    const saveKg = Math.round(base.wetKg - a.wetKg);
+    const helps = (base.overBudget && saveM > 0) || (base.overMass && saveKg > 0);
+    // 解決一個問題卻造成另一個（例如換成載不動的小火箭）的選項不列出
+    const createsProblem = (a.overMass && !base.overMass) || (a.overBudget && !base.overBudget) || a.noCapacity;
+    if (!helps || createsProblem) return;
+    // 這一項能補上多少缺口（0～1），預算和質量取比較有幫助的那個
+    const overM = base.costM - base.budgetM;
+    const overKg = base.wetKg - base.capacityKg;
+    const coverage = Math.min(1, Math.max(
+      base.overBudget ? saveM / overM : 0,
+      base.overMass ? saveKg / overKg : 0,
+    ));
+    options.push({
+      key, value, label, saveM, saveKg, coverage,
+      ev: a.complete ? computeExpectedValue(variant, features, a) : null,
+      fixes: !a.overBudget && !a.overMass && !a.noCapacity,
+    });
+  };
+
+  SUBSYSTEM_KEYS.forEach((key) => {
+    const current = design.parts[key];
+    if (!current) return;
+    const tiers = key === "payload" ? payloadOptionsFor(design.objective) : SUBSYSTEMS[key];
+    const lower = tiers[tiers.indexOf(current) - 1];
+    if (!lower || !isOptionAvailable(design.event, key, lower)) return;
+    consider(key, lower.id, t("mp.sysItem", { item: hotspotLabel(key), value: t("tier." + lower.id) }),
+      { ...design, parts: { ...design.parts, [key]: lower } });
+  });
+  if (design.rocket) {
+    ROCKETS.forEach((rocket) => {
+      if (rocket === design.rocket || rocket.costM >= design.rocket.costM || !isOptionAvailable(design.event, "rocket", rocket)) return;
+      consider("rocket", rocket.id, t("mp.sysItem", { item: t("selection.rocketGroup"), value: t("rocket." + rocket.id + ".name") }),
+        { ...design, rocket });
+    });
+  }
+  if (design.fuel) {
+    FUELS.forEach((fuel) => {
+      if (fuel !== design.fuel) {
+        consider("fuel", fuel.id, t("mp.sysItem", { item: hotspotLabel("fuel"), value: t("fuel." + fuel.id) }), { ...design, fuel });
+      }
+    });
+  }
+
+  // 排序：能單獨解決的優先；其次是能補上至少 1/4 缺口的；同一級裡，「每省 $1M 損失的期望價值」最少的排前面
+  const lossPerM = (o) => (o.ev === null ? 0 : Math.max(0, baseEv - o.ev)) / Math.max(o.saveM, 0.1);
+  const big = (o) => (o.coverage >= 0.25 ? 1 : 0);
+  options.sort((a, b) => (b.fixes - a.fixes) || (big(b) - big(a)) || (lossPerM(a) - lossPerM(b)));
+  return { options: options.slice(0, 4), baseEv, complete: base.complete };
+}
+
+function mpRenderNegotiation(analysis) {
+  const box = document.getElementById("mp-negotiate");
+  if (!MP.active || !(analysis.overBudget || analysis.overMass)) {
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+  box.classList.remove("hidden");
+  const design = currentDesign();
+  const key = mpDesignKey(design);
+  if (mpNegoCache.key === key) {
+    box.innerHTML = mpNegotiationHtml(analysis);
+    return;
+  }
+  box.innerHTML = mpNegotiationHeader(analysis) + `<p class="mp-nego-calc">${t("mp.negoCalculating")}</p>`;
+  // 要模擬好幾個方案，延後一下再算，拖動滑桿時不會卡住
+  clearTimeout(mpNegoTimer);
+  mpNegoTimer = setTimeout(() => {
+    if (mpDesignKey(currentDesign()) !== key) return;
+    mpNegoCache = { key, ...mpNegotiationOptions(currentDesign()) };
+    box.innerHTML = mpNegotiationHtml(analyzeDesign(currentDesign()));
+  }, 120);
+}
+
+function mpNegotiationHeader(analysis) {
+  const costs = mpRoleCosts(currentDesign());
+  const title = analysis.overBudget
+    ? t("mp.negoTitleBudget", { over: fmtMoney(Math.round((analysis.costM - analysis.budgetM) * 10) / 10) })
+    : t("mp.negoTitleMass", { over: fmtNum(Math.round(analysis.wetKg - analysis.capacityKg)) });
+  return `
+    <h4 class="mp-nego-title">${glyph("warn")}${title}</h4>
+    <p class="mp-nego-hint">${t("mp.negoHint")}</p>
+    <div class="mp-nego-spend">${MP_ROLES.map((r) => {
+      const holder = mpRoleHolder(r);
+      return `<span><img class="glyph" src="image/icons/glyph-${MP_ROLE_GLYPH[r]}.png" alt="" />${t("mp.role." + r + ".name")}${holder ? "（" + mpEscape(mpPlayerName(holder)) + "）" : ""} ${fmtMoney(Math.round(costs[r] * 10) / 10)}</span>`;
+    }).join("")}</div>`;
+}
+
+function mpNegotiationHtml(analysis) {
+  const { options, baseEv, complete } = mpNegoCache;
+  const list = options.length
+    ? options.map((o, i) => {
+      const role = mpRoleOf(o.key);
+      const holder = mpRoleHolder(role);
+      const mine = holder === MP.pid;
+      const saves = [o.saveM > 0 ? t("mp.negoSaves", { cost: fmtMoney(o.saveM) }) : "", o.saveKg > 0 ? t("mp.negoSavesMass", { kg: fmtNum(o.saveKg) }) : ""].filter(Boolean).join(" · ");
+      const ev = complete && o.ev !== null ? t("mp.negoEv", { from: fmtPct(baseEv), to: fmtPct(o.ev) }) : "";
+      return `
+        <div class="mp-nego-option">
+          <div class="mp-nego-main">
+            <div class="mp-nego-label">${o.label}${o.fixes ? `<span class="mp-nego-fix">${t("mp.negoFixes")}</span>` : ""}</div>
+            <div class="mp-nego-meta">${saves}${ev ? " · " + ev : ""} · ${t("mp.role." + role + ".name")}${holder ? "（" + mpEscape(mpPlayerName(holder)) + "）" : ""}</div>
+          </div>
+          ${mine
+            ? `<button type="button" class="btn btn-secondary mp-nego-btn" data-nego-apply="${i}">${t("mp.negoIDo")}</button>`
+            : `<button type="button" class="btn btn-secondary mp-nego-btn" data-nego-ask="${i}">${t("mp.negoAsk")}</button>`}
+        </div>`;
+    }).join("")
+    : `<p class="mp-nego-calc">${t("mp.negoNone")}</p>`;
+  return mpNegotiationHeader(analysis) + list;
+}
+
+function mpOnNegotiationClick(e) {
+  const apply = e.target.closest("[data-nego-apply]");
+  const ask = e.target.closest("[data-nego-ask]");
+  const option = apply ? mpNegoCache.options[apply.dataset.negoApply] : ask ? mpNegoCache.options[ask.dataset.negoAsk] : null;
+  if (!option) return;
+  if (apply) {
+    if (!mpTryEdit(option.key)) return;
+    const patch = { [option.key]: option.value };
+    // 換推進系統時，推進劑沿用目前的量，由飛控再調整
+    mpSetDesign(patch);
+    return;
+  }
+  const holder = mpRoleHolder(mpRoleOf(option.key));
+  mpSendChat(t("mp.negoAskMsg", {
+    name: holder ? mpPlayerName(holder) : t("mp.role." + mpRoleOf(option.key) + ".name"),
+    change: option.label,
+    cost: option.saveM > 0 ? fmtMoney(option.saveM) : fmtNum(option.saveKg) + " kg",
+  }));
+  mpToggleChat(true);
+}
+
 function initMultiplayer() {
   MP.pid = mpPlayerId();
   MP.net = createNet();
@@ -694,4 +966,18 @@ function initMultiplayer() {
   document.getElementById("mp-start-btn").addEventListener("click", mpStartMission);
   document.getElementById("mp-objective").addEventListener("change", (e) => mpSetSetup("objectiveId", e.target.value));
   document.getElementById("mp-event").addEventListener("change", (e) => mpSetSetup("eventId", e.target.value));
+
+  document.getElementById("mp-bar").addEventListener("click", (e) => {
+    if (e.target.closest("[data-chat-toggle]")) mpToggleChat();
+  });
+  document.getElementById("mp-chat-close").addEventListener("click", () => mpToggleChat(false));
+  document.getElementById("mp-chat-send").addEventListener("click", mpSubmitChatInput);
+  document.getElementById("mp-chat-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.isComposing) mpSubmitChatInput();
+  });
+  document.getElementById("mp-chat-quick").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-quick]");
+    if (chip) mpSendChat(tt("mp.chatQuick")[chip.dataset.quick]);
+  });
+  document.getElementById("mp-negotiate").addEventListener("click", mpOnNegotiationClick);
 }
