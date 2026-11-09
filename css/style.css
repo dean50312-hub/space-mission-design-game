@@ -1095,6 +1095,7 @@ details > summary::-webkit-details-marker {
 
 .mp-form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding: 16px;
   margin-bottom: 16px;
@@ -1106,12 +1107,17 @@ details > summary::-webkit-details-marker {
 
 .mp-field {
   display: grid;
+  min-width: 0;
   gap: 4px;
   font-size: 13px;
   color: var(--text-dim);
 }
 
+/* 寬度跟著容器走：瀏覽器預設的輸入框寬度在大字型下會比手機螢幕還寬 */
 .mp-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   font-family: var(--font-body);
   font-size: 16px;
   color: var(--text);
