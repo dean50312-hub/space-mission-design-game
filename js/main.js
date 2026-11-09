@@ -226,6 +226,7 @@ function renderEventScreen() {
   }
 
   document.getElementById("start-btn").disabled = !gameState.orbit;
+  renderMissionHud();
   renderCampaignHint("event-hint");
   renderLearningObjectives();
 }
@@ -283,6 +284,7 @@ function showScreen(name) {
     renderSelectionScreen();
     renderCampaignHint("selection-hint");
   }
+  if (["event", "selection", "simulation", "results"].includes(name)) renderMissionHud();
   if (name === "achievements") renderAchievementsGallery();
 }
 

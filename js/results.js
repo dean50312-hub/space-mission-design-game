@@ -425,7 +425,10 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
   reason.textContent = cause;
   reason.classList.toggle("hidden", !cause);
 
-  document.getElementById("result-score").innerHTML = scoreCardHtml(scoreInfo, simResult) + medalsHtml(scoreInfo);
+  // 任務報告書：評分卡右上角蓋一個任務結果的印章
+  const stampKind = kind === "success" ? "success" : kind === "fail" ? "fail" : "partial";
+  document.getElementById("result-score").innerHTML =
+    `<div class="report-stamp ${stampKind}">${t("results.stamp_" + stampKind)}</div>` + scoreCardHtml(scoreInfo, simResult) + medalsHtml(scoreInfo);
   FX.celebrate(scoreInfo.grade);
   if (scoreInfo.medals.some((m) => m.isNew)) setTimeout(sfxAchievement, 900);
 

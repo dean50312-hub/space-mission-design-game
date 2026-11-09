@@ -61,6 +61,40 @@ function fmtDistance(m) {
   return m >= 1000 ? `${fmtNum(m / 1000, 1)} km` : m >= 1 ? `${fmtNum(m, 1)} m` : `${fmtNum(m * 100)} cm`;
 }
 
+// ---------- 任務狀態列：簡報、設計、發射、報告畫面頂端，隨時看得到任務、軌道、事件、火箭和預算 ----------
+
+function hudMeter(label, used, limit, text) {
+  const ratio = limit > 0 ? used / limit : 0;
+  const status = ratio > 1 ? "bad" : ratio > 0.9 ? "warn" : "ok";
+  return `
+    <div class="hud-cell hud-meter ${status}">
+      <span class="hud-label">${label}</span>
+      <span class="hud-value">${text}</span>
+      <span class="hud-bar"><span style="width:${Math.min(100, ratio * 100)}%"></span></span>
+    </div>`;
+}
+
+function renderMissionHud() {
+  const objective = gameState.missionObjective;
+  if (!objective) return;
+  const design = currentDesign();
+  const analysis = analyzeDesign(design);
+  const cell = (label, value, extra = "") => `<div class="hud-cell${extra}"><span class="hud-label">${label}</span><span class="hud-value">${value}</span></div>`;
+  const html = `
+    <div class="hud-cell hud-mission">
+      <img src="image/icons/objective-${objective.id}.png" alt="" />
+      <div><span class="hud-label">${t("hud.mission")}</span><span class="hud-value">${t("objective." + objective.id + ".short")}</span></div>
+    </div>
+    ${cell(t("hud.orbit"), gameState.orbit ? t("orbitShort." + gameState.orbit.id) : "—")}
+    ${gameState.event ? cell(t("hud.event"), t("event." + gameState.event.id + ".name"), gameState.event.id === "nominal" ? "" : " hud-alert") : ""}
+    ${cell(t("hud.rocket"), gameState.rocket ? t("rocket." + gameState.rocket.id + ".name").replace(/ \(.*\)$/, "") : "—")}
+    ${gameState.orbit ? hudMeter(t("hud.budget"), analysis.costM, analysis.budgetM, `${fmtMoney(Math.round(analysis.costM * 10) / 10)} / ${fmtMoney(analysis.budgetM)}`) : ""}
+    ${gameState.rocket && analysis.capacityKg > 0 ? hudMeter(t("hud.mass"), analysis.wetKg, analysis.capacityKg, `${fmtNum(Math.round(analysis.wetKg))} / ${fmtNum(analysis.capacityKg)} kg`) : ""}`;
+  document.querySelectorAll(".mission-hud").forEach((el) => {
+    el.innerHTML = html;
+  });
+}
+
 // ---------- 畫面 ----------
 
 function renderSelectionScreen() {
@@ -270,6 +304,36 @@ function isHotspotFilled(key) {
   return key === "fuel" ? Boolean(gameState.fuel) : Boolean(gameState.parts[key]);
 }
 
+// 子系統檢查清單：每個零件位置的狀態燈（已選綠燈、未選黃燈），點一下就打開那個零件的選單
+function renderSystemsChecklist() {
+  const panel = document.createElement("div");
+  panel.className = "systems-checklist panel";
+  const defs = HOTSPOT_DEFS.filter((h) => gameState.features[h.key] !== false);
+  const ready = defs.filter((h) => isHotspotFilled(h.key)).length;
+  panel.innerHTML = `
+    <div class="console-head"><span class="led${ready === defs.length ? " led-ok" : ""}"></span>${t("selection.systemsTitle")}<span class="console-clock">${ready}/${defs.length}</span></div>
+    <p class="detail-explainer">${t("selection.systemsHint")}</p>`;
+  const list = document.createElement("div");
+  list.className = "systems-list";
+  defs.forEach((h) => {
+    const filled = isHotspotFilled(h.key);
+    const value = h.key === "fuel"
+      ? (gameState.fuel ? t("fuel." + gameState.fuel.id) : t("selection.systemEmpty"))
+      : (gameState.parts[h.key] ? tierLabel(h.key, gameState.parts[h.key].id) : t("selection.systemEmpty"));
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "systems-row" + (filled ? " ok" : "");
+    row.innerHTML = `<span class="led${filled ? " led-ok" : " led-warn"}"></span><span class="systems-name">${hotspotLabel(h.key)}</span><span class="systems-value">${value}</span>`;
+    row.addEventListener("click", () => {
+      activeHotspot = h.key;
+      renderSelectionScreen();
+    });
+    list.appendChild(row);
+  });
+  panel.appendChild(list);
+  return panel;
+}
+
 function renderBlueprintPanel() {
   const wrap = document.createElement("div");
   wrap.className = "blueprint-panel";
@@ -282,7 +346,7 @@ function renderBlueprintPanel() {
   body.className = "blueprint-body";
 
   body.appendChild(renderBlueprintFrame());
-  if (activeHotspot) body.appendChild(renderHotspotDetail(activeHotspot));
+  body.appendChild(activeHotspot ? renderHotspotDetail(activeHotspot) : renderSystemsChecklist());
 
   const sheet = document.createElement("aside");
   sheet.id = "budget-sheet";
@@ -840,9 +904,12 @@ function updateBudgetSheet() {
     const headline = analysis.complete
       ? `
         <div class="sheet-headline">
-          <div class="sheet-ev"><span class="sheet-ev-label">${t("sheet.expectedValue")}</span><span class="sheet-ev-number">${fmtPct(expectedValue)}</span></div>
-          <div class="sheet-sub">${t("sheet.fullSuccess", { pct: fmtPct(analysis.fullSuccess) })}</div>
-          ${methodNote}
+          <div class="ev-ring" style="--ev: ${Math.round(expectedValue * 100)}"><span class="sheet-ev-number">${fmtPct(expectedValue)}</span></div>
+          <div class="sheet-ev-text">
+            <span class="sheet-ev-label">${t("sheet.expectedValue")}</span>
+            <div class="sheet-sub">${t("sheet.fullSuccess", { pct: fmtPct(analysis.fullSuccess) })}</div>
+            ${methodNote}
+          </div>
         </div>`
       : `<div class="sheet-headline pending">${t("sheet.pending")}</div>`;
 
@@ -873,6 +940,7 @@ function updateBudgetSheet() {
   warning.classList.toggle("hidden", messages.length === 0);
 
   document.getElementById("launch-btn").disabled = isLaunchBlocked(analysis);
+  renderMissionHud();
   mpDecorateLaunchBtn();
   mpRenderNegotiation(analysis);
 }

@@ -25,6 +25,7 @@ const STRINGS = {
       settings: "Settings",
     },
     nav: { back: "Back" },
+    hud: { mission: "Mission", orbit: "Orbit", event: "Space weather", rocket: "Rocket", budget: "Budget", mass: "Mass" },
     brief: {
       rocket: {
         light: "Cheapest, but carries only 200 kg and can't reach GEO.",
@@ -455,6 +456,9 @@ const STRINGS = {
     selection: {
       title: "Design Your Satellite",
       rocketGroup: "Rocket",
+      systemsTitle: "Subsystems",
+      systemsHint: "Tap a subsystem here or on the blueprint to choose its part.",
+      systemEmpty: "Not chosen",
       launchBtn: "Launch!",
       warningBudget: "Over budget — cannot launch!",
       warningMass: "Over the rocket's capacity — cannot launch!",
@@ -725,6 +729,9 @@ const STRINGS = {
     },
     results: {
       title_success: "Mission Accomplished!",
+      stamp_success: "Mission success",
+      stamp_partial: "Partial",
+      stamp_fail: "Mission lost",
       title_partial: "Partial Success",
       title_underperform: "The Satellite Works, but the Mission Fell Short",
       title_partialLow: "The Satellite Failed Early and the Mission Fell Short",
