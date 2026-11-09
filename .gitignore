@@ -6,3 +6,4 @@ Thumbs.db
 
 # 音樂母帶（已轉成 audio/bgm/*.mp3）
 *.wav
+output/
