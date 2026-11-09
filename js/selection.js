@@ -26,7 +26,7 @@ function resetBlueprintUIState() {
 // ---------- 數字格式 ----------
 
 function fmtNum(n, digits = 0) {
-  return Number(n).toLocaleString(getLang() === "zh" ? "zh-TW" : "en-US", {
+  return Number(n).toLocaleString("en-US", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   });
@@ -51,9 +51,9 @@ function fmtPointing(deg) {
   return deg >= 1 ? `${fmtNum(deg)}°` : `${fmtNum(deg, 2)}°`;
 }
 
-// 中文句子之間不加空白，英文要
+// 句子之間的空白（原本中文版不加空白，英文版要）
 function sentenceGap() {
-  return getLang() === "zh" ? "" : " ";
+  return " ";
 }
 
 function fmtDistance(m) {

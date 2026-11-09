@@ -88,7 +88,7 @@ function renderAchievementsGallery() {
         const desc = medalDescription(medal, p);
         total++;
         if (has) owned++;
-        return `<img src="image/icons/medal-${medal.id}.png" class="${has ? "" : "locked"}" title="${t(`medal.${medal.id}.name`)}：${desc}" alt="" />`;
+        return `<img src="image/icons/medal-${medal.id}.png" class="${has ? "" : "locked"}" title="${t(`medal.${medal.id}.name`)}: ${desc}" alt="" />`;
       })
       .join("");
     const best = storageGetBestScore(objective.id);

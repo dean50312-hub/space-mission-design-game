@@ -7,7 +7,7 @@ function defaultSave() {
     unlockedAchievements: [],
     failCount: 0,
     tutorialSeen: {},
-    settings: { lang: "zh", soundOn: true, volume: 0.6 },
+    settings: { lang: "en", soundOn: true, volume: 0.6 },
     campaign: { currentLevel: 1, completed: false, failures: {} }, // failures：關卡 → 連續沒過關的次數
     skillPoints: 0,
     unlockedSkills: [],

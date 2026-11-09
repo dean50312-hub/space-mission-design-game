@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>太空精算師 · Space Actuary</title>
-<meta name="description" content="在預算、質量與風險之間，精算出最好的太空任務。NASA Space Apps Challenge 2026「Space Mission Design Game」參賽作品。" />
-<meta property="og:title" content="太空精算師 · Space Actuary" />
-<meta property="og:description" content="設計衛星、選擇火箭與軌道，在真實的太空工程限制下精算任務的期望價值。" />
+<title>Space Actuary</title>
+<meta name="description" content="Design a satellite, pick a rocket and orbit, and weigh budget, mass, and risk to find the best space mission. A NASA Space Apps Challenge 2026 entry for Space Mission Design Game." />
+<meta property="og:title" content="Space Actuary" />
+<meta property="og:description" content="Design a satellite under real spacecraft engineering limits and work out the mission's expected value." />
 <meta name="theme-color" content="#0b0e2b" />
 <link rel="icon" type="image/png" href="image/icons/mascot-orbit.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=81" />
+<link rel="stylesheet" href="css/style.css?v=82" />
 </head>
 <body>
 <main id="app">
@@ -251,14 +251,6 @@
 
     <div class="settings-panel panel">
       <div class="settings-row">
-        <span data-i18n="settings.language"></span>
-        <div class="lang-buttons">
-          <button type="button" class="seg-btn lang-btn" data-lang="zh">中文</button>
-          <button type="button" class="seg-btn lang-btn" data-lang="en">English</button>
-        </div>
-      </div>
-
-      <div class="settings-row">
         <span data-i18n="settings.sound"></span>
         <label class="switch">
           <input type="checkbox" id="settings-sound-toggle" />
@@ -275,19 +267,6 @@
     <button id="settings-reset-btn" class="btn btn-danger" data-i18n="settings.resetProgress"></button>
     <button id="settings-back-btn" class="btn btn-secondary" data-i18n="nav.back"></button>
   </section>
-
-  <!-- 第一次進入網站時先選語言（文字固定中英並列，不經過翻譯） -->
-  <div id="lang-overlay" class="tutorial-overlay lang-overlay hidden">
-    <div class="lang-card panel">
-      <img class="lang-mascot" src="image/icons/mascot-orbit.png" alt="" />
-      <h2 class="lang-title">選擇語言<span>Choose your language</span></h2>
-      <div class="lang-choices">
-        <button type="button" class="btn btn-primary lang-pick-btn" data-lang="zh">中文</button>
-        <button type="button" class="btn btn-primary lang-pick-btn" data-lang="en">English</button>
-      </div>
-      <p class="lang-note">之後可以在「設定」更改 · You can change this later in Settings</p>
-    </div>
-  </div>
 
   <div id="anomaly-overlay" class="tutorial-overlay hidden">
     <div class="anomaly-card panel panel-alert">
@@ -329,30 +308,30 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=81"></script>
-<script src="js/i18n.js?v=81"></script>
-<script src="js/sound.js?v=81"></script>
-<script src="js/fx.js?v=81"></script>
-<script src="js/data.js?v=81"></script>
-<script src="js/state.js?v=81"></script>
-<script src="js/mission.js?v=81"></script>
-<script src="js/operations.js?v=81"></script>
-<script src="js/scoring.js?v=81"></script>
-<script src="js/bestdesigns.js?v=81"></script>
-<script src="js/earthmap.js?v=81"></script>
-<script src="js/orbitview.js?v=81"></script>
-<script src="js/ascentview.js?v=81"></script>
-<script src="js/selection.js?v=81"></script>
-<script src="js/simulation.js?v=81"></script>
-<script src="js/results.js?v=81"></script>
-<script src="js/learning.js?v=81"></script>
-<script src="js/achievements.js?v=81"></script>
-<script src="js/settings.js?v=81"></script>
-<script src="js/codex.js?v=81"></script>
-<script src="js/netconfig.js?v=81"></script>
-<script src="js/net.js?v=81"></script>
-<script src="js/multiplayer.js?v=81"></script>
-<script src="js/tutorial.js?v=81"></script>
-<script src="js/main.js?v=81"></script>
+<script src="js/storage.js?v=82"></script>
+<script src="js/i18n.js?v=82"></script>
+<script src="js/sound.js?v=82"></script>
+<script src="js/fx.js?v=82"></script>
+<script src="js/data.js?v=82"></script>
+<script src="js/state.js?v=82"></script>
+<script src="js/mission.js?v=82"></script>
+<script src="js/operations.js?v=82"></script>
+<script src="js/scoring.js?v=82"></script>
+<script src="js/bestdesigns.js?v=82"></script>
+<script src="js/earthmap.js?v=82"></script>
+<script src="js/orbitview.js?v=82"></script>
+<script src="js/ascentview.js?v=82"></script>
+<script src="js/selection.js?v=82"></script>
+<script src="js/simulation.js?v=82"></script>
+<script src="js/results.js?v=82"></script>
+<script src="js/learning.js?v=82"></script>
+<script src="js/achievements.js?v=82"></script>
+<script src="js/settings.js?v=82"></script>
+<script src="js/codex.js?v=82"></script>
+<script src="js/netconfig.js?v=82"></script>
+<script src="js/net.js?v=82"></script>
+<script src="js/multiplayer.js?v=82"></script>
+<script src="js/tutorial.js?v=82"></script>
+<script src="js/main.js?v=82"></script>
 </body>
 </html>

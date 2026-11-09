@@ -48,27 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("uplink-btn").addEventListener("click", () => finishUplink(true));
   document.getElementById("tutorial-skip-btn").addEventListener("click", skipAllTutorials);
 
-  document.querySelectorAll(".lang-btn").forEach((btn) => {
-    btn.addEventListener("click", () => handleLangChange(btn.dataset.lang));
-  });
   document.getElementById("settings-sound-toggle").addEventListener("change", handleSoundToggleChange);
   document.getElementById("settings-volume-slider").addEventListener("input", handleVolumeChange);
   document.getElementById("settings-reset-btn").addEventListener("click", handleResetProgress);
 
-  document.querySelectorAll(".lang-pick-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      handleLangChange(btn.dataset.lang);
-      storageUpdateSettings({ langChosen: true });
-      document.getElementById("lang-overlay").classList.add("hidden");
-      showTutorialIfNeeded("home");
-    });
-  });
-
   renderHomeScreen();
   showScreen("home");
-  // 第一次進來先選語言，選完才開始首頁教學
-  if (storageGetSettings().langChosen) showTutorialIfNeeded("home");
-  else document.getElementById("lang-overlay").classList.remove("hidden");
+  showTutorialIfNeeded("home");
 });
 
 function goHome() {

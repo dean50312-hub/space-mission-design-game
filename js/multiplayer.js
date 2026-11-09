@@ -650,17 +650,17 @@ function mpTeamReportHtml(simResult) {
       impact: [[t("factor.coverage"), f.coverage], [t("mp.launchReliability"), analysis.reliability.launch]],
     },
     scientist: {
-      choices: `${hotspotLabel("payload")}：${tierName("payload")}`,
+      choices: `${hotspotLabel("payload")}: ${tierName("payload")}`,
       costM: costs.scientist,
       impact: [[t("factor.performance"), f.performance]],
     },
     engineer: {
-      choices: ["power", "structure", "attitude"].map((k) => `${hotspotLabel(k)}：${tierName(k)}`).join(" · "),
+      choices: ["power", "structure", "attitude"].map((k) => `${hotspotLabel(k)}: ${tierName(k)}`).join(" · "),
       costM: costs.engineer,
       impact: [[t("factor.power"), f.power], [t("factor.pointing"), f.pointing]],
     },
     flight: {
-      choices: `${hotspotLabel("comm")}：${tierName("comm")} · ${design.fuel ? t("fuel." + design.fuel.id) : "—"}`,
+      choices: `${hotspotLabel("comm")}: ${tierName("comm")} · ${design.fuel ? t("fuel." + design.fuel.id) : "—"}`,
       costM: costs.flight,
       impact: [[t("factor.delivery"), f.delivery], [t("factor.lifetime"), f.lifetime]],
       extra: (simResult.decisions || []).length ? t("mp.decisionsMade", { n: simResult.decisions.length }) : "",
@@ -900,7 +900,7 @@ function mpNegotiationHeader(analysis) {
     <p class="mp-nego-hint">${t("mp.negoHint")}</p>
     <div class="mp-nego-spend">${MP_ROLES.map((r) => {
       const holder = mpRoleHolder(r);
-      return `<span><img class="glyph" src="image/icons/glyph-${MP_ROLE_GLYPH[r]}.png" alt="" />${t("mp.role." + r + ".name")}${holder ? "（" + mpEscape(mpPlayerName(holder)) + "）" : ""} ${fmtMoney(Math.round(costs[r] * 10) / 10)}</span>`;
+      return `<span><img class="glyph" src="image/icons/glyph-${MP_ROLE_GLYPH[r]}.png" alt="" />${t("mp.role." + r + ".name")}${holder ? " (" + mpEscape(mpPlayerName(holder)) + ")" : ""} ${fmtMoney(Math.round(costs[r] * 10) / 10)}</span>`;
     }).join("")}</div>`;
 }
 
@@ -917,7 +917,7 @@ function mpNegotiationHtml(analysis) {
         <div class="mp-nego-option">
           <div class="mp-nego-main">
             <div class="mp-nego-label">${o.label}${o.fixes ? `<span class="mp-nego-fix">${t("mp.negoFixes")}</span>` : ""}</div>
-            <div class="mp-nego-meta">${saves}${ev ? " · " + ev : ""} · ${t("mp.role." + role + ".name")}${holder ? "（" + mpEscape(mpPlayerName(holder)) + "）" : ""}</div>
+            <div class="mp-nego-meta">${saves}${ev ? " · " + ev : ""} · ${t("mp.role." + role + ".name")}${holder ? " (" + mpEscape(mpPlayerName(holder)) + ")" : ""}</div>
           </div>
           ${mine
             ? `<button type="button" class="btn btn-secondary mp-nego-btn" data-nego-apply="${i}">${t("mp.negoIDo")}</button>`
