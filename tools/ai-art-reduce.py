@@ -6,6 +6,9 @@ ChatGPT 交付的 native 版本把任務目標、事件、吉祥物縮成 32×32
 - LANCZOS 縮小，透明度二值化（像素圖不要半透明邊）
 - 減到 24 色（不抖色），最後補 1 px 深色外框，在深藍背景上輪廓才清楚
 
+零件圖（image/parts/）另外處理：卡片上用 96 px 顯示、手機螢幕密度又高，所以輸出 192 px（顯示尺寸的 2 倍），
+並把四周透明邊裁到最小，讓零件本體填滿圖框；CSS 用平滑縮放顯示。
+
 用法：py tools/ai-art-reduce.py（需要本機有 output/art-refresh/originals/，那個資料夾不進 git）
 """
 
@@ -16,19 +19,22 @@ from PIL import Image
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 SRC = os.path.join(ROOT, "output", "art-refresh", "originals", "icons")
 OUT = os.path.join(ROOT, "image", "icons")
+PARTS_SRC = os.path.join(ROOT, "output", "art-refresh", "originals", "parts")
+PARTS_OUT = os.path.join(ROOT, "image", "parts")
+PARTS_SIZE = 192
 OUTLINE = (7, 10, 36, 255)
 
 # 檔名前綴 → 輸出尺寸（等於 css/style.css 裡的顯示尺寸）
 TARGETS = {"objective-": 64, "event-": 64, "mascot-orbit": 64, "orbit-": 96}
 
 
-def reduce(path, size, colors=24):
+def reduce(path, size, colors=24, pad_ratio=0.07, outline_px=1):
     im = Image.open(path).convert("RGBA")
     bbox = im.getchannel("A").point(lambda a: 255 if a > 40 else 0).getbbox()
     im = im.crop(bbox)
     w, h = im.size
     side = max(w, h)
-    pad = int(side * 0.07)
+    pad = int(side * pad_ratio)
     square = Image.new("RGBA", (side + 2 * pad, side + 2 * pad), (0, 0, 0, 0))
     square.paste(im, ((side - w) // 2 + pad, (side - h) // 2 + pad))
     small = square.resize((size, size), Image.LANCZOS)
@@ -36,10 +42,13 @@ def reduce(path, size, colors=24):
     rgb = small.convert("RGB").quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
     out = rgb.convert("RGBA")
     out.putalpha(alpha)
-    return add_outline(out)
+    for i in range(outline_px):
+        out = add_outline(out, grow=i > 0)
+    return out
 
 
-def add_outline(im):
+# grow=True：從已經畫好的外框再往外加一圈（第二圈以後）
+def add_outline(im, grow=False):
     px = im.load()
     w, h = im.size
     edge = []
@@ -49,7 +58,7 @@ def add_outline(im):
                 continue
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nx, ny = x + dx, y + dy
-                if 0 <= nx < w and 0 <= ny < h and px[nx, ny][3] and px[nx, ny] != OUTLINE:
+                if 0 <= nx < w and 0 <= ny < h and px[nx, ny][3] and (grow or px[nx, ny] != OUTLINE):
                     edge.append((x, y))
                     break
     for x, y in edge:
@@ -63,6 +72,10 @@ def main():
         size = next((s for prefix, s in TARGETS.items() if name.startswith(prefix)), None)
         if size:
             reduce(os.path.join(SRC, name), size).save(os.path.join(OUT, name))
+            count += 1
+    for name in sorted(os.listdir(PARTS_SRC)):
+        if name.endswith(".png"):
+            reduce(os.path.join(PARTS_SRC, name), PARTS_SIZE, colors=48, pad_ratio=0.03, outline_px=2).save(os.path.join(PARTS_OUT, name))
             count += 1
     print("ok", count)
 

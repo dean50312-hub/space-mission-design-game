@@ -74,9 +74,11 @@ img {
   image-rendering: pixelated;
 }
 
-/* 64 px 原生的 AI 圖示縮小顯示時（32 px 的小頭像、任務縮圖），像素放大規則會讓線條歪斜，改用平滑縮小 */
+/* 比顯示尺寸大的 AI 圖縮小顯示時（小頭像、任務縮圖、設計圖熱點、圖鑑），像素放大規則會讓線條歪斜，改用平滑縮小 */
 .selection-brief-icon,
-.orbit-hint-avatar {
+.orbit-hint-avatar,
+.hotspot-icon-img,
+.codex-icon {
   image-rendering: auto;
 }
 
@@ -1034,7 +1036,8 @@ details > summary::-webkit-details-marker {
 }
 
 .swatch-rocket { height: 72px; }
-.swatch-part { height: 64px; }
+/* 零件圖是 192 px 的高解析度圖（顯示尺寸的 2 倍，手機上才清楚），縮小時用平滑縮放 */
+.swatch-part { height: 96px; image-rendering: auto; }
 .swatch-orbit { height: 96px; }
 
 .part-name {
@@ -1601,7 +1604,6 @@ body:has(.mp-bar:not(.hidden)) {
   height: 64px;
   flex-shrink: 0;
   object-fit: contain;
-  image-rendering: pixelated;
 }
 
 .codex-icon-glyph {
@@ -1649,7 +1651,7 @@ body:has(.mp-bar:not(.hidden)) {
 
 @media (max-width: 600px) {
   .codex-entry { gap: 10px; padding: 10px; }
-  .codex-icon { width: 48px; height: 48px; image-rendering: auto; }
+  .codex-icon { width: 48px; height: 48px; }
 }
 
 .rocket-summary {
