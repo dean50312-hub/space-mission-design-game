@@ -74,6 +74,12 @@ img {
   image-rendering: pixelated;
 }
 
+/* 64 px 原生的 AI 圖示縮小顯示時（32 px 的小頭像、任務縮圖），像素放大規則會讓線條歪斜，改用平滑縮小 */
+.selection-brief-icon,
+.orbit-hint-avatar {
+  image-rendering: auto;
+}
+
 /* 視差星空（最底層）與點擊火花、彩帶（最上層），都不攔截點擊 */
 .fx-stars,
 .fx-particles {
@@ -1591,8 +1597,8 @@ body:has(.mp-bar:not(.hidden)) {
 }
 
 .codex-icon {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
   object-fit: contain;
   image-rendering: pixelated;
@@ -1643,7 +1649,7 @@ body:has(.mp-bar:not(.hidden)) {
 
 @media (max-width: 600px) {
   .codex-entry { gap: 10px; padding: 10px; }
-  .codex-icon { width: 40px; height: 40px; }
+  .codex-icon { width: 48px; height: 48px; image-rendering: auto; }
 }
 
 .rocket-summary {
