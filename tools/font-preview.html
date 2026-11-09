@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Font options preview</title>
+<!-- 字體候選對照：同一組介面元素套不同字體，讓組員挑選。不是遊戲的一部分 -->
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=Silkscreen&family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;600&family=Inter:wght@400;600&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  @font-face {
+    font-family: "Cubic 11";
+    src: url("https://cdn.jsdelivr.net/gh/ACh-K/Cubic-11@1.500/fonts/web/Cubic_11.woff2") format("woff2");
+  }
+  body { margin: 0; padding: 16px; background: #0b0e2b; color: #e8ecff; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .opt { --pixel: "Cubic 11"; --body: "Noto Sans TC"; border: 2px solid #262c63; border-radius: 4px; padding: 12px; background: #0b0e2b; }
+  .tag { font: 600 13px "Inter", sans-serif; color: #0b0e2b; background: #ffd166; display: inline-block; padding: 2px 8px; border-radius: 3px; margin-bottom: 4px; }
+  .fonts { font: 12px "Inter", sans-serif; color: #9aa3d1; margin-bottom: 12px; }
+  h1 { font-family: var(--pixel); font-size: 30px; color: #4fd1ff; margin: 0; text-shadow: 3px 3px 0 #070a24; line-height: 1.2; }
+  .sub { font-family: var(--pixel); font-size: 11px; color: #ffd166; letter-spacing: 2px; margin: 4px 0 10px; }
+  .btn { display: block; width: 100%; box-sizing: border-box; padding: 10px 12px; margin-bottom: 8px; font-family: var(--pixel); font-size: 20px; color: #4fd1ff; background: transparent; border: 10px solid; border-image: url("../image/ui/button-frame.png") 4 fill / 10px stretch; text-shadow: 2px 2px 0 #070a24; image-rendering: pixelated; }
+  .btn.sec { color: #e8ecff; font-size: 15px; }
+  .card { background: #141838; border: 2px solid #4fd1ff; border-radius: 4px; padding: 10px; margin: 6px 0 10px; }
+  .name { font-family: var(--pixel); font-size: 16px; }
+  .stats { font-family: var(--body); font-size: 12px; color: #9aa3d1; margin-top: 4px; }
+  .score { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .grade { font-family: var(--pixel); font-size: 54px; color: #ffd166; text-shadow: 3px 3px 0 #070a24, 0 0 14px #ffd166; line-height: 1; }
+  .num { font-family: var(--pixel); font-size: 26px; }
+  p { font-family: var(--body); font-size: 14px; line-height: 1.6; color: #e8ecff; margin: 0; }
+  @media (max-width: 760px) { body { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+  <template id="sample">
+    <h1>Space Actuary</h1>
+    <div class="sub">SPACE MISSION DESIGN GAME</div>
+    <button class="btn">Launch!</button>
+    <button class="btn sec">Back to Mission Briefing</button>
+    <div class="card">
+      <div class="name">High-Capacity</div>
+      <div class="stats">Handles 4,000 Gbit/day · 5 W · 2 kg · $1.5M · Space-qualified</div>
+    </div>
+    <div class="score"><span class="grade">S</span><span class="num">97 / 100</span></div>
+    <p>A cheaper rocket frees money for better parts; a reliable one cuts the risk of losing everything at once — which pays off?</p>
+  </template>
+
+  <div class="opt" style="--pixel: 'Cubic 11'; --body: 'Noto Sans TC'"><span class="tag">A · current</span><div class="fonts">Cubic 11 + Noto Sans TC</div></div>
+  <div class="opt" style="--pixel: 'Pixelify Sans'; --body: 'IBM Plex Sans'"><span class="tag">B</span><div class="fonts">Pixelify Sans + IBM Plex Sans</div></div>
+  <div class="opt" style="--pixel: 'Silkscreen'; --body: 'Inter'"><span class="tag">C</span><div class="fonts">Silkscreen + Inter</div></div>
+  <div class="opt" style="--pixel: 'Press Start 2P'; --body: 'IBM Plex Sans'"><span class="tag">D</span><div class="fonts">Press Start 2P + IBM Plex Sans</div></div>
+
+  <script>
+    const tpl = document.getElementById("sample");
+    document.querySelectorAll(".opt").forEach((o) => o.appendChild(tpl.content.cloneNode(true)));
+  </script>
+</body>
+</html>
