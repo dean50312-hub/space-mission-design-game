@@ -63,7 +63,7 @@ Internal design notes are in Traditional Chinese.
 
 ## Credits and licenses
 
-- Fonts: [Cubic 11](https://github.com/ACh-K/Cubic-11) (SIL OFL 1.1), Noto Sans TC (SIL OFL 1.1)
+- Fonts: [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) (SIL OFL 1.1), [IBM Plex Sans](https://fonts.google.com/specimen/IBM+Plex+Sans) (SIL OFL 1.1)
 - Map data: [Natural Earth](https://www.naturalearthdata.com/) (public domain)
 - Charts: [Chart.js](https://www.chartjs.org/) (MIT)
 - Multiplayer sync: [Firebase Realtime Database](https://firebase.google.com/products/realtime-database)

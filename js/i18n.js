@@ -8,7 +8,7 @@ const STRINGS = {
       recordsTitle: "Mission Records",
       team: "Made by team Mission Impaysible",
       notPlayed: "Not yet flown",
-      credits: "Coastlines: Natural Earth · Font: Cubic 11",
+      credits: "Coastlines: Natural Earth · Fonts: Press Start 2P, IBM Plex Sans",
       levelNames: ["Basics", "Propulsion", "Space weather", "Operations"],
       startGame: "Free Play",
       startGameLocked: "Free Play (unlocks after completing the campaign)",

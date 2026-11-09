@@ -42,7 +42,7 @@ const waterfallLabelPlugin = {
     const { ctx } = chart;
     const meta = chart.getDatasetMeta(0);
     ctx.save();
-    ctx.font = "11px 'Cubic 11', monospace";
+    ctx.font = "8px 'Press Start 2P', monospace";
     ctx.textBaseline = "middle";
     meta.data.forEach((bar, i) => {
       const row = rows[i];
@@ -88,11 +88,11 @@ function renderWaterfallChart(simResult, best) {
         x: {
           min: 0,
           max: 100,
-          ticks: { color: "#9aa3d1", font: { family: "'Cubic 11', monospace", size: 11 }, callback: (v) => `${v}%` },
+          ticks: { color: "#9aa3d1", font: { family: "'Press Start 2P', monospace", size: 8 }, callback: (v) => `${v}%` },
           grid: { color: "#2a2f66" },
         },
         y: {
-          ticks: { color: "#e8ecff", font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
+          ticks: { color: "#e8ecff", font: { size: 12, family: "'IBM Plex Sans', sans-serif" } },
           grid: { display: false },
         },
       },

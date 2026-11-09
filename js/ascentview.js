@@ -161,7 +161,7 @@ const AscentView = (() => {
   }
 
   function drawBoundaries(proj) {
-    ctx.font = "11px 'Cubic 11', monospace";
+    ctx.font = "8px 'Press Start 2P', monospace";
     ctx.textBaseline = "bottom";
     ATMOSPHERE_BOUNDARIES.forEach(({ alt, key }) => {
       const y = Math.round(proj.y(alt));
