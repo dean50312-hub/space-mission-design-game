@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSettingsUI();
 
   FX.init();
+  startConsoleClock();
   initCodex();
   initMultiplayer();
 
@@ -61,6 +62,16 @@ function goHome() {
   renderHomeScreen();
   showScreen("home");
   showTutorialIfNeeded("home");
+}
+
+// 首頁監視器右上角的 UTC 時鐘（純裝飾）
+function startConsoleClock() {
+  const el = document.getElementById("home-clock");
+  const tick = () => {
+    el.textContent = "UTC " + new Date().toISOString().slice(11, 19);
+  };
+  tick();
+  setInterval(tick, 1000);
 }
 
 function renderHomeScreen() {

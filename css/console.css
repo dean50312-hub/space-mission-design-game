@@ -1,0 +1,619 @@
+/* =========================================================================
+   任務控制中心風格（2026-11 介面改版）
+   接在 css/style.css 後面載入，只覆蓋視覺與版面；顏色沿用 style.css 的色彩變數。
+   - 面板：深色玻璃底＋細邊框＋四角 L 形括號（用背景漸層畫，不佔偽元素）
+   - 按鈕：切角的控制台按鈕；主要動作是亮青色實心
+   - 背景：淡淡的格線、掃描線與暗角，營造控制台螢幕的感覺
+   ========================================================================= */
+
+:root {
+  --glass: rgba(14, 19, 52, 0.82);
+  --glass-strong: rgba(22, 28, 72, 0.94);
+  --edge: rgba(79, 209, 255, 0.26);
+  --edge-strong: rgba(79, 209, 255, 0.7);
+  --glow-soft: 0 0 22px rgba(79, 209, 255, 0.1);
+  --bracket: 12px;
+}
+
+/* ---------- 背景：格線、光暈、掃描線、暗角 ---------- */
+
+body {
+  background-color: #060920;
+  background-image:
+    radial-gradient(ellipse at 15% -10%, rgba(79, 209, 255, 0.16), transparent 55%),
+    radial-gradient(ellipse at 95% 110%, rgba(179, 136, 255, 0.12), transparent 50%),
+    linear-gradient(rgba(79, 209, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 209, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+}
+
+body::before {
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+body::after {
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+}
+
+#app {
+  max-width: 1040px;
+}
+
+#app:has(#screen-selection.active) {
+  max-width: 1280px;
+}
+
+#app:has(#screen-home.active) {
+  max-width: 1180px;
+}
+
+/* ---------- 面板 ---------- */
+
+.panel {
+  --bc: var(--accent);
+  border: 1px solid var(--edge);
+  border-image: none;
+  border-radius: 2px;
+  padding: 14px 16px;
+  background:
+    linear-gradient(var(--bc), var(--bc)) left top / var(--bracket) 2px no-repeat,
+    linear-gradient(var(--bc), var(--bc)) left top / 2px var(--bracket) no-repeat,
+    linear-gradient(var(--bc), var(--bc)) right top / var(--bracket) 2px no-repeat,
+    linear-gradient(var(--bc), var(--bc)) right top / 2px var(--bracket) no-repeat,
+    linear-gradient(var(--bc), var(--bc)) left bottom / var(--bracket) 2px no-repeat,
+    linear-gradient(var(--bc), var(--bc)) left bottom / 2px var(--bracket) no-repeat,
+    linear-gradient(var(--bc), var(--bc)) right bottom / var(--bracket) 2px no-repeat,
+    linear-gradient(var(--bc), var(--bc)) right bottom / 2px var(--bracket) no-repeat,
+    linear-gradient(180deg, var(--glass-strong), var(--glass));
+  box-shadow: var(--glow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.panel-alert {
+  --bc: var(--red);
+  border-color: rgba(255, 85, 102, 0.5);
+  border-image: none;
+  box-shadow: 0 0 26px rgba(255, 85, 102, 0.18);
+}
+
+.panel-gold {
+  --bc: var(--gold);
+  border-color: rgba(255, 209, 102, 0.5);
+  border-image: none;
+  box-shadow: 0 0 26px rgba(255, 209, 102, 0.14);
+}
+
+/* ---------- 標題 ---------- */
+
+.screen > h2,
+#screen-results > h2 {
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-shadow: 0 0 14px rgba(79, 209, 255, 0.45), 2px 2px 0 #060920;
+  padding: 2px 0 2px 14px;
+  border-left: 4px solid var(--accent);
+  margin: 6px 0 20px;
+}
+
+.section-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 28px 0 12px;
+}
+
+.section-title::before {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--edge-strong), transparent);
+}
+
+.part-group h3,
+.blueprint-panel > h3 {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ---------- 按鈕：切角控制台按鈕 ---------- */
+
+.btn {
+  border: 1px solid var(--edge-strong);
+  border-image: none;
+  border-radius: 0;
+  background: linear-gradient(180deg, rgba(31, 127, 179, 0.24), rgba(10, 14, 42, 0.92));
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  box-shadow: inset 0 0 18px rgba(79, 209, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding: 14px 18px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 0.1s ease, background 0.15s ease, color 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  filter: none;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(79, 209, 255, 0.34), rgba(14, 22, 60, 0.95));
+  box-shadow: inset 0 0 22px rgba(79, 209, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.btn-primary {
+  color: #04102b;
+  text-shadow: none;
+  border-color: #b8f0ff;
+  background: linear-gradient(180deg, #8fe8ff 0%, #4fd1ff 45%, #1f9fd6 100%);
+  box-shadow: inset 0 -3px 0 rgba(4, 16, 43, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: #04102b;
+  background: linear-gradient(180deg, #c4f5ff 0%, #6fdcff 45%, #2ab0e6 100%);
+  box-shadow: inset 0 -3px 0 rgba(4, 16, 43, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.btn-primary:disabled {
+  color: var(--text-dim);
+}
+
+.btn-danger {
+  color: var(--red);
+  border-color: rgba(255, 85, 102, 0.7);
+  background: linear-gradient(180deg, rgba(255, 85, 102, 0.2), rgba(30, 10, 30, 0.92));
+}
+
+.btn-danger:hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 85, 102, 0.4), rgba(40, 10, 30, 0.95));
+}
+
+.btn-small {
+  padding: 8px 14px;
+}
+
+/* ---------- 步驟軌道：像發射倒數的節點 ---------- */
+
+.mission-steps {
+  gap: 0;
+  margin: 0 0 18px;
+}
+
+.mission-steps li {
+  border-top: none;
+  padding: 28px 4px 0;
+  text-align: center;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 8px;
+}
+
+.mission-steps li::before {
+  content: counter(step);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 8px;
+  color: var(--text-faint);
+  background: #060920;
+  border: 1px solid var(--line-strong);
+  z-index: 1;
+}
+
+.mission-steps li::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--line);
+}
+
+.mission-steps[data-current="1"] li:nth-child(1)::before,
+.mission-steps[data-current="2"] li:nth-child(2)::before,
+.mission-steps[data-current="3"] li:nth-child(3)::before,
+.mission-steps[data-current="4"] li:nth-child(4)::before {
+  color: #04102b;
+  background: var(--accent);
+  border-color: #b8f0ff;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.mission-steps[data-current="1"] li:nth-child(1)::after,
+.mission-steps[data-current="2"] li:nth-child(2)::after,
+.mission-steps[data-current="3"] li:nth-child(3)::after,
+.mission-steps[data-current="4"] li:nth-child(4)::after {
+  background: linear-gradient(90deg, var(--accent), var(--line));
+}
+
+.mission-steps[data-current="2"] li:nth-child(-n + 1)::before,
+.mission-steps[data-current="3"] li:nth-child(-n + 2)::before,
+.mission-steps[data-current="4"] li:nth-child(-n + 3)::before {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.mission-steps[data-current="2"] li:nth-child(-n + 1)::after,
+.mission-steps[data-current="3"] li:nth-child(-n + 2)::after,
+.mission-steps[data-current="4"] li:nth-child(-n + 3)::after {
+  background: var(--accent-deep);
+}
+
+/* ---------- 卡片 ---------- */
+
+.part-card {
+  border: 1px solid var(--edge);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(27, 34, 84, 0.72), rgba(10, 14, 40, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.part-card:hover {
+  border-color: var(--edge-strong);
+  box-shadow: 0 0 18px rgba(79, 209, 255, 0.16);
+}
+
+.part-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(31, 127, 179, 0.38), rgba(12, 18, 52, 0.92));
+  box-shadow: 0 0 0 1px var(--accent), 0 0 24px rgba(79, 209, 255, 0.28);
+}
+
+.swatch {
+  border: 1px solid var(--edge);
+  background: radial-gradient(ellipse at 50% 60%, rgba(79, 209, 255, 0.14), transparent 70%), #050819;
+}
+
+.chip {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ---------- 儀表條：分段式 ---------- */
+
+.sheet-bar {
+  height: 8px;
+  background: #050819;
+  border: 1px solid var(--line);
+}
+
+.sheet-bar-fill {
+  background: repeating-linear-gradient(90deg, var(--green) 0 5px, transparent 5px 7px);
+  filter: drop-shadow(0 0 4px rgba(87, 227, 137, 0.5));
+}
+
+.sheet-line.warn .sheet-bar-fill {
+  background: repeating-linear-gradient(90deg, var(--gold) 0 5px, transparent 5px 7px);
+  filter: drop-shadow(0 0 4px rgba(255, 209, 102, 0.5));
+}
+
+.sheet-line.bad .sheet-bar-fill {
+  background: repeating-linear-gradient(90deg, var(--red) 0 5px, transparent 5px 7px);
+  filter: drop-shadow(0 0 4px rgba(255, 85, 102, 0.6));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
+}
+
+/* ---------- 控制台共用小元件：面板標頭列、指示燈、時鐘 ---------- */
+
+.console-head,
+.console-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.console-head {
+  margin: -4px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--edge);
+}
+
+.console-foot {
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--edge);
+}
+
+.console-foot > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-clock {
+  margin-left: auto;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.led {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.led-live {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: led-blink 1.2s steps(2) infinite;
+}
+
+.led-ok {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+@keyframes led-blink {
+  50% { opacity: 0.25; }
+}
+
+/* ---------- 首頁：左邊標題＋選單，右邊發射台監視器 ---------- */
+
+.home-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 24px;
+  align-items: stretch;
+  padding-top: 16px;
+}
+
+.home-hero {
+  text-align: left;
+  padding: 8px 0 18px;
+}
+
+.home-eyebrow {
+  color: var(--gold);
+}
+
+.game-title {
+  font-size: 40px;
+  line-height: 1.15;
+  text-shadow: 4px 4px 0 var(--accent-deep), 0 0 28px rgba(79, 209, 255, 0.55);
+}
+
+.game-title-alt {
+  margin: 12px 0 14px;
+}
+
+.home-subtitle {
+  font-size: 15px;
+  max-width: 440px;
+  margin: 0 0 12px;
+}
+
+.home-team {
+  margin: 0;
+}
+
+.home-menu {
+  margin-top: 0;
+}
+
+.home-menu .btn-secondary {
+  text-align: left;
+  padding-left: 22px;
+}
+
+.home-menu .btn-secondary::before {
+  content: "› ";
+  color: var(--accent);
+}
+
+.home-menu-row .btn-secondary {
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 8px;
+}
+
+.home-menu-row .btn-secondary::before {
+  content: none;
+}
+
+.home-viewport {
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+.viewport-scene {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid var(--edge);
+  background:
+    radial-gradient(ellipse at 70% 20%, rgba(179, 136, 255, 0.18), transparent 45%),
+    linear-gradient(180deg, #050716 0%, #0b1238 60%, #12204e 100%);
+}
+
+/* 發射場的地面（和 ui/launchpad.png 的草地同色）與地平線上的晨光 */
+.viewport-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 19px;
+  background: #3e843e;
+  box-shadow: inset 0 2px 0 #5aa85a;
+}
+
+.viewport-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 19px;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, rgba(255, 159, 67, 0.12) 60%, rgba(255, 209, 102, 0.28));
+}
+
+.viewport-planet {
+  position: absolute;
+  width: 96px;
+  right: 8%;
+  top: 10%;
+  animation: float 7s ease-in-out infinite;
+}
+
+.viewport-moon {
+  position: absolute;
+  width: 28px;
+  left: 12%;
+  top: 16%;
+  animation: float 5s ease-in-out infinite reverse;
+}
+
+.viewport-pad {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 230px;
+}
+
+.viewport-launchpad {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  image-rendering: pixelated;
+}
+
+.viewport-rocket {
+  position: absolute;
+  left: 50%;
+  bottom: 19px; /* 發射台台面：ui/launchpad.png 第 62 列，縮成 240 px 寬後離底部 19 px */
+  height: 170px;
+  transform: translateX(-50%);
+  image-rendering: auto;
+  filter: drop-shadow(0 0 10px rgba(79, 209, 255, 0.25));
+}
+
+/* 發射前的液氧排氣：幾團白色蒸氣慢慢飄散 */
+.viewport-steam {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  width: 26px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(232, 236, 255, 0.55);
+  filter: blur(3px);
+  animation: steam 3.6s ease-out infinite;
+}
+
+.viewport-steam.s2 { animation-delay: 1.2s; }
+.viewport-steam.s3 { animation-delay: 2.4s; }
+
+@keyframes steam {
+  0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translate(40%, -30px) scale(2.4); opacity: 0; }
+}
+
+/* 監視器準星與掃描線 */
+.viewport-crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(79, 209, 255, 0.35), rgba(79, 209, 255, 0.35)) 50% 0 / 1px 14px no-repeat,
+    linear-gradient(rgba(79, 209, 255, 0.35), rgba(79, 209, 255, 0.35)) 50% 100% / 1px 14px no-repeat,
+    linear-gradient(rgba(79, 209, 255, 0.35), rgba(79, 209, 255, 0.35)) 0 50% / 14px 1px no-repeat,
+    linear-gradient(rgba(79, 209, 255, 0.35), rgba(79, 209, 255, 0.35)) 100% 50% / 14px 1px no-repeat;
+}
+
+.viewport-crosshair::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, transparent, rgba(79, 209, 255, 0.08), transparent);
+  animation: scan-sweep 5s linear infinite;
+}
+
+@keyframes scan-sweep {
+  from { top: -40px; }
+  to { top: 100%; }
+}
+
+/* 任務日誌：五種任務並排 */
+.record-tile {
+  border: 1px solid var(--edge);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(27, 34, 84, 0.72), rgba(10, 14, 40, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.home-footer {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 860px) {
+  .home-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero {
+    text-align: center;
+  }
+
+  .home-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .home-viewport {
+    min-height: 300px;
+    order: -1;
+  }
+
+  .game-title {
+    font-size: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport-steam,
+  .viewport-crosshair::after,
+  .led-live {
+    animation: none;
+  }
+}
