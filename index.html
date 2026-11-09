@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=94" />
-<link rel="stylesheet" href="css/console.css?v=94" />
+<link rel="stylesheet" href="css/style.css?v=98" />
+<link rel="stylesheet" href="css/console.css?v=98" />
 </head>
 <body>
 <main id="app">
@@ -35,6 +35,7 @@
           <button id="home-campaign-btn" class="btn btn-primary"></button>
           <ol id="home-campaign-progress" class="campaign-pips"></ol>
           <button id="home-start-btn" class="btn btn-secondary"></button>
+          <p id="home-start-hint" class="menu-hint hidden" data-i18n="home.startHint"></p>
           <button id="home-custom-btn" class="btn btn-secondary"></button>
           <button id="home-mp-btn" class="btn btn-secondary" data-i18n="home.multiplayer"></button>
           <div class="home-menu-row">
@@ -45,27 +46,21 @@
         </nav>
       </div>
 
-      <!-- 主視覺：發射台監視器（純裝飾） -->
-      <div class="home-viewport panel" aria-hidden="true">
-        <div class="console-head">
-          <span class="led led-live"></span><span data-i18n="home.viewportTitle"></span>
-          <span id="home-clock" class="console-clock"></span>
-        </div>
+      <!-- 主視覺：地球與軌道、發射台上的火箭（純裝飾） -->
+      <div class="home-viewport" aria-hidden="true">
         <div class="viewport-scene">
-          <img class="viewport-planet" src="image/Stars/Saturn.png" alt="" />
-          <img class="viewport-moon" src="image/Stars/mars.png" alt="" />
-          <div class="viewport-horizon"></div>
+          <div class="viewport-glow"></div>
+          <img class="viewport-earth-img" src="image/ui/home-earth.png" alt="" />
           <div class="viewport-ground"></div>
           <div class="viewport-pad">
             <img class="viewport-rocket" src="image/rocket/rocket-medium.png" alt="" />
             <img class="viewport-launchpad" src="image/ui/launchpad.png" alt="" />
             <span class="viewport-steam s1"></span><span class="viewport-steam s2"></span><span class="viewport-steam s3"></span>
           </div>
-          <div class="viewport-crosshair"></div>
         </div>
-        <div class="console-foot">
+        <div class="viewport-status">
           <span><span class="led led-ok"></span><span data-i18n="home.statusNominal"></span></span>
-          <span data-i18n="home.statusWeather"></span>
+          <span id="home-clock" class="console-clock"></span>
         </div>
       </div>
     </div>
@@ -149,8 +144,13 @@
     <!-- 多人連線：超出預算或質量時的協商面板 -->
     <div id="mp-negotiate" class="mp-negotiate panel panel-gold hidden"></div>
 
-    <div class="button-row">
+    <!-- 底部固定的操作列：捲到哪裡都按得到發射 -->
+    <div class="button-row action-bar">
       <button id="selection-back-btn" class="btn btn-secondary" data-i18n="selection.backBtn"></button>
+      <div class="action-info">
+        <span id="action-ev" class="action-ev"></span>
+        <span class="action-hint" data-i18n="selection.actionHint"></span>
+      </div>
       <button id="launch-btn" class="btn btn-primary" disabled data-i18n="selection.launchBtn"></button>
     </div>
   </section>
@@ -201,13 +201,17 @@
     <p id="result-reason" class="result-reason hidden"></p>
     <p id="result-campaign-note" class="campaign-note hidden"></p>
     <div id="result-score" class="result-score"></div>
+    <h3 class="section-title" data-i18n="waterfall.title"></h3>
+    <div id="value-strip" class="value-strip"></div>
+    <details id="waterfall-details" class="waterfall-details">
+      <summary data-i18n="waterfall.showDetail"></summary>
+      <p class="waterfall-hint" data-i18n="waterfall.hint"></p>
+      <div class="chart-wrap waterfall-wrap panel">
+        <canvas id="waterfall-chart"></canvas>
+      </div>
+    </details>
     <div id="result-quiz" class="result-quiz"></div>
     <div id="result-report" class="result-report panel"></div>
-    <h3 class="section-title" data-i18n="waterfall.title"></h3>
-    <p class="waterfall-hint" data-i18n="waterfall.hint"></p>
-    <div class="chart-wrap waterfall-wrap panel">
-      <canvas id="waterfall-chart"></canvas>
-    </div>
     <h3 class="section-title" data-i18n="results.achievementsHeader"></h3>
     <ul id="achievements-list" class="badge-list"></ul>
     <div class="button-row">
@@ -337,30 +341,30 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="js/storage.js?v=94"></script>
-<script src="js/i18n.js?v=94"></script>
-<script src="js/sound.js?v=94"></script>
-<script src="js/fx.js?v=94"></script>
-<script src="js/data.js?v=94"></script>
-<script src="js/state.js?v=94"></script>
-<script src="js/mission.js?v=94"></script>
-<script src="js/operations.js?v=94"></script>
-<script src="js/scoring.js?v=94"></script>
-<script src="js/bestdesigns.js?v=94"></script>
-<script src="js/earthmap.js?v=94"></script>
-<script src="js/orbitview.js?v=94"></script>
-<script src="js/ascentview.js?v=94"></script>
-<script src="js/selection.js?v=94"></script>
-<script src="js/simulation.js?v=94"></script>
-<script src="js/results.js?v=94"></script>
-<script src="js/learning.js?v=94"></script>
-<script src="js/achievements.js?v=94"></script>
-<script src="js/settings.js?v=94"></script>
-<script src="js/codex.js?v=94"></script>
-<script src="js/netconfig.js?v=94"></script>
-<script src="js/net.js?v=94"></script>
-<script src="js/multiplayer.js?v=94"></script>
-<script src="js/tutorial.js?v=94"></script>
-<script src="js/main.js?v=94"></script>
+<script src="js/storage.js?v=98"></script>
+<script src="js/i18n.js?v=98"></script>
+<script src="js/sound.js?v=98"></script>
+<script src="js/fx.js?v=98"></script>
+<script src="js/data.js?v=98"></script>
+<script src="js/state.js?v=98"></script>
+<script src="js/mission.js?v=98"></script>
+<script src="js/operations.js?v=98"></script>
+<script src="js/scoring.js?v=98"></script>
+<script src="js/bestdesigns.js?v=98"></script>
+<script src="js/earthmap.js?v=98"></script>
+<script src="js/orbitview.js?v=98"></script>
+<script src="js/ascentview.js?v=98"></script>
+<script src="js/selection.js?v=98"></script>
+<script src="js/simulation.js?v=98"></script>
+<script src="js/results.js?v=98"></script>
+<script src="js/learning.js?v=98"></script>
+<script src="js/achievements.js?v=98"></script>
+<script src="js/settings.js?v=98"></script>
+<script src="js/codex.js?v=98"></script>
+<script src="js/netconfig.js?v=98"></script>
+<script src="js/net.js?v=98"></script>
+<script src="js/multiplayer.js?v=98"></script>
+<script src="js/tutorial.js?v=98"></script>
+<script src="js/main.js?v=98"></script>
 </body>
 </html>

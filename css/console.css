@@ -980,3 +980,456 @@ body::after {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+/* ---------- 結果頁上半：評分＋交付價值並排 ---------- */
+
+.report-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 8px;
+}
+
+.score-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-panel .score-card {
+  flex: 1;
+}
+
+.value-panel {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.value-compare {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.value-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.value-big {
+  font-family: var(--font-pixel);
+  font-size: 32px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.value-big.actual {
+  color: var(--accent);
+  text-shadow: 0 0 14px rgba(79, 209, 255, 0.55);
+}
+
+.value-cap,
+.value-vs {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.value-vs {
+  padding-bottom: 18px;
+}
+
+.value-loss {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--edge);
+}
+
+.value-loss-title {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.value-loss p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* 「價值去哪了」一排五格 */
+.value-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.value-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.value-cell-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.value-cell-number {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.value-cell.factorLoss .value-cell-number { color: var(--red); }
+.value-cell.riskLoss .value-cell-number { color: var(--orange); }
+.value-cell.actual .value-cell-number { color: var(--green); }
+
+.value-cell-bar {
+  display: block;
+  height: 8px;
+  background: #050819;
+  border: 1px solid var(--line);
+}
+
+.value-cell-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.value-cell.factorLoss .value-cell-bar > span { background: var(--red); }
+.value-cell.riskLoss .value-cell-bar > span { background: var(--orange); }
+.value-cell.actual .value-cell-bar > span { background: var(--green); }
+
+.waterfall-details > summary {
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+@media (max-width: 860px) {
+  .report-top {
+    grid-template-columns: 1fr;
+  }
+
+  .value-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- 設計圖：引線標註 ---------- */
+
+.blueprint-frame .hotspot-label {
+  display: none;
+}
+
+.callout-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.callout-lines line {
+  stroke: rgba(79, 209, 255, 0.45);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 3 2;
+}
+
+.callout-lines line.active {
+  stroke: var(--accent);
+  stroke-dasharray: none;
+}
+
+.callout {
+  position: absolute;
+  z-index: 3;
+  transform: translateY(-50%);
+  max-width: 28%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 7px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(6, 9, 32, 0.92);
+  border: 1px solid var(--edge);
+}
+
+.callout-left {
+  right: 72%;
+}
+
+.callout-right {
+  left: 72%;
+}
+
+.callout:hover {
+  border-color: var(--edge-strong);
+}
+
+.callout.active {
+  border-color: var(--accent);
+  background: rgba(31, 127, 179, 0.4);
+  box-shadow: 0 0 12px rgba(79, 209, 255, 0.4);
+}
+
+/* 標註框很窄，像素字放不下 Communications 這種長字，所以用內文字體的粗體大寫 */
+.callout-name {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.callout-value {
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.callout.filled .callout-value {
+  color: var(--green);
+}
+
+/* ---------- 預算表：價值因子兩欄、可靠度三個大數字 ---------- */
+
+.factor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 14px;
+}
+
+.reliability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.reliability-grid .factor-row {
+  border-bottom: none;
+  padding: 0;
+}
+
+.reliability-grid .factor-row summary {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.reliability-grid .factor-row summary span:last-child {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--accent);
+}
+
+.reliability-grid .factor-row[open] {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 底部固定的操作列 ---------- */
+
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px -16px 0;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(6, 9, 32, 0.6), rgba(6, 9, 32, 0.97) 30%);
+  border-top: 1px solid var(--edge);
+  backdrop-filter: blur(4px);
+}
+
+.action-bar .btn {
+  width: auto;
+  margin: 0;
+}
+
+.action-bar #launch-btn {
+  min-width: 200px;
+}
+
+.action-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.action-ev {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.action-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+body:has(.mp-bar:not(.hidden)) .action-bar {
+  bottom: 56px;
+}
+
+@media (max-width: 720px) {
+  .action-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .action-info {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .action-hint {
+    display: none;
+  }
+
+  .action-bar #launch-btn {
+    min-width: 0;
+    order: 0;
+  }
+
+  .factor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sheet-subtitle {
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 16px 0 6px;
+}
+
+/* ---------- 首頁 B：大地球主視覺（取代發射台監視器） ---------- */
+
+.home-viewport {
+  min-height: 470px;
+}
+
+.home-viewport .viewport-scene {
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.viewport-glow {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 90%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79, 209, 255, 0.22), transparent 62%);
+}
+
+.viewport-earth-img {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(82%, 460px);
+  transform: translateX(-50%);
+  image-rendering: auto;
+  animation: float 9s ease-in-out infinite;
+}
+
+.home-viewport .viewport-ground {
+  height: 19px;
+  left: 6%;
+  right: 6%;
+  border-radius: 1px;
+}
+
+.viewport-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.viewport-status > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-hint {
+  margin: -6px 0 12px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+#home-start-hint.hidden {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .home-viewport {
+    min-height: 340px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport-earth-img { animation: none; }
+}
+
+/* 印章蓋在評分卡右上角外緣，不要壓到分數 */
+.score-panel .report-stamp {
+  top: -14px;
+  right: -6px;
+  padding: 6px 10px;
+  font-size: 8px;
+  background: rgba(6, 9, 32, 0.9);
+}
+
+.score-panel {
+  margin-top: 8px;
+}
+
+.callout-name {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .callout-name { font-size: 10px; }
+  .callout-value { font-size: 10px; }
+  .action-bar .btn { font-size: 12px; padding: 12px 10px; }
+}

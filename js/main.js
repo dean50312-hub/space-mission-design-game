@@ -80,7 +80,8 @@ function renderHomeScreen() {
 
   const startBtn = document.getElementById("home-start-btn");
   startBtn.disabled = !campaignComplete;
-  startBtn.textContent = campaignComplete ? t("home.startGame") : t("home.startGameLocked");
+  startBtn.textContent = t("home.startGame");
+  document.getElementById("home-start-hint").classList.toggle("hidden", campaignComplete);
 
   // 自訂模式一開始就開放：老師、評審可以直接挑想看的任務和事件
   document.getElementById("home-custom-btn").textContent = t("home.custom");

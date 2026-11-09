@@ -2,15 +2,17 @@
 
 // 熱點放在零件的真實位置（對照 tools/sat-art.py 畫的設計圖，地球在畫面下方）：
 // 推進器噴嘴在背向地球的頂面、太陽能板在兩翼、通訊天線與酬載朝向地球
+// label：引線標註放在設計圖左側或右側的哪個高度（%），標籤和零件之間畫一條細線
 const HOTSPOT_DEFS = [
-  { key: "fuel", top: 16, left: 50 },
-  { key: "attitude", top: 42, left: 59 },
-  { key: "structure", top: 57, left: 40 },
-  { key: "computer", top: 35, left: 33 },
-  { key: "power", top: 49, left: 87 },
-  { key: "comm", top: 79, left: 27 },
-  { key: "payload", top: 78, left: 55 },
+  { key: "fuel", top: 16, left: 50, label: { side: "right", y: 6 } },
+  { key: "attitude", top: 42, left: 59, label: { side: "right", y: 30 } },
+  { key: "structure", top: 57, left: 40, label: { side: "left", y: 50 } },
+  { key: "computer", top: 35, left: 33, label: { side: "left", y: 21 } },
+  { key: "power", top: 49, left: 87, label: { side: "right", y: 67 } },
+  { key: "comm", top: 79, left: 27, label: { side: "left", y: 92 } },
+  { key: "payload", top: 78, left: 55, label: { side: "right", y: 89 } },
 ];
+const CALLOUT_EDGE = { left: 28, right: 72 };
 
 // 推進劑滑桿的上限跟著設計走：自動計算量的 3 倍，自動計算的位置大約在滑桿 1/3 處
 const PROPELLANT_SLIDER_AUTO_MULTIPLE = 3;
@@ -379,10 +381,32 @@ function renderBlueprintFrame() {
     frame.appendChild(ram);
   }
 
-  HOTSPOT_DEFS.filter((h) => gameState.features[h.key] !== false).forEach((h) => {
+  const defs = HOTSPOT_DEFS.filter((h) => gameState.features[h.key] !== false);
+  const lines = defs.map((h) =>
+    `<line x1="${h.left}" y1="${h.top}" x2="${CALLOUT_EDGE[h.label.side]}" y2="${h.label.y}" class="${activeHotspot === h.key ? "active" : ""}" />`).join("");
+  frame.insertAdjacentHTML("beforeend", `<svg class="callout-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>`);
+
+  defs.forEach((h) => {
+    const callout = document.createElement("button");
+    callout.type = "button";
+    callout.className = `callout callout-${h.label.side}` + (isHotspotFilled(h.key) ? " filled" : "") + (activeHotspot === h.key ? " active" : "");
+    callout.style.top = h.label.y + "%";
+    const value = h.key === "fuel"
+      ? (gameState.fuel ? t("fuel." + gameState.fuel.id) : t("selection.systemEmpty"))
+      : (gameState.parts[h.key] ? tierLabel(h.key, gameState.parts[h.key].id) : t("selection.systemEmpty"));
+    callout.innerHTML = `<span class="callout-name">${hotspotLabel(h.key)}</span><span class="callout-value">${value}</span>`;
+    callout.addEventListener("click", () => {
+      activeHotspot = activeHotspot === h.key ? null : h.key;
+      renderSelectionScreen();
+    });
+    frame.appendChild(callout);
+  });
+
+  defs.forEach((h) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "hotspot";
+    btn.setAttribute("aria-label", hotspotLabel(h.key));
     btn.style.top = h.top + "%";
     btn.style.left = h.left + "%";
     if (isHotspotFilled(h.key)) btn.classList.add("selected");
@@ -894,10 +918,10 @@ function updateBudgetSheet() {
   const design = currentDesign();
   const analysis = analyzeDesign(design);
   const sheet = document.getElementById("budget-sheet");
+  const expectedValue = analysis.complete ? computeExpectedValue(design, gameState.features, analysis) : 0;
 
   if (sheet) {
     const openKeys = new Set([...sheet.querySelectorAll("details[open]")].map((d) => d.dataset.key));
-    const expectedValue = analysis.complete ? computeExpectedValue(design, gameState.features, analysis) : 0;
     const methodNote = gameState.features.operations
       ? `<div class="sheet-sub">${t("sheet.monteCarloNote", { runs: fmtNum(EV_SIMULATION_RUNS) })}</div>`
       : "";
@@ -919,9 +943,9 @@ function updateBudgetSheet() {
       <div class="sheet-section">${renderBudgetLines(analysis)}</div>
       ${analysis.complete ? `
         <h5 class="sheet-subtitle">${t("sheet.valueBreakdown")}</h5>
-        <div class="sheet-section">${renderFactorRows(analysis)}</div>
+        <div class="sheet-section factor-grid">${renderFactorRows(analysis)}</div>
         <h5 class="sheet-subtitle">${t("sheet.reliability")}</h5>
-        <div class="sheet-section">${renderReliabilityRows(analysis)}</div>` : ""}
+        <div class="sheet-section reliability-grid">${renderReliabilityRows(analysis)}</div>` : ""}
     `;
     sheet.querySelectorAll("details").forEach((d) => {
       if (openKeys.has(d.dataset.key)) d.open = true;
@@ -940,6 +964,9 @@ function updateBudgetSheet() {
   warning.classList.toggle("hidden", messages.length === 0);
 
   document.getElementById("launch-btn").disabled = isLaunchBlocked(analysis);
+  document.getElementById("action-ev").textContent = analysis.complete
+    ? t("selection.actionEv", { ev: fmtPct(expectedValue) })
+    : t("selection.actionPending");
   renderMissionHud();
   mpDecorateLaunchBtn();
   mpRenderNegotiation(analysis);

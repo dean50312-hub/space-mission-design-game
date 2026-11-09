@@ -50,7 +50,7 @@ const waterfallLabelPlugin = {
       let text;
       if (!isLoss) text = fmtPct(row.range[1], 1);
       else if (Math.abs(row.delta) < 0.0005) text = "±0%";
-      else text = `${row.delta < 0 ? "−" : "+"}${fmtPct(Math.abs(row.delta), 1)}`;
+      else text = `${row.delta < 0 ? "-" : "+"}${fmtPct(Math.abs(row.delta), 1)}`;
       ctx.fillStyle = isLoss ? "#ffb3bb" : "#e8ecff";
       ctx.fillText(text, Math.max(bar.x, bar.base) + 6, bar.y);
     });
@@ -208,9 +208,49 @@ function scoreCardHtml(scoreInfo, simResult) {
       </div>
     </div>
     ${scoreInfo.capped ? `<p class="score-loss">${glyph("warn")}${t("results.scoreCapped", { design: scoreInfo.designScore, cap: FAILED_MISSION_SCORE_CAP, target: fmtPct(CAMPAIGN_PASS_VALUE) })}</p>` : ""}
-    ${luckNoteHtml(simResult)}
-    ${biggestLossHtml(simResult, scoreInfo.designScore)}
     <p class="score-explain">${t("results.scoreExplain", { target: fmtPct(CAMPAIGN_PASS_VALUE) })}</p>`;
+}
+
+// 右邊的「交付價值」面板：這次實際交付 vs. 發射前的期望，加上最大的損失來源
+function valuePanelHtml(simResult, scoreInfo) {
+  const loss = biggestLoss(simResult, scoreInfo.designScore);
+  return `
+    <div class="value-panel panel">
+      <div class="console-head">${t("results.delivered")}</div>
+      <div class="value-compare">
+        <div class="value-figure"><span class="value-big actual">${fmtPct(simResult.deliveredValue)}</span><span class="value-cap">${t("results.thisFlight")}</span></div>
+        <span class="value-vs">${t("results.vs")}</span>
+        <div class="value-figure"><span class="value-big">${fmtPct(simResult.expectedValue)}</span><span class="value-cap">${t("results.expected")}</span></div>
+      </div>
+      <p class="report-luck">${luckComment(simResult)}</p>
+      ${luckNoteHtml(simResult)}
+      <div class="value-loss">
+        <div class="value-loss-title">${t("results.biggestLoss")}</div>
+        <p>${loss ? loss.text : t("results.noBigLoss")}</p>
+      </div>
+    </div>`;
+}
+
+// 「價值去哪了」一排五格：理想 → 設計限制 → 失敗風險 → 期望值 → 這次實際
+function valueStripHtml(simResult) {
+  const a = simResult.analysis;
+  const designValue = ["coverage", "performance", "delivery", "power", "pointing", "lifetime"].reduce((v, key) => v * a.factors[key], 1);
+  const cells = [
+    { label: t("waterfall.ideal"), value: 1, kind: "total" },
+    { label: t("waterfall.designLimits"), value: designValue - 1, kind: "factorLoss" },
+    { label: t("waterfall.failureRisk"), value: simResult.expectedValue - designValue, kind: "riskLoss" },
+    { label: t("waterfall.expected").replace(/^= /, ""), value: simResult.expectedValue, kind: "total" },
+    { label: t("waterfall.actual"), value: simResult.deliveredValue, kind: "actual" },
+  ];
+  return cells.map((c) => {
+    const text = c.kind.endsWith("Loss") ? (c.value > -0.0005 ? "±0%" : "-" + fmtPct(-c.value)) : fmtPct(c.value);
+    return `
+      <div class="value-cell ${c.kind}">
+        <span class="value-cell-label">${c.label}</span>
+        <span class="value-cell-number">${text}</span>
+        <span class="value-cell-bar"><span style="width:${Math.min(100, Math.abs(c.value) * 100)}%"></span></span>
+      </div>`;
+  }).join("");
 }
 
 // 這次的結果和期望值差很多時，直接在評分旁邊講清楚：差的部分是運氣，分數評的是設計
@@ -226,8 +266,8 @@ function luckNoteHtml(simResult) {
 // 瀑布圖裡扣最多的那一項，直接寫在評分下面，附上預算表裡同一段原理說明
 const RISK_EXPLAIN_KEYS = { launch: "launch", deploy: "deploy", ops: "ops", opsWithReserve: "ops" };
 
-function biggestLossHtml(simResult, score) {
-  if (score >= 95) return "";
+function biggestLoss(simResult, score) {
+  if (score >= 95) return null;
   const a = simResult.analysis;
   let worst = null;
   let v = 1;
@@ -246,14 +286,14 @@ function biggestLossHtml(simResult, score) {
     if (prev - next > worst.loss) worst = { kind: "risk", key, loss: prev - next };
     prev = next;
   });
-  if (worst.loss < 0.05) return "";
+  if (worst.loss < 0.05) return null;
 
   const gap = sentenceGap();
   const text = worst.kind === "factor"
     ? t("results.lossFactor", { factor: t("factor." + worst.key), value: fmtPct(a.factors[worst.key]) }) + gap + factorExplanation(worst.key, a)
     : t("results.lossRisk", { risk: t("waterfall." + worst.key), value: fmtPct(worst.loss) }) + gap +
       t("reliabilityExplain." + RISK_EXPLAIN_KEYS[worst.key], { share: fmtPct(RECOVERABLE_ANOMALY_SHARE) });
-  return `<p class="score-loss">${glyph("warn")}${text}</p>`;
+  return { text };
 }
 
 function medalDescription(medal, params) {
@@ -427,23 +467,19 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
 
   // 任務報告書：評分卡右上角蓋一個任務結果的印章
   const stampKind = kind === "success" ? "success" : kind === "fail" ? "fail" : "partial";
-  document.getElementById("result-score").innerHTML =
-    `<div class="report-stamp ${stampKind}">${t("results.stamp_" + stampKind)}</div>` + scoreCardHtml(scoreInfo, simResult) + medalsHtml(scoreInfo);
+  document.getElementById("result-score").innerHTML = `
+    <div class="report-top">
+      <div class="score-panel">
+        <div class="report-stamp ${stampKind}">${t("results.stamp_" + stampKind)}</div>
+        ${scoreCardHtml(scoreInfo, simResult)}
+      </div>
+      ${valuePanelHtml(simResult, scoreInfo)}
+    </div>
+    ${medalsHtml(scoreInfo)}`;
   FX.celebrate(scoreInfo.grade);
   if (scoreInfo.medals.some((m) => m.isNew)) setTimeout(sfxAchievement, 900);
 
   document.getElementById("result-report").innerHTML = `
-    <div class="report-numbers">
-      <div class="report-number">
-        <span class="report-number-label">${t("results.delivered")}</span>
-        <span class="report-number-value">${fmtPct(simResult.deliveredValue)}</span>
-      </div>
-      <div class="report-number">
-        <span class="report-number-label">${t("results.expected")}</span>
-        <span class="report-number-value dim">${fmtPct(simResult.expectedValue)}</span>
-      </div>
-    </div>
-    <p class="report-luck">${luckComment(simResult)}</p>
     ${mpTeamReportHtml(simResult)}
     ${simResult.uplink && simResult.uplink.total > 0 ? `<p class="report-luck">${glyph("signal")}${t("results.uplinkSummary", simResult.uplink)}</p>` : ""}
     ${decisionSummary(simResult)}
@@ -469,7 +505,12 @@ function renderResultsScreen(simResult, achievements, campaignAward, scoreInfo) 
     campaignNote.classList.add("hidden");
   }
 
-  renderWaterfallChart(simResult, scoreInfo.best);
+  document.getElementById("value-strip").innerHTML = valueStripHtml(simResult);
+  const waterfall = document.getElementById("waterfall-details");
+  waterfall.open = false;
+  waterfall.ontoggle = () => {
+    if (waterfall.open) renderWaterfallChart(simResult, scoreInfo.best);
+  };
 
   const bestDetails = document.getElementById("best-design");
   if (bestDetails) bestDetails.addEventListener("toggle", () => bestDetails.open && fillBestDesignRows(scoreInfo.best));
