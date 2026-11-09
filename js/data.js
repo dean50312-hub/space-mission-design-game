@@ -44,7 +44,9 @@ function rocketReliability(rocket) {
 }
 
 // 衛星本體（電腦、熱控、線路）：每顆衛星都需要，不讓玩家選
-const BUS_CORE = { massKg: 20, powerW: 20, costM: 4, grade: "qualified" };
+// 衛星本體的共用部分（配電、線束、熱控）。衛星電腦另外選，見 SUBSYSTEMS.computer；
+// 原本 20 kg／20 W／$4M 含一台標準電腦，拆出來後扣掉標準電腦，預設設計的數值不變
+const BUS_CORE = { massKg: 18, powerW: 15, costM: 2.5, grade: "qualified" };
 
 // 地球磁場強度和距離的立方成反比；磁力棒的指向精度以 LEO 550 km 為基準換算
 const EARTH_RADIUS_KM_FOR_FIELD = 6371;
@@ -78,6 +80,14 @@ const SUBSYSTEMS = {
     { id: "standard", pointingDeg: 0.02, magnetic: false, powerW: 40, massKg: 20, costM: 4, grade: "qualified" },
     { id: "premium", pointingDeg: 0.02, magnetic: false, powerW: 55, massKg: 28, costM: 6.5, grade: "redundant" },
   ],
+  // 衛星電腦＝整套指令與資料處理系統（C&DH）：電腦板＋固態記錄器＋線束＋飛行軟體開發驗證，
+  // 所以質量、成本比單一電腦板大得多。dataGbitPerDay 是每天能處理、存下、排隊下傳的資料量。
+  // 三種各有長處：最貴的抗輻射電腦「買的是不會壞，不是算力」，處理量反而比大容量型少
+  computer: [
+    { id: "economy", dataGbitPerDay: 100, powerW: 1, massKg: 0.5, costM: 0.3, grade: "cots" }, // NanoMind A3200 級
+    { id: "standard", dataGbitPerDay: 4000, powerW: 5, massKg: 2, costM: 1.5, grade: "qualified" }, // EnduroSat OBC＋大容量儲存
+    { id: "premium", dataGbitPerDay: 1000, powerW: 25, massKg: 10, costM: 8, grade: "redundant" }, // RAD750 級，雙機備份
+  ],
   structure: [
     // 結構質量為其他乾質量的比例；輻射倍率越低代表屏蔽越好
     { id: "economy", massFraction: 0.1, costM: 1, radiationMultiplier: 1.6, launchSurvival: 0.97, impactRisk: 0.08 },
@@ -107,7 +117,7 @@ const PAYLOADS = {
   ],
 };
 
-const SUBSYSTEM_KEYS = ["power", "comm", "payload", "attitude", "structure"];
+const SUBSYSTEM_KEYS = ["power", "comm", "payload", "attitude", "structure", "computer"];
 
 // 熱預算（只顯示，不影響任務價值）：用掉的電最後幾乎都變成熱，要靠散熱面輻射到太空。
 // 每平方公尺散熱面的淨散熱量 ≈ εσT⁴ − 吸收的地球紅外線與反照（ε 0.85、20°C 時 εσT⁴ ≈ 355 W/m²）
@@ -207,11 +217,12 @@ const CAMPAIGN_PASS_VALUE = 0.5;
 
 // 戰役關卡的 feature flag。level 為 null 代表自由遊玩（全開）。
 function getCampaignFeatures(level) {
-  if (!level) return { orbit: true, fuel: true, attitude: true, events: true, operations: true, forcedEventId: null };
+  if (!level) return { orbit: true, fuel: true, attitude: true, computer: true, events: true, operations: true, forcedEventId: null };
   return {
     orbit: true,
     fuel: level >= 2,
     attitude: level >= 2,
+    computer: level >= 3, // 第 3 關講太空輻射，同時開放選衛星電腦
     events: level >= 3,
     operations: level >= 4,
     forcedEventId: level === 3 ? "solar_flare" : null,

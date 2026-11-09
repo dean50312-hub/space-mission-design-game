@@ -21,6 +21,10 @@ function defaultAttitude() {
   return SUBSYSTEMS.attitude.find((a) => a.id === "standard");
 }
 
+function defaultComputer() {
+  return SUBSYSTEMS.computer.find((c) => c.id === "standard");
+}
+
 function currentDesign() {
   return {
     objective: gameState.missionObjective,
@@ -38,10 +42,11 @@ function eventEffect(design) {
   return (design.event && design.event.effect) || {};
 }
 
-// 衛星用電（不含電推進器）：本體 + 酬載 + 通訊 + 姿態控制
+// 衛星用電（不含電推進器）：本體 + 酬載 + 通訊 + 姿態控制 + 電腦
 function designPowerLoadW(design) {
-  const { payload, comm, attitude } = design.parts;
-  return BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0) + (attitude ? attitude.powerW : 0);
+  const { payload, comm, attitude, computer } = design.parts;
+  return BUS_CORE.powerW + (payload ? payload.powerW : 0) + (comm ? comm.powerW : 0) + (attitude ? attitude.powerW : 0) +
+    (computer ? computer.powerW : 0);
 }
 
 // 太陽能板依需求定大小：軌道平均可用功率要撐得起用電，裝了電推進器還要能讓它全功率運轉
@@ -80,7 +85,7 @@ function designCostM(design) {
 
 function designDryMassKg(design) {
   let mass = BUS_CORE.massKg;
-  ["comm", "payload", "attitude"].forEach((key) => {
+  ["comm", "payload", "attitude", "computer"].forEach((key) => {
     if (design.parts[key]) mass += design.parts[key].massKg;
   });
   const powerSpec = powerSystemSpec(design);
@@ -168,7 +173,7 @@ function analyzeDesign(design) {
 
   if (!design.orbit) return analysis;
   const orbit = design.orbit;
-  const { power, comm, payload, attitude, structure } = design.parts;
+  const { power, comm, payload, attitude, structure, computer } = design.parts;
 
   analysis.powerLoadW = designPowerLoadW(design);
   analysis.powerSpec = powerSystemSpec(design);
@@ -197,6 +202,7 @@ function analyzeDesign(design) {
     const contact = orbit.contactHoursPerDay * (orbit.id === "leo" ? effect.leoContactMultiplier || 1 : 1);
     analysis.dataDownGbit = comm.rateMbps[orbit.id] * contact * 3.6;
   }
+  if (computer) analysis.dataCapGbit = computer.dataGbitPerDay;
 
   if (!analysis.complete) return analysis;
 
@@ -214,7 +220,9 @@ function analyzeDesign(design) {
     performance = Math.sqrt(Math.min(1, payload.bands / req.bands) * Math.min(1, req.maxGsdM / analysis.gsdM));
   }
 
-  const delivery = analysis.dataGenGbit !== undefined ? Math.min(1, analysis.dataDownGbit / analysis.dataGenGbit) : 1;
+  // 每天傳回地面的資料：取「下傳量」和「電腦能處理、存下的量」比較小的那個
+  analysis.dataDeliveredGbit = Math.min(analysis.dataDownGbit, analysis.dataCapGbit);
+  const delivery = analysis.dataGenGbit !== undefined ? Math.min(1, analysis.dataDeliveredGbit / analysis.dataGenGbit) : 1;
   const powerFactor = Math.min(1, analysis.powerAvailW / analysis.powerLoadW);
   // 指向不準：相機拍不到目標、天線對不準地面。和性能一樣取平方根，代表價值隨誤差逐漸下降
   const pointing = analysis.pointingDeg >= UNCONTROLLED_POINTING_DEG ? 0 : Math.sqrt(Math.min(1, objective.pointingDeg / analysis.pointingDeg));
@@ -246,7 +254,7 @@ function analyzeDesign(design) {
     payload: gradeHazardPerYear(payload.grade) * environment,
     attitude: gradeHazardPerYear(attitude.grade) * environment,
     propulsion: gradeHazardPerYear("qualified") * environment,
-    bus: gradeHazardPerYear(BUS_CORE.grade) * environment,
+    bus: gradeHazardPerYear(computer.grade) * environment, // 「電腦當機」異常的發生率由電腦等級決定
   };
   const hazard = Object.values(hazardBreakdown).reduce((sum, h) => sum + h, 0);
 
@@ -335,6 +343,7 @@ function bestSingleChange(design, features) {
   });
   SUBSYSTEM_KEYS.forEach((key) => {
     if (key === "attitude" && !features.attitude) return;
+    if (key === "computer" && !features.computer) return;
     const options = key === "payload" ? payloadOptionsFor(design.objective) : SUBSYSTEMS[key];
     options.forEach((tier) => {
       if (tier === design.parts[key]) return;

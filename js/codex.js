@@ -1,7 +1,7 @@
 // 太空圖鑑：遊戲畫面只放做決定需要的一句話，完整介紹、真實原型和科學概念都放在這裡
 
 const CODEX_TABS = ["rockets", "orbits", "parts", "events", "objectives", "concepts"];
-const CODEX_PART_GROUPS = ["power", "comm", "attitude", "structure", "payload_optical", "payload_transponder", "payload_plasma", "fuel"];
+const CODEX_PART_GROUPS = ["power", "comm", "attitude", "structure", "computer", "payload_optical", "payload_transponder", "payload_plasma", "fuel"];
 const CODEX_CONCEPTS = [
   "rocketEquation", "orbits", "gravityTurn", "inverseSquare", "diffraction", "angularMomentum",
   "magneticField", "eclipse", "radiation", "drag", "massMargin", "laplace", "expectedValue",
@@ -27,7 +27,7 @@ function codexPartTiers(group) {
   const tiers = kind ? PAYLOADS[kind] : SUBSYSTEMS[group];
   return tiers.map((tier) => ({
     id: tier.id,
-    name: t("tier." + tier.id),
+    name: tierLabel(group, tier.id),
     icon: kind ? `image/parts/payload-${kind}-${tier.id}.png` : `image/parts/${group}-${tier.id}.png`,
     body: t(`partProto.${group}.${tier.id}`),
   }));

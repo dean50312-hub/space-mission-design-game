@@ -23,7 +23,7 @@ const SEARCH_QUICK_RUNS = 120;
 const SEARCH_FINALISTS = 15;
 
 function featureKey(features) {
-  return `f${features.fuel ? 1 : 0}a${features.attitude ? 1 : 0}o${features.operations ? 1 : 0}`;
+  return `f${features.fuel ? 1 : 0}a${features.attitude ? 1 : 0}c${features.computer ? 1 : 0}o${features.operations ? 1 : 0}`;
 }
 
 function scenarioKey(objective, event, features) {
@@ -55,6 +55,7 @@ function* candidateDesigns(objective, event, features) {
     const budgetM = missionBudgetM(objective, orbit) + budgetDelta;
     const fuels = features.fuel ? FUELS : [defaultFuelForOrbit(orbit.id)];
     const attitudes = features.attitude ? SUBSYSTEMS.attitude : [defaultAttitude()];
+    const computers = features.computer ? SUBSYSTEMS.computer : [defaultComputer()];
     for (const rocket of ROCKETS) {
       for (const power of SUBSYSTEMS.power) {
         for (const comm of SUBSYSTEMS.comm) {
@@ -62,13 +63,15 @@ function* candidateDesigns(objective, event, features) {
             for (const attitude of attitudes) {
               for (const structure of SUBSYSTEMS.structure) {
                 for (const fuel of fuels) {
-                  const parts = { power, comm, payload, attitude, structure };
+                 for (const computer of computers) {
+                  const parts = { power, comm, payload, attitude, structure, computer };
                   const base = { objective, orbit, event, budgetM, rocket, parts, fuel, propellantKg: 0 };
                   const auto = autoPropellantKg(base);
                   const amounts = features.fuel
                     ? [...new Set(SEARCH_PROPELLANT_FACTORS.map((f) => Math.min(PROPELLANT_MAX_KG, Math.round((auto * f) / PROPELLANT_STEP_KG) * PROPELLANT_STEP_KG)))]
                     : [auto];
                   for (const propellantKg of amounts) yield { ...base, propellantKg };
+                 }
                 }
               }
             }

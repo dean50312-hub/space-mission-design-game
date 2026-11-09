@@ -149,7 +149,7 @@ function changeDescription(change) {
   if (change.kind === "fuel") return t("hindsight.changeFuel", { to: t("fuel." + change.to.id) });
   if (change.kind === "propellant") return t("hindsight.changePropellant", { kg: fmtNum(change.propellantKg) });
   const partName = hotspotLabel(change.key);
-  return t("hindsight.changePart", { part: partName, from: t("tier." + change.from.id), to: t("tier." + change.to.id) });
+  return t("hindsight.changePart", { part: partName, from: tierLabel(change.key, change.from.id), to: tierLabel(change.key, change.to.id) });
 }
 
 function hindsightText(simResult, score) {
@@ -360,12 +360,13 @@ function bestDesignRows(best, features) {
   });
   SUBSYSTEM_KEYS.forEach((key) => {
     if (key === "attitude" && !features.attitude) return;
+    if (key === "computer" && !features.computer) return;
     const options = key === "payload" ? payloadOptionsFor(objective) : SUBSYSTEMS[key];
     rows.push({
       label: hotspotLabel(key),
-      choice: t("tier." + best.parts[key]),
+      choice: tierLabel(key, best.parts[key]),
       alts: options.filter((o) => o !== base.parts[key]).map((tier) => ({
-        name: t("tier." + tier.id),
+        name: tierLabel(key, tier.id),
         outcome: alternativeOutcome({ ...base, parts: { ...base.parts, [key]: tier } }, features, best.ev),
       })),
     });

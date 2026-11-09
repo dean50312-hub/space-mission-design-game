@@ -6,6 +6,7 @@ const HOTSPOT_DEFS = [
   { key: "fuel", top: 16, left: 50 },
   { key: "attitude", top: 42, left: 59 },
   { key: "structure", top: 57, left: 40 },
+  { key: "computer", top: 35, left: 33 },
   { key: "power", top: 49, left: 87 },
   { key: "comm", top: 79, left: 27 },
   { key: "payload", top: 78, left: 55 },
@@ -238,6 +239,11 @@ function hotspotLabel(key) {
   return t("subsystem." + key);
 }
 
+// 零件等級的名稱：衛星電腦三種各有長處，不用「經濟／標準／高階」
+function tierLabel(key, tierId) {
+  return key === "computer" ? t("computerTier." + tierId) : t("tier." + tierId);
+}
+
 function partImageSrc(key, tierId) {
   if (key === "payload") return `image/parts/payload-${gameState.missionObjective.payloadKind}-${tierId}.png`;
   return `image/parts/${key}-${tierId}.png`;
@@ -407,6 +413,9 @@ function partStatsText(key, tier) {
   if (key === "structure") {
     return t("selection.structureStats", { ...common, fraction: fmtNum(tier.massFraction * 100) });
   }
+  if (key === "computer") {
+    return t("selection.computerStats", { ...common, data: fmtNum(tier.dataGbitPerDay), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg, tier.massKg < 1 ? 1 : 0) });
+  }
   if (key === "attitude") {
     const achieved = achievedPointingDeg(tier, orbit);
     return t("selection.attitudeStats", { ...common, pointing: fmtPointing(achieved), watts: fmtNum(tier.powerW), mass: fmtNum(tier.massKg) }) +
@@ -457,8 +466,8 @@ function renderSubsystemCards(key) {
     const available = isOptionAvailable(gameState.event, key, tier);
 
     card.innerHTML = `
-      <img class="swatch swatch-part" src="${partImageSrc(key, tier.id)}" alt="${t("tier." + tier.id)}" />
-      <div class="part-name">${t("tier." + tier.id)}</div>
+      <img class="swatch swatch-part" src="${partImageSrc(key, tier.id)}" alt="${tierLabel(key, tier.id)}" />
+      <div class="part-name">${tierLabel(key, tier.id)}</div>
       ${unavailableTag(available)}
       <div class="part-stats">${partStatsText(key, tier)}</div>
       <div class="part-proto">${partProtoText(key, tier)}</div>
@@ -686,13 +695,18 @@ function renderBudgetLines(analysis) {
   }
 
   if (analysis.dataGenGbit !== undefined && analysis.dataDownGbit !== undefined) {
+    // 電腦還沒選時只看下傳量；選了之後取兩者較小的
+    const cap = analysis.dataCapGbit !== undefined ? analysis.dataCapGbit : Infinity;
+    const sent = Math.min(analysis.dataDownGbit, cap);
+    const computerLimits = cap < analysis.dataDownGbit && cap < analysis.dataGenGbit;
     lines.push(sheetLine({
       icon: "data",
       labelKey: "sheet.data",
-      valueText: `${fmtNum(analysis.dataDownGbit, analysis.dataDownGbit < 10 ? 1 : 0)} / ${fmtNum(analysis.dataGenGbit)} Gbit`,
-      ratio: analysis.dataDownGbit / analysis.dataGenGbit,
-      status: statusForSupply(analysis.dataDownGbit, analysis.dataGenGbit),
+      valueText: `${fmtNum(sent, sent < 10 ? 1 : 0)} / ${fmtNum(analysis.dataGenGbit)} Gbit`,
+      ratio: sent / analysis.dataGenGbit,
+      status: statusForSupply(sent, analysis.dataGenGbit),
       explainKey: "sheetExplain.data_" + orbit.id,
+      extraText: computerLimits ? t("sheetExplain.dataComputerLimit", { cap: fmtNum(analysis.dataCapGbit), down: fmtNum(analysis.dataDownGbit) }) : "",
     }));
   }
 

@@ -7,7 +7,7 @@ const MP_ROLE_KEYS = {
   director: ["orbit", "rocket"],
   scientist: ["payload"],
   engineer: ["power", "structure", "attitude"],
-  flight: ["comm", "fuel"],
+  flight: ["comm", "computer", "fuel"],
 };
 const MP_ROLE_GLYPH = { director: "cost", scientist: "star", engineer: "power", flight: "signal" };
 const MP_MAX_PLAYERS = 4;
@@ -641,7 +641,7 @@ function mpTeamReportHtml(simResult) {
   if (!MP.active || !MP.room) return "";
   const { design, analysis } = simResult;
   const f = analysis.factors;
-  const tierName = (key) => (design.parts[key] ? t("tier." + design.parts[key].id) : "—");
+  const tierName = (key) => (design.parts[key] ? tierLabel(key, design.parts[key].id) : "—");
   const costs = mpRoleCosts(design);
   const rows = {
     director: {
@@ -660,7 +660,7 @@ function mpTeamReportHtml(simResult) {
       impact: [[t("factor.power"), f.power], [t("factor.pointing"), f.pointing]],
     },
     flight: {
-      choices: `${hotspotLabel("comm")}: ${tierName("comm")} · ${design.fuel ? t("fuel." + design.fuel.id) : "—"}`,
+      choices: `${hotspotLabel("comm")}: ${tierName("comm")} · ${hotspotLabel("computer")}: ${tierName("computer")} · ${design.fuel ? t("fuel." + design.fuel.id) : "—"}`,
       costM: costs.flight,
       impact: [[t("factor.delivery"), f.delivery], [t("factor.lifetime"), f.lifetime]],
       extra: (simResult.decisions || []).length ? t("mp.decisionsMade", { n: simResult.decisions.length }) : "",
@@ -772,7 +772,7 @@ function mpDesignChangeText(patch) {
     } else if (SUBSYSTEM_KEYS.includes(key)) {
       const options = key === "payload" ? payloadOptionsFor(gameState.missionObjective) : SUBSYSTEMS[key];
       after.parts[key] = options.find((o) => o.id === id);
-      items.push([hotspotLabel(key), t("tier." + id)]);
+      items.push([hotspotLabel(key), tierLabel(key, id)]);
     }
   });
   if (!items.length) return "";
@@ -803,7 +803,7 @@ function mpRoleCosts(design) {
     director: design.rocket ? design.rocket.costM : 0,
     scientist: partCost("payload"),
     engineer: (power ? power.costM : 0) + partCost("structure") + partCost("attitude"),
-    flight: partCost("comm") + fuelCost,
+    flight: partCost("comm") + partCost("computer") + fuelCost,
   };
 }
 
@@ -841,7 +841,7 @@ function mpNegotiationOptions(design) {
     const tiers = key === "payload" ? payloadOptionsFor(design.objective) : SUBSYSTEMS[key];
     const lower = tiers[tiers.indexOf(current) - 1];
     if (!lower || !isOptionAvailable(design.event, key, lower)) return;
-    consider(key, lower.id, t("mp.sysItem", { item: hotspotLabel(key), value: t("tier." + lower.id) }),
+    consider(key, lower.id, t("mp.sysItem", { item: hotspotLabel(key), value: tierLabel(key, lower.id) }),
       { ...design, parts: { ...design.parts, [key]: lower } });
   });
   if (design.rocket) {

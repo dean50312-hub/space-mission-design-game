@@ -26,7 +26,7 @@ function resetForNewGame() {
   else gameState.event = gameState.features.events ? pickRandomEvent(gameState.features.forcedEventId) : null;
 
   gameState.rocket = null;
-  gameState.parts = { power: null, comm: null, payload: null, attitude: null, structure: null };
+  gameState.parts = { power: null, comm: null, payload: null, attitude: null, structure: null, computer: null };
   gameState.fuel = null;
   gameState.propellantKg = 0;
 
@@ -43,6 +43,7 @@ function recomputeBudget() {
 // 劇情關卡還沒教推進與姿態控制時，由系統配好反應輪、依軌道選推進器並自動計算推進劑
 function syncAutoPropulsion() {
   if (!gameState.features.attitude) gameState.parts.attitude = defaultAttitude();
+  if (!gameState.features.computer) gameState.parts.computer = defaultComputer();
   if (gameState.features.fuel || !gameState.orbit) return;
   gameState.fuel = defaultFuelForOrbit(gameState.orbit.id);
   gameState.propellantKg = autoPropellantKg(currentDesign());

@@ -4,7 +4,7 @@
 const LEARNING_OBJECTIVES_BY_LEVEL = {
   1: ["o_orbit", "o_comm"],
   2: ["o_rocket_eq", "o_electric", "o_torquer"],
-  3: ["o_env"],
+  3: ["o_env", "o_computer"],
   4: ["o_reserve", "o_repair"],
 };
 
@@ -39,6 +39,7 @@ const QUIZ_QUESTIONS = [
   { id: "q_torquer", level: 2, objective: "o_torquer" },
   { id: "q_radiation", level: 3, objective: "o_env" },
   { id: "q_debris", level: 3, objective: "o_env" },
+  { id: "q_computer", level: 3, objective: "o_computer" },
   { id: "q_reserve", level: 4, objective: "o_reserve" },
   { id: "q_repair", level: 4, objective: "o_repair" },
 ];
