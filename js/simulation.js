@@ -201,10 +201,10 @@ function setRocketState(state) {
 
 // 尾焰大小對準各火箭的噴嘴（火箭圖固定顯示 96 px 高）：w／h 是每道火焰的寬高，gap 是三道火焰之間的間距
 const FLAME_LAYOUT = {
-  light: { w: 10, h: 30, gap: 0 },
-  medium: { w: 12, h: 34, gap: 0 },
-  pslv: { w: 6, h: 24, gap: 3 }, // 兩側固體助推器＋核心級
-  heavy: { w: 12, h: 32, gap: 1 }, // 三支核心並排
+  light: { w: 10, h: 40, gap: 0 },
+  medium: { w: 12, h: 48, gap: 0 },
+  pslv: { w: 6, h: 34, gap: 3 }, // 兩側固體助推器＋核心級
+  heavy: { w: 12, h: 46, gap: 1 }, // 三支核心並排
 };
 
 function setFlames(count) {
@@ -213,7 +213,8 @@ function setFlames(count) {
   exhaust.style.setProperty("--flame-w", layout.w + "px");
   exhaust.style.setProperty("--flame-h", layout.h + "px");
   exhaust.style.gap = layout.gap + "px";
-  exhaust.innerHTML = '<span class="flame"></span>'.repeat(count);
+  // 每道火焰三層：外圍光暈、橘紅色羽流、白黃色高溫核心
+  exhaust.innerHTML = '<span class="flame"><span class="flame-glow"></span><span class="flame-plume"></span><span class="flame-core"></span></span>'.repeat(count);
 }
 
 // ---------- 真實的飛行事件：助推器分離、一二節分離、整流罩分離 ----------

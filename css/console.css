@@ -1433,3 +1433,87 @@ body:has(.mp-bar:not(.hidden)) .action-bar {
   .callout-value { font-size: 10px; }
   .action-bar .btn { font-size: 12px; padding: 12px 10px; }
 }
+
+/* ---------- 發射：火箭不再左右搖擺，尾焰改成分層火焰 ----------
+   真實火箭升空時沿著重力轉向的弧線平穩轉向（整組火箭＋尾焰由 js/ascentview.js 一起旋轉），
+   不會左右擺動；引擎噴流是高溫核心＋往外擴散、逐漸變暗的羽流 */
+
+#rocket.flying {
+  animation: none;
+}
+
+.flame {
+  background: none;
+  animation: none;
+}
+
+.flame-glow,
+.flame-plume,
+.flame-core {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.flame-glow {
+  width: 360%;
+  height: 120%;
+  top: -12%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 18%, rgba(255, 180, 70, 0.55), rgba(255, 120, 40, 0.18) 40%, transparent 70%);
+  filter: blur(3px);
+  animation: flame-glow 0.9s ease-in-out infinite alternate;
+}
+
+.flame-plume {
+  width: 130%;
+  height: 100%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg,
+    #fff8d6 0%,
+    #ffd166 14%,
+    #ff9f43 36%,
+    rgba(255, 85, 50, 0.8) 62%,
+    rgba(255, 60, 40, 0) 100%);
+  clip-path: polygon(22% 0, 78% 0, 100% 26%, 64% 100%, 36% 100%, 0 26%);
+  filter: blur(0.6px);
+  animation: flame-flicker 0.16s steps(2, jump-none) infinite alternate;
+}
+
+.flame-core {
+  width: 60%;
+  height: 42%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffffff 0%, #fff4c2 45%, rgba(255, 236, 160, 0) 100%);
+  border-radius: 40% 40% 50% 50% / 15% 15% 85% 85%;
+  filter: blur(0.4px);
+  animation: flame-flicker 0.11s steps(2, jump-none) infinite alternate-reverse;
+}
+
+.flame:nth-child(2) .flame-plume { animation-duration: 0.19s; }
+.flame:nth-child(3) .flame-plume { animation-duration: 0.14s; }
+
+@keyframes flame-flicker {
+  from { transform: translateX(-50%) scale(0.94, 0.9); opacity: 0.92; }
+  to { transform: translateX(-50%) scale(1.04, 1.06); opacity: 1; }
+}
+
+@keyframes flame-glow {
+  from { opacity: 0.75; }
+  to { opacity: 1; }
+}
+
+/* 低空的馬赫鑽石畫在羽流上面 */
+#exhaust.diamonds .flame::after {
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame-glow,
+  .flame-plume,
+  .flame-core {
+    animation: none;
+  }
+}
