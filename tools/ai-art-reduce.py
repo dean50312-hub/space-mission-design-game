@@ -22,6 +22,11 @@ OUT = os.path.join(ROOT, "image", "icons")
 PARTS_SRC = os.path.join(ROOT, "output", "art-refresh", "originals", "parts")
 PARTS_OUT = os.path.join(ROOT, "image", "parts")
 PARTS_SIZE = 192
+# 火箭（第三輪）：飛行畫面顯示 96 px 高，輸出 2 倍密度；左右裁到緊貼箭體，
+# js/simulation.js 的 ROCKET_STAGING 比例是以這個裁切後的圖量的
+ROCKETS_SRC = os.path.join(ROOT, "output", "rocket-refresh", "originals", "rocket")
+ROCKETS_OUT = os.path.join(ROOT, "image", "rocket")
+ROCKET_HEIGHT = 192
 OUTLINE = (7, 10, 36, 255)
 
 # 檔名前綴 → 輸出尺寸（等於 css/style.css 裡的顯示尺寸）
@@ -44,6 +49,17 @@ def reduce(path, size, colors=24, pad_ratio=0.07, outline_px=1):
     out.putalpha(alpha)
     for i in range(outline_px):
         out = add_outline(out, grow=i > 0)
+    return out
+
+
+def reduce_rocket(path, colors=32):
+    im = Image.open(path).convert("RGBA")
+    im = im.crop(im.getchannel("A").point(lambda a: 255 if a > 40 else 0).getbbox())
+    w = max(1, round(im.width * ROCKET_HEIGHT / im.height))
+    small = im.resize((w, ROCKET_HEIGHT), Image.LANCZOS)
+    alpha = small.getchannel("A").point(lambda v: 255 if v >= 128 else 0)
+    out = small.convert("RGB").quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGBA")
+    out.putalpha(alpha)
     return out
 
 
@@ -76,6 +92,10 @@ def main():
     for name in sorted(os.listdir(PARTS_SRC)):
         if name.endswith(".png"):
             reduce(os.path.join(PARTS_SRC, name), PARTS_SIZE, colors=48, pad_ratio=0.03, outline_px=2).save(os.path.join(PARTS_OUT, name))
+            count += 1
+    for name in sorted(os.listdir(ROCKETS_SRC)):
+        if name.endswith(".png"):
+            reduce_rocket(os.path.join(ROCKETS_SRC, name)).save(os.path.join(ROCKETS_OUT, name))
             count += 1
     print("ok", count)
 

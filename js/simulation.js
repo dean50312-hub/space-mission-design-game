@@ -199,21 +199,33 @@ function setRocketState(state) {
   setFlames(state === "exploded" ? 0 : ROCKET_STAGING[rocketId] && ROCKET_STAGING[rocketId].boosterSide ? 3 : 1);
 }
 
+// 尾焰大小對準各火箭的噴嘴（火箭圖固定顯示 96 px 高）：w／h 是每道火焰的寬高，gap 是三道火焰之間的間距
+const FLAME_LAYOUT = {
+  light: { w: 10, h: 30, gap: 0 },
+  medium: { w: 12, h: 34, gap: 0 },
+  pslv: { w: 6, h: 24, gap: 3 }, // 兩側固體助推器＋核心級
+  heavy: { w: 12, h: 32, gap: 1 }, // 三支核心並排
+};
+
 function setFlames(count) {
   const exhaust = document.getElementById("exhaust");
-  exhaust.classList.toggle("narrow", Boolean(gameState.rocket) && gameState.rocket.id === "pslv" && count > 1);
+  const layout = (gameState.rocket && FLAME_LAYOUT[gameState.rocket.id]) || FLAME_LAYOUT.medium;
+  exhaust.style.setProperty("--flame-w", layout.w + "px");
+  exhaust.style.setProperty("--flame-h", layout.h + "px");
+  exhaust.style.gap = layout.gap + "px";
   exhaust.innerHTML = '<span class="flame"></span>'.repeat(count);
 }
 
 // ---------- 真實的飛行事件：助推器分離、一二節分離、整流罩分離 ----------
 // 數值是 image/rocket/rocket-*.png 上的位置比例：boosterSide = 兩側助推器各占圖寬多少，
 // stageCut = 第一節占圖高多少（從底部算），fairing = 整流罩占圖高多少（從頂部算）
+// 2026-11 換成第三輪 AI 美術後重新量測（tools/ai-art-reduce.py 把火箭裁到緊貼箭體）
 
 const ROCKET_STAGING = {
-  light: { stageCut: 0.62, fairing: 0.22 },
-  pslv: { boosterSide: 0.25, stageCut: 0.34, fairing: 0.28 },
-  medium: { stageCut: 0.66, fairing: 0.22 },
-  heavy: { boosterSide: 0.35, stageCut: 0.66, fairing: 0.22 },
+  light: { stageCut: 0.62, fairing: 0.19 },
+  pslv: { boosterSide: 0.245, stageCut: 0.55, fairing: 0.2 },
+  medium: { stageCut: 0.64, fairing: 0.21 },
+  heavy: { boosterSide: 0.32, stageCut: 0.65, fairing: 0.19 },
 };
 
 let rocketClip = { top: 0, right: 0, bottom: 0, left: 0 };
